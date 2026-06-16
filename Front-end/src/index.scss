@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+:root {
+    /* Primary palette (pink/red) */
+    --clr-primary:        #E86C6E;
+    --clr-primary-hover:  #9E3E40;
+    --clr-primary-active: #BC4749;
+    --clr-primary-light:  #E88C90;
+    --clr-primary-bg:     #FFD1D1;
+    --clr-primary-bg2:    #FF9898;
+    --clr-primary-dark:   #780909;
+    --clr-primary-text:   #AB4749;
+
+    /* Green palette */
+    --clr-green:          #ACCA62;
+    --clr-green-hover:    #759A45;
+    --clr-green-active:   #8EA94B;
+    --clr-green-dark:     #336F36;
+    --clr-green-bg:       #BAD96E;
+    --clr-green-bg2:      #CCE889;
+    --clr-green-event:    #91D082;
+    --clr-green-border:   #5A944B;
+
+    /* Neutral */
+    --clr-bg:             #FFF1E5;
+    --clr-border:         #E9C5BC;
+    --clr-shadow:         rgba(123, 87, 54, 0.5);
+    --clr-overlay:        rgba(150, 127, 127, 0.5);
+    --clr-disabled:       #C4B0B1;
+}
+
+body {
+    box-sizing: border-box;
+    margin: 0;
+    font-family: 'Nunito', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--clr-bg);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}

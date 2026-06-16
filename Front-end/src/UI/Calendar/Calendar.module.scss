@@ -1,0 +1,128 @@
+.calendar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 15px;
+    max-width: 254px;
+    border: 1px solid #DA6264;
+    border-radius: 6px;
+    background-color: #FFF1E5;
+    gap: 20px;
+    &.green {
+        background-color: #ACCA62;
+        border: 1px solid #ACCA62;
+        .monthInfo {
+            .title {
+                color: #FFF1E5;
+            }
+        }
+        .weekInfo {
+            background-color: #E4F6B8;
+            border-radius: 4px 4px 0 0;
+            .week {
+                color: #48762D;
+            }
+        }
+        .monthTable,
+        .yearTable,
+        .periodTable {
+            background-color: #E4F6B8;
+        }
+    }
+    .monthInfo,
+    .yearInfo {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        gap: 15px;
+        .monthButton {
+            width: 26px;
+            height: 26px;
+            border-radius: 18px;
+            cursor: pointer;
+            &:nth-child(n+3) {
+                transform: rotate(180deg);
+            }
+        }
+        .title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+    }
+    .weekInfo {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(7, 32px);
+        justify-content: center;
+        justify-items: center;
+        align-items: center;
+        padding: 8px;
+        padding-bottom: 0;
+        .week {
+            position: relative;
+            display: flex;
+            font-size: 14px;
+            color: #CC7474;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            cursor: default;
+        }
+    }
+    .monthTable,
+    .yearTable,
+    .periodTable {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        justify-content: center;
+        justify-items: center;
+        align-items: center;
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+        .item {
+            position: relative;
+            display: flex;
+            font-size: 14px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 32px;
+            cursor: pointer;
+            border-radius: 4px;
+            &:hover,
+            &.selected {
+                background-color: #FC7D7D;
+            }
+            &.selected {
+                font-weight: 700;
+            }
+            &.disabled {
+                color: #7C7C7C;
+                cursor: default;
+                &:hover {
+                    background-color: transparent;
+                }
+            }
+        }
+    }
+    .timePicker {
+        position: relative;
+        display: flex;
+        width: 100%;
+        gap: 10px;
+        align-items: center;
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        .confirmTime {
+            border-radius: 50%;
+        }
+    }
+    
+}

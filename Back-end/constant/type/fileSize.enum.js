@@ -1,0 +1,9 @@
+module.exports = {
+    IMG_MAX_SIZE: 2 * 1024 * 1024,
+    FILE_MAX_SIZE: 5 * 1024 * 1024,
+
+    IMG_MAX_SIZE_SUB: 10 * 1024 * 1024,
+    FILE_MAX_SIZE_SUB: 25 * 1024 * 1024,
+
+    MAX_SUPPORT_SIZE: 200 * 1024 * 1024
+};

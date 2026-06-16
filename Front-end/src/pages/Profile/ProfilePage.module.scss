@@ -1,0 +1,100 @@
+.content {
+    position: relative;
+    display: grid;
+    height: 100%;
+    min-height: 100vh;
+    width: 100vw;
+    grid-template-columns: 75% 25%;
+    padding: 178px 132px 18px 112px;
+    gap: 32px 40px;
+    .userBox {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        gap: 32px;
+        .defaultImgBox {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            background-color: #FCE0DC;
+            border-radius: 50%;
+        }
+
+        .userInfo {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            .contactInfoMain {
+                display: flex;
+                gap: 10px;
+                img {
+                    filter: brightness(0) invert(1);
+                }
+            }
+        }
+    }
+    .userContact {
+        position: relative;
+        height: max-content;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-left: 24px;
+        &::before {
+            position: absolute;
+            content: ' ';
+            display: block;
+            height: 100%;
+            width: 2px;
+            background-color: #E86C6E;
+            left: 0;
+            top: 0;
+        }
+        .contactBox {
+            display: flex;
+            align-items: center;
+            width: max-content;
+            padding: 7px 14px;
+            gap: 10px;
+            color: #4C5B26;
+            border: 1px solid #BAD96E;
+            border-radius: 10px;
+            img {
+                position: relative;
+                width: 16px;
+                height: 16px;
+                object-fit: cover;
+                background-position: center;
+                background-size: cover;
+            }
+        }
+    }
+    .groupsBox {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        .notFoundGroups {
+            height: 100%;
+            border-radius: 15px;
+        }
+    }
+    .buttonBox {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        justify-content: flex-end;
+        grid-row: 3;
+    }
+}
+
+@media (min-width: 1440px) {
+    .content {
+        width: 100%;
+        max-width: 1500px;
+        margin-inline: auto;
+        padding-left: 152px;
+        padding-right: 80px;
+    }
+}

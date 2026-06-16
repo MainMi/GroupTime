@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title><%= typeof title !== 'undefined' ? title : 'GroupTime' %></title>
+</head>
+<body style="margin:0;padding:0;background-color:#FFF1E5;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF1E5;min-height:100vh;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <table width="600" cellpadding="0" cellspacing="0" border="0"
+          style="max-width:600px;width:100%;border-radius:16px;overflow:hidden;border:1px solid #E9C5BC;background:#ffffff;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#E86C6E;padding:24px 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <h1 style="margin:0;color:#FFF1E5;font-size:20px;font-weight:700;letter-spacing:0.5px;">
+                      GroupTime
+                    </h1>
+                  </td>
+                  <td align="right">
+                    <span style="color:#FFD1D1;font-size:13px;">Система розкладу</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 32px;">
+              <% if(typeof title !== 'undefined' && title){ %>
+              <h2 style="margin:0 0 16px;color:#AB4749;font-size:26px;font-weight:700;">
+                <%- title %>
+              </h2>
+              <% } %>
+
+              <% if(typeof subtitle !== 'undefined' && subtitle){ %>
+              <p style="margin:0 0 28px;color:#555;font-size:16px;line-height:1.7;">
+                <%- subtitle %>
+              </p>
+              <% } %>
+
+              <% if(typeof userInfo !== 'undefined' && userInfo){ %>
+              <table cellpadding="0" cellspacing="0" border="0"
+                style="background:#FFF1E5;border-radius:10px;padding:16px 20px;margin-bottom:28px;width:100%;border:1px solid #E9C5BC;">
+                <tr>
+                  <td style="padding:4px 0;color:#777;font-size:13px;width:100px;">Ім'я:</td>
+                  <td style="padding:4px 0;color:#333;font-size:14px;font-weight:600;">
+                    <%- userInfo.fullName || '' %>
+                  </td>
+                </tr>
+                <% if(userInfo.nickname){ %>
+                <tr>
+                  <td style="padding:4px 0;color:#777;font-size:13px;">Нікнейм:</td>
+                  <td style="padding:4px 0;color:#333;font-size:14px;">@<%- userInfo.nickname %></td>
+                </tr>
+                <% } %>
+                <tr>
+                  <td style="padding:4px 0;color:#777;font-size:13px;">Email:</td>
+                  <td style="padding:4px 0;color:#333;font-size:14px;"><%- userInfo.email || '' %></td>
+                </tr>
+                <% if(userInfo.groupName){ %>
+                <tr>
+                  <td style="padding:4px 0;color:#777;font-size:13px;">Група:</td>
+                  <td style="padding:4px 0;color:#333;font-size:14px;"><%- userInfo.groupName %></td>
+                </tr>
+                <% } %>
+              </table>
+              <% } %>
+
+              <% if(typeof groupInfo !== 'undefined' && groupInfo){ %>
+              <table cellpadding="0" cellspacing="0" border="0"
+                style="background:#FFF1E5;border-radius:10px;padding:16px 20px;margin-bottom:28px;width:100%;border:1px solid #E9C5BC;">
+                <tr>
+                  <td style="padding:4px 0;color:#777;font-size:13px;width:100px;">Група:</td>
+                  <td style="padding:4px 0;color:#333;font-size:14px;font-weight:600;">
+                    <%- groupInfo.name || '' %>
+                  </td>
+                </tr>
+                <% if(groupInfo.description){ %>
+                <tr>
+                  <td style="padding:4px 0;color:#777;font-size:13px;vertical-align:top;">Опис:</td>
+                  <td style="padding:4px 0;color:#333;font-size:14px;line-height:1.6;"><%- groupInfo.description %></td>
+                </tr>
+                <% } %>
+              </table>
+              <% } %>
+
+              <!-- Action buttons -->
+              <% if(typeof btnTexts !== 'undefined'){ %>
+              <% btnTexts.forEach(function(btnText, i){ %>
+              <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+                <tr>
+                  <td style="border-radius:24px;background-color:<%= i === 0 ? '#ACCA62' : '#E88C90' %>;">
+                    <a href="<%- hrefs[i] %>"
+                      style="display:inline-block;padding:13px 36px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;border-radius:24px;letter-spacing:0.3px;">
+                      <%- btnText %>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <% }) %>
+              <% } %>
+
+              <p style="margin:24px 0 0;color:#aaa;font-size:13px;line-height:1.6;">
+                Якщо ви не реєструвалися на цій платформі — проігноруйте цей лист.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 32px;border-top:1px solid #E9C5BC;text-align:center;background:#FAFAFA;">
+              <p style="margin:0 0 6px;color:#999;font-size:12px;">
+                © 2026 GroupTime. Всі права захищені.
+              </p>
+              <p style="margin:0;color:#bbb;font-size:11px;">
+                Цей лист надіслано автоматично. Будь ласка, не відповідайте на нього.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

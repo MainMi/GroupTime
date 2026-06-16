@@ -1,0 +1,18 @@
+.addUsers {
+    &Form {
+        display: flex;
+        position: relative;
+        width: 100%;
+        gap: 15px;
+        align-items: flex-end;
+        .inputBox {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            .dropdown {
+                height: 35px !important;
+                border-radius: 15px !important;
+            }
+        }
+    }
+}

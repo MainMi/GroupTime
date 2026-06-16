@@ -1,0 +1,122 @@
+.typeSelect {
+    position: relative;
+    width: 100%;
+}
+
+.control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid var(--clr-green);
+    border-radius: 15px;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+}
+
+.current {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.placeholder {
+    color: #9aa0a6;
+}
+
+.caret {
+    color: var(--clr-green-dark);
+    font-size: 12px;
+}
+
+.dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.popover {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background: #fff;
+    border: 1px solid var(--clr-green-bg);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+.search {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--clr-green-bg);
+    outline: none;
+    padding: 10px 12px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.list {
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--clr-green-bg2);
+    }
+}
+
+.empty {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #9aa0a6;
+}
+
+.create {
+    border-top: 1px solid var(--clr-green-bg);
+    padding: 10px 12px;
+}
+
+.createLabel {
+    font-size: 13px;
+    color: var(--clr-green-dark);
+    margin-bottom: 8px;
+}
+
+.palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+
+    &.swatchActive {
+        border-color: rgba(0, 0, 0, 0.55);
+    }
+}

@@ -1,0 +1,94 @@
+.modalContent {
+    position: relative;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    place-items: center
+}
+
+.events {
+    flex: 50% 0 0;
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 600px));
+    justify-content: center; /* Centers items horizontally */
+    align-content: start; /* Aligns items at the start vertically */
+    gap: 20px;
+    place-items: center;
+    .eventInfo {
+        position: relative;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+        background-color: #FFEDEB;
+        border: 2px solid #E88C90;
+        border-radius: 10px;
+        padding: 24px;
+        color: #414141;
+        .titleBox {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            color: #111;
+            align-items: center;
+        }
+        .sectionBox {
+            position: relative;
+            display: grid;
+            grid-template-columns: 30% 70%;
+            width: 100%;
+            height: 100%;
+            gap: 14px 20px;
+            justify-items: start;
+            align-items: center;
+            .link {
+                text-decoration: underline;
+            }
+            .tag {
+                color: #336F36;
+                border-radius: 20px;
+                border: 1px solid #336F36;
+                padding: 4px 12px;
+                font-weight: 600;
+                text-transform: capitalize;
+            }
+        }
+        .description {
+            display: flex;
+            flex-direction: column;
+        }
+        .filesBox {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+
+            /* Square file tiles in a responsive grid */
+            .fileGrid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+                gap: 12px;
+                width: 100%;
+            }
+        }
+        span {
+            color: #111;
+            font-weight: 500;
+        }
+        .buttonBox {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+    }
+}

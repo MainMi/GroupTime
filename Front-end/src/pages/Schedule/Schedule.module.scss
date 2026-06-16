@@ -1,0 +1,180 @@
+.schedule {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-height: 100vh;
+    grid-template-columns: auto 1fr;
+    padding-left: 72px;
+    .filterBar {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        background-color: #ACCA62;
+        padding: 36px 32px 0 32px;
+        gap: 16px;
+        .filterBox {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+
+        }
+    }
+    .eventTable {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        padding: 40px 36px 20px 12px;
+        gap: 20px;
+        .title {
+            font-size: 36px;
+            padding-left: 24px;
+        }
+        .settingBar {
+            position: relative;
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: 24px;
+            .buttonBox {
+                display: flex;
+                gap: 10px;
+                .aiIcon {
+                    background-color: #ffbdbd;
+                    border: 1px solid #ffbdbd;
+                    border-radius: 50%;
+                }
+            }
+            .monthHandler {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                .monthTitle {
+                    font-size: 24px;
+                    font-weight: 300;
+                    color: #AB4749;
+                }
+                .button {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    background-color: #E88C90;
+                    border: none;
+                    &:last-child {
+                        transform: rotate(180deg);
+                    }
+                }
+            }
+        }
+        .emptyState {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 0;
+            font-size: 18px;
+            color: var(--clr-primary-text);
+            opacity: 0.7;
+        }
+        .weekInfo {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            width: 100%;
+            padding-left: 55px;
+            .weekButton {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background-color: #FFD1D1;
+                padding: 10px 24px;
+                &.selected {
+                    background-color: #FF9898;
+                }
+            }
+        }
+        .tableBox {
+            position: relative;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 12px;
+            .timeColumn {
+                position: relative;
+                display: grid;
+                grid-template-rows: repeat(7, minmax(0, 1fr));
+                height: 100%;
+            }
+            .table {
+                position: relative;
+                display: grid;
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+                width: 100%;
+                height: 100%;
+                .eventRows {
+                    position: relative;
+                    display: grid;
+                    grid-template-rows: repeat(7, minmax(0, 1fr));
+                    width: 100%;
+                    height: 100%;
+                    &:last-child {
+                        .eventBox {
+                            border-right: 1px solid #E9C5BC;
+                        }
+                    }
+                    .eventBox {
+                        position: relative;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        width: 100%;
+                        height: 100%;
+                        border-top: 1px solid #E9C5BC;
+                        border-left: 1px solid #E9C5BC;
+                        padding: 5px;
+                        &:last-child {
+                            border-bottom: 1px solid #E9C5BC;
+                        }
+                        .event {
+                            position: relative;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            width: 100%;
+                            height: 100%;
+                            background-color: #FFD1D1;
+                            border: 1px solid #FF9898;
+                            border-radius: 5px;
+                            padding: 5px;
+                            &.green {
+                                background-color: #CCE889;
+                                border: 1px solid #8EA94B;
+                                .time {
+                                    color: #336F36;
+                                }
+                            }
+                            .title {
+                                font-size: 10px;
+                                padding: 0;
+                            }
+                            .time {
+                                font-size: 10px;
+                                color: #780909;
+                                font-weight: normal;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+}

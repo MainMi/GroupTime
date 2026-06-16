@@ -1,0 +1,1727 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.3.8.5",
+        "title": "HiddenWarrionKPI",
+        "description": "Documention for HiddenWarrionKPI"
+    },
+    "paths": {
+        "/api/group/info": {
+            "post": {
+                "operationId": "getGroup",
+                "description": "get group information",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    {
+                        "type": "id",
+                        "in": "formData",
+                        "name": "groupId",
+                        "example": "66ad3d25e0f1316a4e4497cf"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success group information",
+                        "schema": {
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "example": "637c88a5954e50aa62f70354"
+                                },
+                                "groupId": {
+                                    "type": "string",
+                                    "example": "e666be99-ee6c-47c8-ae63-a9d7b8d4eda4"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "ІП-24"
+                                },
+                                "faculty": {
+                                    "type": "string",
+                                    "example": "ФІОТ"
+                                },
+                                "createdAt": {
+                                    "type": "string",
+                                    "example": "2023-01-01T00:00:00.000Z"
+                                },
+                                "updatedAt": {
+                                    "type": "string",
+                                    "example": "2023-01-01T00:00:00.000Z"
+                                },
+                                "__v": {
+                                    "type": "number",
+                                    "example": 0
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4012"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Group is not found",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "404"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4041"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Group is not found"
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }
+
+        },
+        "/api/group/create": {
+            "post": {
+                "operationId": "createGroup",
+                "description": "create group",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Group name",
+                        "name": "name",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "type (public/private)",
+                        "name": "type",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "",
+                        "name": "description",
+                        "required": true
+                    }
+                    
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success create group",
+                        "schema": {
+                            "type": "string",
+                            "example": "Group created"
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4012"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Group is created already",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "409"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4091"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Group is created already"
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        },
+        "/api/group/join": {
+            "post": {
+                "operationId": "getGroup",
+                "description": "add user to group",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "role",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "group",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success added user to group",
+                        "schema": {
+                            "type": "string",
+                            "example": "Confired"
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4012"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 3": {
+                        "description": "User already in group but dont verificate",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4016"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "User already his group, but you dont verificate"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Max group for user",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "403"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4031"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "description": "${limit} - is value, default 3",
+                                    "example": "You can't add more than ${limit} group"
+                                }
+                            }
+                        }
+                    },
+                    "403 - 2": {
+                        "description": "Max people in group",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "403"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4032"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Number of people in a group maximum"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Group is not found",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "404"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4041"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Group is not found"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "User already in group",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "409"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4092"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "User already his group"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/group/confirm/user": {
+            "get": {
+                "operationId": "getGroup",
+                "description": "confirm user to group",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success confirm user to group",
+                        "schema": {
+                            "type": "string",
+                            "example": "success confirm user to group"
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4013"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Action token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/group/confirm/admin": {
+            "get": {
+                "operationId": "getGroup",
+                "description": "confirm admin to group",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success confirm admin to group",
+                        "schema": {
+                            "type": "string",
+                            "example": "success confirm admin to group"
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4013"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Action token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/group/delete/user": {
+            "get": {
+                "operationId": "getGroup",
+                "description": "confirm delete user to group",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete user to group",
+                        "schema": {
+                            "type": "string",
+                            "example": "user deleted success"
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4013"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Action token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/group/delete/admin": {
+            "get": {
+                "operationId": "getGroup",
+                "description": "confirm delete user to group",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete user to group",
+                        "schema": {
+                            "type": "string",
+                            "example": "admin deleted success"
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4013"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Action token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/group/role/add": {
+            "post": {
+                "operationId": "getGroup",
+                "description": "add role to user",
+                "tags": ["Group"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "id for user",
+                        "name": "userId",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "role",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success added role to user",
+                        "schema": {
+                            "type": "string",
+                            "example": "success added role to user"
+                        }
+                    },
+                    "401": {
+                        "description": "Action token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4013"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Action token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "403"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4033"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Access denied"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/users/create": {
+            "post": {
+                "operationId": "getGroup",
+                "description": "Create users. If users created successfully we send confirmation email",
+                "tags": ["Users"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "nickname",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "firstName",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "lastName",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "email",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "password",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "birthday",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created user successfully. We send confirmation email",
+                        "schema": {
+                            "type": "string",
+                            "example": "Please confirm email"
+                        }
+                    },
+                    "404": {
+                        "description": "Params is required",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "404"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4043"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "${params} is required"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Nickname or email is already taken",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "409"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4093"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "This username or email is already taken"
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+        },
+        "/api/users/avatar": {
+            "post": {
+                "operationId": "getGroup",
+                "description": "add avatar to user",
+                "tags": ["Users"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "file",
+                        "in": "formData",
+                        "name": "avatar",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success added avatar to user",
+                        "schema": {
+                            "properties": {
+                                "ETag": {
+                                    "type": "string",
+                                    "example": "c61fb4ac819deb0895d4dae551fa46cc"
+                                },
+                                "ServerSideEncryption": {
+                                    "type": "string",
+                                    "example": "AES256"
+                                },
+                                "Location": {
+                                    "type": "string",
+                                    "example": "https://api.example.s3.amazonaws.com/image/user/531ef8f7eb1ffea1828c9412/avatarhash.jpg"
+                                },
+                                "key": {
+                                    "type": "string",
+                                    "example": "/image/user/531ef8f7eb1ffea1828c9412/avatarhash.jpg"
+                                },
+                                "Bucket": {
+                                    "type": "string",
+                                    "example": "example-backet-name"
+                                }
+                            }
+                        }
+                    },
+                    "413": {
+                        "description": "File is to big size",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "409"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4132"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "File is to big"
+                                }
+                            }
+                        }
+                    },
+                    "419": {
+                        "description": "File is not available extension",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "409"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4191"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "File is not available extension"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/auth/login": {
+            "post": {
+                "operationId": "getGroup",
+                "description": "add avatar to user",
+                "tags": ["Auth"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "email",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "password",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success login",
+                        "schema": {
+                            "properties": {
+                                "user": {
+                                    "properties": {
+                                        "nickname": {
+                                            "type": "string",
+                                            "example": "Maximax67"
+                                        },
+                                        "firstName": {
+                                            "type": "string",
+                                            "example": "Max"
+                                        },
+                                        "lastName": {
+                                            "type": "string",
+                                            "example": "Ifinov"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "test@gmail.com"
+                                        },
+                                        "password": {
+                                            "type": "string",
+                                            "example": "t$2b$10$etJ2XKD8xAh4AzItmge.ilOlHa1dfuDvyKKpiGRwXtZMcc5I27kd"
+                                        },
+                                        "birthday": {
+                                            "type": "string",
+                                            "example": "1990-01-01"
+                                        },
+                                        "global_role": {
+                                            "type": "string",
+                                            "example": "student"
+                                        },
+                                        "groups": {
+                                            "type": "array",
+                                            "example": "[GroupSchema]"
+                                        },
+                                        "authorized": {
+                                            "type": "boolean",
+                                            "example": "true"
+                                        },
+                                        "fullName": {
+                                            "type": "string",
+                                            "example": "Max Ifinov"
+                                        },
+                                        "avatar": {
+                                            "type": "string",
+                                            "example": "AvatarSchema"
+                                        },
+                                        "__v": {
+                                            "type": "number",
+                                            "example": 0
+                                        }
+                                    }
+                                },
+                                "actionToken": {
+                                    "type": "string",
+                                    "example": "949d1u22cbffbrarjh182eig55721odj"
+                                },
+                                "refreshToken": {
+                                    "type": "string",
+                                    "example": "949d1u22cbffbrarjh182eig55791obj"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You dont confirm email",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4011"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "${params} is required"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Params is required",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "404"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4043"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "${params} is required"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        },
+        "/api/auth/forgot/password": {
+            "post": {
+                "operationId": "getGroup",
+                "description": "send gmail for forgot password",
+                "tags": ["Auth"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "name": "email",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "send email for new password",
+                        "schema": {
+                            "type": "string",
+                            "example": "send you gmail url for new password"
+                        }
+                    },
+                    "404": {
+                        "description": "Params is required",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "404"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4043"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "${params} is required"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "getGroup",
+                "description": "confirm change new password",
+                "tags": ["Auth"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "new password",
+                        "name": "password",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "confirm change new password",
+                        "schema": {
+                            "type": "string",
+                            "example": "success change password"
+                        }
+                    },
+                    "401": {
+                        "description": "Action token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4013"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Action token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/confirm/email": {
+            "get": {
+                "operationId": "getGroup",
+                "description": "confirm email for user",
+                "tags": ["Auth"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successfully confirm email",
+                        "schema": {
+                            "type": "string",
+                            "example": "successfully confirm email"
+                        }
+                    },
+                    "401": {
+                        "description": "Action token is invalid",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4013"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Action token is invalid"
+                                }
+                            }
+                        }
+                    },
+                    "401 - 2": {
+                        "description": "No token provided",
+                        "schema": {
+                            "properties": {
+                                "status": {
+                                    "type": "number",
+                                    "example": "401"
+                                },
+                                "errorStatus": {
+                                    "type": "number",
+                                    "example": "4014"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "No token provided"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/schedule/week": {
+            "get": {
+                "operationId": "getScheduleWeek",
+                "description": "Get schedule week",
+                "tags": ["Schedule"],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Schedule count week",
+                        "name": "countWeek",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success get schedule",
+                        "schema": {
+                            "properties": {
+                                "day": {
+                                    "type": "string",
+                                    "example": "Пн"
+                                },
+                                "events": {
+                                    "properties": {
+                                        "_id": {
+                                            "type": "string",
+                                            "example": "63e631ca68603d4694907f19"
+                                        },
+                                        "teacherName": {
+                                            "type": "string",
+                                            "example": "Пархоменко Андрій Володимирович"
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "ІП-21"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Основи програмування"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "Практика"
+                                        },
+                                        "time": {
+                                            "type": "string",
+                                            "example": "10:25"
+                                        },
+                                        "place": {
+                                            "type": "string",
+                                            "example": "18-"
+                                        },
+                                        "static": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "tag": {
+                                            "type": "string",
+                                            "example": "lec"
+                                        },
+                                        "extraEvent": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "__v": {
+                                            "type": "number",
+                                            "example": 0
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "402": {
+                        "description": "Invalid token"
+                    }
+                }
+            }
+
+        },
+        "/api/schedule/addExtraEvent": {
+            "post": {
+                "operationId": "addExtraEvent",
+                "description": "add extra event",
+                "tags": ["Schedule"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event semester",
+                        "name": "semester",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Schedule count week",
+                        "name": "countWeek",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event day of week",
+                        "name": "day",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event time",
+                        "name": "time",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event name",
+                        "name": "name",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Teacher full name",
+                        "name": "teacherName",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event type: lection, practice or lab",
+                        "name": "type",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success added extra event"
+                    },
+                    "402": {
+                        "description": "Invalid token"
+                    }
+                }
+            }
+
+        },
+        "/api/schedule/deleteExtraEvent": {
+            "post": {
+                "operationId": "deleteExtraEvent",
+                "description": "delete extra event",
+                "tags": ["Schedule"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event semester",
+                        "name": "semester",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Schedule count week",
+                        "name": "countWeek",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event day of week",
+                        "name": "day",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event time",
+                        "name": "time",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Updated event name",
+                        "name": "name",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Updated teacher full name",
+                        "name": "teacherName",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Updated event type: lection, practice or lab",
+                        "name": "type",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete extra event"
+                    },
+                    "402": {
+                        "description": "Invalid token"
+                    }
+                }
+            }
+
+        },
+        "/api/schedule/updateExtraEvent": {
+            "post": {
+                "operationId": "updateExtraEvent",
+                "description": "update extra event",
+                "tags": ["Schedule"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event semester",
+                        "name": "semester",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Schedule count week",
+                        "name": "countWeek",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event day of week",
+                        "name": "day",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event time",
+                        "name": "time",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success update extra event"
+                    },
+                    "402": {
+                        "description": "Invalid token"
+                    }
+                }
+            }
+
+        },
+        "/api/schedule/DetailInfo/add": {
+            "post": {
+                "operationId": "addDetailInfo",
+                "description": "add detailInfo",
+                "tags": ["Schedule"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event year",
+                        "name": "year",
+                        "required": false
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event semester",
+                        "name": "semester",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Schedule count week",
+                        "name": "countWeek",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event day of week",
+                        "name": "day",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event time",
+                        "name": "time",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event detailInfo data",
+                        "name": "data",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success add detailInfo"
+                    },
+                    "402": {
+                        "description": "Invalid token"
+                    }
+                }
+            }
+
+        },
+        "/api/schedule/DetailInfo/delete": {
+            "post": {
+                "operationId": "deleteDetailInfo",
+                "description": "delete detailInfo",
+                "tags": ["Schedule"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event year",
+                        "name": "year",
+                        "required": false
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event semester",
+                        "name": "semester",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Schedule count week",
+                        "name": "countWeek",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event day of week",
+                        "name": "day",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event time",
+                        "name": "time",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete detailInfo"
+                    },
+                    "402": {
+                        "description": "Invalid token"
+                    }
+                }
+            }
+
+        },
+        "/api/schedule/DetailInfo/add/file": {
+            "post": {
+                "operationId": "addDetailInfoFile",
+                "description": "add file to detailInfo",
+                "tags": ["Schedule"],
+                "parameters": [
+                    { 
+                        "type": "string",
+                        "in": "header",
+                        "description": "ActionToken for user",
+                        "name": "Authorization",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event year",
+                        "name": "year",
+                        "required": false
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Event semester",
+                        "name": "semester",
+                        "required": true
+                    },
+                    { 
+                        "type": "number",
+                        "in": "formData",
+                        "description": "Schedule count week",
+                        "name": "countWeek",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event day of week",
+                        "name": "day",
+                        "required": true
+                    },
+                    { 
+                        "type": "string",
+                        "in": "formData",
+                        "description": "Event time",
+                        "name": "time",
+                        "required": true
+                    },
+                    { 
+                        "type": "file",
+                        "in": "formData",
+                        "description": "DetailInfo file",
+                        "name": "data",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success add file detailInfo"
+                    },
+                    "402": {
+                        "description": "Invalid token or unsupported file"
+                    }
+                }
+            }
+
+        }
+    }
+}

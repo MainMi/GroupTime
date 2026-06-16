@@ -1,0 +1,74 @@
+.modal {
+    border: 1px solid #E88C90;
+}
+
+.modalContent {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 20px;
+    height: 100%;
+    width: 760px;
+    max-width: 92vw;
+    gap: 15px;
+
+    /* Кастомний скроллбар */
+    max-height: 88vh;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #E88C90;
+        border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #d67a7e;
+    }
+
+    .titleBox {
+        display: flex;
+        justify-content: space-between;
+    }
+    .buttonBox {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    /* --- Scope controls (groups / time range / day), above the send row --- */
+    .scopePanel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #E88C90;
+        border-radius: 10px;
+        background: #FFF9F8;
+        flex: 0 0 auto;
+    }
+    .scopeRow {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+    .scopeField {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1 1 200px;
+
+        label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+    }
+}

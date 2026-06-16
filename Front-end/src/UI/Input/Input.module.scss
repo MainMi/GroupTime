@@ -1,0 +1,64 @@
+.labelBox {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+    width: 100%;
+    &.only {
+        gap: 0;
+    }
+
+    label {
+        font-size: 14px;
+    }
+    
+    .input {
+        display: flex;
+        width: 100%;
+        padding: 9px 12px 8px;
+        background-color: transparent;
+        border: 1px solid #626262;
+        border-radius: 15px;
+        font-size: 14px;
+        transition: 250ms;
+        gap: 10px;
+        &:focus,
+        &:focus-visible {
+            border: 1px solid #ACCA62;
+            outline: none;
+        }
+        &:active {
+            border: 1px solid #64AB52;
+        }
+        &::placeholder {
+            color: #B2B5AC;
+        }
+        &:disabled {
+            color: #A1A1A1;
+            border: 1px solid #A1A1A1;
+        }
+        
+        &.error {
+            border: 1px solid #DA6264;
+            &:focus,
+            &:focus-visible {
+                border: 1px solid #ACCA62;
+                outline: none;
+            }
+        }
+    }
+    
+    .error {
+        font-size: 12px;
+        color: #DA6264;
+    }
+
+    img {
+        position: absolute;
+        top: 32px;
+        width: 18px;
+        height: 18px;
+        left: calc(100% - 30px);
+    }
+}
+

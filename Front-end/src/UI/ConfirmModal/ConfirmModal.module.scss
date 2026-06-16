@@ -1,0 +1,30 @@
+.modal {
+    width: min(420px, 90vw);
+    padding: 0;
+}
+
+.box {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+}
+
+.title {
+    margin: 0;
+    font-size: 18px;
+    color: var(--clr-green-dark);
+}
+
+.message {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #555;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

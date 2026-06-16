@@ -1,0 +1,110 @@
+.content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 48px 95px 48px 167px;
+    .gridBox {
+        position: relative;
+        width: 100%;
+        display: grid;
+        gap: 48px;
+        .aboutBox {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 45px;
+            .imgBox {
+                position: relative;
+            }
+            .textBox {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                h1 {
+                    font-size: 48px;
+                }
+                p {
+                    font-size: 20px;
+                    span {
+                        color: #780909;
+                    }
+                }
+            }
+        }
+        .teamBox {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            flex-direction: column;
+            position: relative;
+            gap: 28px;
+            h2 {
+                font-size: 28px;
+            }
+            .teamGrid {
+                position: relative;
+                width: 100%;
+                display: grid;
+                justify-items: center;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 24px 0;
+            }
+        }
+    }
+}
+
+@media (min-width: 1440px) {
+    .content {
+        padding: 48px 125px 48px 197px;
+        .gridBox {
+            .aboutBox {
+                .textBox {
+                    h1 {
+                        font-size: 56px;
+                    }
+                    p {
+                        font-size: 24px;
+                    }
+                }
+                .imgBox {
+                    position: relative;
+                    width: 129px;
+                    height: 243px;
+                    img {
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                    }
+                }
+            }
+            .teamBox {
+                h2 {
+                    font-size: 36px;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 991px) {
+    .content {
+        padding: 42px 75px 42px 147px;
+        .gridBox {
+            gap: 42px;
+            .aboutBox {
+                .textBox {
+                    h1 {
+                        font-size: 42px;
+                    }
+                    p {
+                        font-size: 18px;
+                    }
+                }
+            }
+        }
+    }
+}

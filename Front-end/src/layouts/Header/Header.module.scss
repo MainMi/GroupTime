@@ -1,0 +1,81 @@
+.header {
+    position: fixed;
+    display: grid;
+    grid-template-rows: repeat(auto-fit, minmax(300px, 1fr));
+    width: 72px;
+    height: 100vh;
+    background-color: #FFF1E5;
+    box-shadow: rgba(0, 0, 0, 0.56) 0px 5px 5px;
+    z-index: 100;
+    .navigate {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-rows: repeat(auto-fit, minmax(80px, 1fr));
+        align-items: center;
+        justify-items: center;
+        img {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            z-index: 10;
+        }
+        a {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            min-height: 80px;
+        }
+        a.active::before {
+            position: absolute;
+            content: ' ';
+            width: 80px;
+            height: 100px;
+            background: url('../../static/image/menuIcons/activeIcon.svg');
+            background-size: cover;
+            left: -4px;
+            margin-top: 5px;
+            z-index: 5;
+        }
+    }
+    .panelBox {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        background-color: #DA6264;
+        border-radius: 40px 40px 0 0;
+        padding: 12px;
+        .langBtn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #DA6264;
+            background: #fff;
+            border: 0;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 200ms;
+            &:hover { background: #FFE3E3; }
+        }
+        .detailBtn {
+            position: relative;
+            display: flex;
+            width: 48px;
+            height: 24px;
+            background: url('../../static/image/menuIcons/detailsIcon.svg');
+            border: 0;
+            cursor: pointer;
+        }
+    }
+}

@@ -1,0 +1,33 @@
+.contactBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 225px;
+    gap: 10px;
+    .avatar {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    h3 {
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .contactBox {
+        width: 320px;
+        .avatar {
+            width: 225px;
+            height: 225px;
+        }
+        h3 {
+            font-size: 28px;
+        }
+    }
+    
+}

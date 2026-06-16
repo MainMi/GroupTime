@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-06-02T06:14:18.235Z",
+  "config": {
+    "maxTokens": 256,
+    "promptsPerModel": 2,
+    "delayMs": 900
+  },
+  "currentDefaultModel": "llama-3.3-70b-versatile",
+  "results": [
+    {
+      "model": "llama-3.1-8b-instant",
+      "isCurrentDefault": false,
+      "runs": 2,
+      "avgLatencyMs": 493.5,
+      "avgCompletionTokens": 58.5,
+      "avgTokensPerSec": 118.6,
+      "samples": [
+        "Привіт, Микита! Перша пара в понеділок відбувається з 10:00 до 12:35 за допомогою Zoom під керівництвом викладача Іваненка І.І. в аудиторії 301.",
+        "Привіт, Микита! Цього тижня у тебе є дві пари: Бази даних (понеділок, 10:00, Zoom, Іваненко І.І.) та Алгоритми (середа, 12:20, Offline, Петренко П.П.)."
+      ]
+    },
+    {
+      "model": "llama-3.3-70b-versatile",
+      "isCurrentDefault": true,
+      "runs": 2,
+      "avgLatencyMs": 583,
+      "avgCompletionTokens": 87,
+      "avgTokensPerSec": 149.6,
+      "samples": [
+        "Привіт, Микита. У понеділок твоя перша пара починається о 10:00 і триває 95 хвилин. Це пара з Базів даних, яку проводить Іваненко І.І. Пара проходить у кімнаті",
+        "Привіт, Микита. Цього тижня у тебе заплановано дві пари. У понеділок у тебе була пара з \"Бази даних\" о 10:00 у кімнаті 301 з викладачем Іваненко І.І. через Zoom"
+      ]
+    },
+    {
+      "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "isCurrentDefault": false,
+      "runs": 2,
+      "avgLatencyMs": 252.5,
+      "avgCompletionTokens": 77,
+      "avgTokensPerSec": 306.9,
+      "samples": [
+        "Привіт, Микита! Сьогодні вівторок, і найближча пара у тебе попереду — в понеділок. Але якщо ти питаєш про першу пару в понеділок, то вона о 10:00, і викладач",
+        "Привіт, Микита! У тебе цього тижня дві пари: Бази даних (понеділок, 10:00, 301 (Zoom), викладач Іваненко І.І.) та Алгоритми (середа, 12:20, 210, викладач П"
+      ]
+    },
+    {
+      "model": "openai/gpt-oss-20b",
+      "isCurrentDefault": false,
+      "runs": 2,
+      "avgLatencyMs": 412.5,
+      "avgCompletionTokens": 195,
+      "avgTokensPerSec": 464.4,
+      "samples": [
+        "Першою парою в понеділок є **Бази даних** о 10:00. Заняття проходить у аудиторії **301** через **Zoom**.",
+        ""
+      ]
+    },
+    {
+      "model": "qwen/qwen3-32b",
+      "isCurrentDefault": false,
+      "runs": 2,
+      "avgLatencyMs": 942.5,
+      "avgCompletionTokens": 256,
+      "avgTokensPerSec": 288.4,
+      "samples": [
+        "<think> Okay, let's see. The user is asking about the first class on Monday and where it's held. The current time is Tuesday, June 2, 2026, at 09:14. The regula",
+        "<think> Okay, let's see. The user is Mykita from group IP-21, asking about the number of classes this week and the subjects. The current time is Tuesday, June 2"
+      ]
+    }
+  ]
+}

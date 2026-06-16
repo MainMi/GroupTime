@@ -1,0 +1,107 @@
+.labelBox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .checkBox {
+        -webkit-appearance: none;
+        appearance: none;
+        border: 2px solid #FFF1E5;
+        display: grid;
+        place-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        transition: 250ms;
+        &.green {
+            border: 2px solid #ACCA62;
+            &::before {
+                box-shadow: inset 16px 16px #759A45;
+            }
+            &:checked {
+                background-color: #ACCA62;
+                &:hover {
+                    background-color: #E4F6B8;
+                    border: 2px solid #ACCA62;
+                    transition: 250ms;
+                    &::before {
+                        transition: 250ms;
+                        box-shadow: inset 16px 16px #CCE889;
+                    }
+                }
+            }
+        }
+        &:disabled {
+            border: 2px solid #A1A1A1;
+            & + span {
+                color: #A1A1A1;
+            }
+        }
+        &.error {
+            border: 2px solid #9A1818;
+        }
+        &::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            transform-origin: bottom left;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+            box-shadow: inset 16px 16px #E86C6E;
+            transition: 250ms;
+        }
+        &:checked {
+            background-color: #FFF1E5;
+            transition: 250ms;
+            &::before {
+                transform: scale(1);
+            }
+            &:hover {
+                background-color: #FFF1E5;
+                border: 2px solid #FFF1E5;
+                transition: 250ms;
+                &::before {
+                    transition: 250ms;
+                    box-shadow: inset 16px 16px #FFD1D1;
+                }
+            }
+            &:disabled {
+                background-color: #A1A1A1;
+                border: 2px solid #A1A1A1;
+                transition: 250ms;
+                &::before {
+                    transition: 250ms;
+                    box-shadow: inset 16px 16px #FFFFFF;
+                }
+                &:hover {
+                    background-color: #C9C9C9;
+                    border: 2px solid #C9C9C9;
+                    &::before {
+                        transition: 250ms;
+                        box-shadow: inset 16px 16px #FFFFFF;
+                    }
+                }
+            }
+            &.error {
+                background-color: #9A1818;
+                border: 2px solid #9A1818;
+                transition: 250ms;
+                &::before {
+                    transition: 250ms;
+                    box-shadow: inset 16px 16px #FFFFFF;
+                }
+                &:hover {
+                    background-color: #E86C6E;
+                    border: 2px solid #E86C6E;
+                    &::before {
+                        transition: 250ms;
+                        box-shadow: inset 16px 16px #FFFFFF;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+

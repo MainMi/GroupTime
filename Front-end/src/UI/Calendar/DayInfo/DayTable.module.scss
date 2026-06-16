@@ -1,0 +1,72 @@
+.dayTable {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0 8px 8px 8px;
+    &.green {
+        background-color: #E4F6B8;
+        border-radius: 0 0 4px 4px;
+        .weekTable {
+            &:hover,
+            &.selected {
+                background-color: #CCE889;
+            }
+            .day {
+                &:hover,
+                &.selected {
+                    background-color: #FC7D7D;
+                }
+                &.inRange {
+                    background-color: #CCE889;
+                    border-radius: 6px;
+                }
+            }
+        }
+    }
+    .weekTable {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(7, 32px);
+        justify-content: center;
+        justify-items: center;
+        align-items: center;
+        background-color: transparent;
+        border-radius: 4px;
+        transition: 300ms;
+        cursor: default;
+        &:hover,
+        &.selected {
+            background-color: #FFD1D1;
+        }
+        .day {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+            border-radius: 20px;
+            transition: 300ms;
+            cursor: pointer;
+            &:hover,
+            &.selected {
+                background-color: #ACCA62;
+            }
+            &.selected {
+                font-weight: 700;
+            }
+            &.inRange {
+                background-color: #FFE4E4;
+                border-radius: 6px;
+            }
+            &.disabled {
+                color: #7C7C7C;
+                cursor: default;
+                &:hover {
+                    background-color: transparent;
+                }
+            }
+        }
+    }
+}

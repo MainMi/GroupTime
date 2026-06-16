@@ -1,0 +1,28 @@
+# Dependencies & build output
+node_modules/
+build/
+coverage/
+
+# Secrets — keep .env.example / .env.test (no secrets) tracked
+.env
+.env.local
+.env.*.local
+
+# Local notes, experiments and anything not part of the project
+_local/
+
+# Docs and Claude Code working files
+*.md
+CLAUDE.md
+.claude/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+package-lock.json

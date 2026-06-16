@@ -1,0 +1,4 @@
+module.exports = {
+    MIN_GROUP_SEARCH_QUERY_LENGTH: 3,
+    MAX_GROUP_SEARCH_QUERY_LENGTH: 50,
+};

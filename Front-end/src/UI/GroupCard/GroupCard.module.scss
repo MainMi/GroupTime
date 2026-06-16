@@ -1,0 +1,113 @@
+.content {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 32px;
+    width: 100%;
+    padding: 8px 16px;
+    background-color: #FFFFFF;
+    border: 2px solid #FFBEBE;
+    border-radius: 10px;
+    &.notVerificate {
+        background-color: #f2fbdd;
+    }
+    .groupInfo {
+        position: relative;
+        display: grid;
+        height: 100%;
+        width: 100%;
+        gap: 8px;
+        .infoBox {
+            position: relative;
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            height: 100%;
+            width: 100%;
+            gap: 8px 16px;
+            .imgBox {
+                position: relative;
+                height: 54px;
+                width: 54px;
+                border-radius: 50%;
+                background-color: #A2C059;
+            }
+            .info {
+                position: relative;
+                height: 100%;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                h3 {
+                    font-size: 20px;
+                    line-height: 24px;
+                }
+                .statusBox {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    .imgBox {
+                        position: relative;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        width: 24px;
+                        height: 24px;
+                        background-color: #8EA94B;
+                        border-radius: 5px;
+                        img {
+                            width: 16px;
+                            height: 16px;
+                        }
+                    }
+                    .status {
+                        color: #8EA94B;
+                        padding: 1px 10px;
+                        font-size: 14px;
+                        border: 1px solid #8EA94B;
+                        border-radius: 10px;
+                    }
+                    &.private {
+                        .status {
+                            color: #CB5456;
+                            border: 1px solid #CB5456;
+                        }
+                        .imgBox {
+                            background-color: #CB5456;
+                        }
+                    }
+                }
+            }
+            .description {
+                color: #7C7C7C;
+                font-size: 14px;
+                line-height: 17px;
+                grid-column: 1 / span 2;
+            }
+        }
+        
+    }
+    .groupNavigation {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        .buttonBox {
+            display: flex;
+            gap: 10px;
+            button {
+                border-radius: 50%;
+            }
+        }
+        .userCount {
+            padding-right: 15px;
+        }
+        .addButton {
+            border-radius: 15px;
+        }
+        .goToButton {
+            transform: rotate(180deg);
+            border-radius: 50%;
+        }
+    }
+}

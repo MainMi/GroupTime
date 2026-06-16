@@ -1,0 +1,43 @@
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--clr-bg);
+    padding: 40px 16px;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid var(--clr-border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+
+    .icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 22px;
+        color: var(--clr-primary-text);
+    }
+
+    p {
+        margin: 0;
+        font-size: 15px;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    &.success h2 { color: var(--clr-green-dark); }
+    &.error   h2 { color: var(--clr-primary);     }
+}

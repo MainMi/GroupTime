@@ -1,0 +1,155 @@
+.labelBox {
+    display: grid;
+    position: relative;
+    width: 100%;
+    grid-template-rows: 1fr 0 0;
+    height: min-content;
+    transition: 250ms;
+
+    &.active {
+        grid-template-rows: auto auto auto;
+    }
+
+    label {
+        font-size: 14px;
+    }
+
+    .dropdown {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 9px 12px 8px;
+        background-color: transparent;
+        border: 1px solid #626262;
+        background-color: transparent;
+        border-radius: 15px;
+        list-style: none;
+        font-size: 14px;
+        transition: 250ms;
+        gap: 10px;
+        height: 100%;
+        &.placeholder {
+            color: #A1A1A1;
+        }
+
+        &.green {
+            border: 1px solid #626262;
+            background-color: transparent;
+        }
+
+        &.green ~ .dropdownList {
+            background-color: #BAD96E;
+        }
+
+        &::after {
+            content: '';
+            position: relative;
+            width: 16px;
+            height: 16px;
+            background: url('../../static/image/buttonIcons/chevronIcon-pink.svg') center no-repeat;
+            transform: rotate(-90deg);
+        }
+
+        &:focus,
+        &:focus-visible {
+            background-color: #FFD1D1;
+            border: 1px solid #626262;
+            outline: none;
+        }
+
+        &.selected {
+            background-color: #fac8c8;
+        }
+
+        &.green {
+            &:focus,
+            &:focus-visible {
+                background-color: #CCE889;
+                border: 1px solid #626262;
+                outline: none;
+            }
+            &.selected {
+                background-color: #e2ff9e;
+            }
+        }
+        
+        &:active {
+            border: 1px solid #64AB52;
+        }
+        
+
+        &::placeholder {
+            color: #B2B5AC;
+        }
+
+        &:disabled {
+            color: #A1A1A1;
+            border: 1px solid #A1A1A1;
+        }
+
+        &.error {
+            border: 1px solid #DA6264;
+
+            &:focus,
+            &:focus-visible {
+                border: 1px solid #ACCA62;
+                outline: none;
+            }
+        }
+    }
+
+    .dropdownList {
+        position: absolute;
+        display: grid;
+        color: #FFF1E5;
+        background-color: #FFBEBE;
+        border-radius: 15px;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.15);
+        padding: 0;
+        transform-origin: top;
+        transform: scale(0);
+        width: 100%;
+        height: max-content;
+        z-index: 100;
+        top: 40px;
+
+        &.active {
+            transition: transform 250ms 250ms, padding 250ms 250ms;
+            transform: scale(1);
+            padding: 8px 12px;
+        }
+
+        .listItem {
+            padding: 4px 8px;
+            list-style: none;
+            display: block;
+
+            &.green {
+                &:hover {
+                    background-color: #A2C059;
+                }
+            }
+
+            &:hover {
+                background-color: #F7A1A2;
+                border-radius: 15px;
+            }
+        }
+
+        .checkboxItem {
+            padding: 4px 8px;
+            list-style: none;
+
+            &:hover {
+                background-color: #F7A1A2;
+            }
+        }
+    }
+
+    .error {
+        font-size: 12px;
+        color: #DA6264;
+    }
+}

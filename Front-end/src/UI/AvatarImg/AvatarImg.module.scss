@@ -1,0 +1,22 @@
+.imgBox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 50%;
+    background-color: #FCE0DC;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    .logo {
+        width: 50%;
+        height: 50%;
+        object-fit: contain;
+    }
+}

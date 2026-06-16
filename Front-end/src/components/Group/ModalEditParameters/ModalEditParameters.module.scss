@@ -1,0 +1,39 @@
+.modal{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 85vh;
+    min-height: 400px;
+    width: 50vw;
+    min-width: 500px;
+    overflow: hidden;
+    align-items: center;
+    .pattern {
+        margin: 0;
+        padding-bottom: 140px;
+    }
+    .content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        padding: 27px 50px;
+        gap: 20px;
+        .sectionBox {
+            position: relative;
+            display: grid;
+            grid-template-columns: 50% 50%;
+            width: 100%;
+            gap: 20px 0;
+            justify-items: start;
+            align-items: center;
+        }
+        .buttonBox {
+            display: flex;
+            gap: 15px;
+        }
+    }
+}

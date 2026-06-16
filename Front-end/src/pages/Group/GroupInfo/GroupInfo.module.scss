@@ -1,0 +1,97 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    .container {
+        display: grid;
+        gap: 20px;
+        padding: 48px 276px 20px 348px;
+        justify-items: left;
+        .btn {
+            padding: 9px 20px 9px 16px;
+        }
+        .groupInfoBox {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            grid-template-columns: auto 1fr;
+            display: grid;
+            gap: 36px;
+            .groupInfo {
+                position: relative;
+                display: flex;
+                width: 100%;
+                flex-direction: column;
+                gap: 10px;
+                .inputDescription {
+                    color: #000;
+                    font-size: 14px;
+                }
+                .inputTitle {
+                    font-family: "Nunito", sans-serif;
+                    font-size: 24px !important;
+                    height: auto !important;
+                    font-weight: bold;
+                }
+                
+                .buttonBox {
+                    display: flex;
+                    gap: 10px;
+                    .groupInfoBtn {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        font-size: 16px;
+                        gap: 8px;
+                        padding: 4px 16px;
+                        border-radius: 10px;
+                        border: 1px solid #A2C059;
+                        background-color: #ECFFBF;
+                        img {
+                            width: 22px;
+                            height: 22px;
+                            object-fit: cover;
+                        }
+                        &.private {
+                            border: 1px solid #E86C6E;
+                            background-color: #FCE0DC;
+                        }
+                    }
+                }
+            }
+        }
+        .userBox {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+            .addUserBox {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 12px;
+                margin-bottom: 8px;
+                border: 1px dashed var(--clr-green);
+                border-radius: 10px;
+            }
+            .users {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    }
+}
+
+// Wide screens: cap content width and rebalance the oversized side paddings so
+// the page doesn't stretch thin on 1440px+ monitors (left padding clears the
+// fixed 72px nav).
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1400px;
+        margin-inline: auto;
+        padding: 48px 80px 20px 152px;
+    }
+}

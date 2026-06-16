@@ -1,0 +1,72 @@
+// Square file tile used in event details. Category colors mirror the app's
+// pink/green palette while staying readable on the light card background.
+
+.tile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-decoration: none;
+    color: #414141;
+    cursor: pointer;
+
+    .preview {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: #fff;
+        border: 1px solid #E88C90;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: border-color 150ms, box-shadow 150ms;
+
+        .icon { color: #E88C90; }
+
+        .badge {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: #B85C60;
+        }
+
+        .thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .name {
+        font-size: 12px;
+        line-height: 1.3;
+        text-align: center;
+        color: #414141;
+        // Clamp to two lines so tiles stay aligned.
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
+    }
+
+    &:hover .preview {
+        border-color: #336F36;
+        box-shadow: 0 2px 8px rgba(51, 111, 54, 0.18);
+    }
+
+    // Per-category accent on the icon/badge.
+    &.image .preview { border-color: #336F36; }
+    &.pdf .preview .icon { color: #D7484E; }
+    &.pdf .preview .badge { color: #D7484E; }
+    &.spreadsheet .preview .icon,
+    &.spreadsheet .preview .badge { color: #2E7D4F; }
+    &.presentation .preview .icon,
+    &.presentation .preview .badge { color: #C77A1E; }
+    &.archive .preview .icon,
+    &.archive .preview .badge { color: #7A6BBd; }
+}

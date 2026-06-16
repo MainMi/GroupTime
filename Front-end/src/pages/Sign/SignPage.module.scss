@@ -1,0 +1,172 @@
+.content {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    padding: 0 110px 0 182px;
+    background-color: #ACCA62;
+
+    .signBox {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        width: 1020px;
+        height: 624px;
+        background-color: #FFF1E5;
+        border-radius: 10px;
+        overflow: hidden;
+        .registerForm,
+        .loginForm {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 48px 80px;
+            left: 0;
+            top: 0;
+            transition: 1s;
+            .mobileTitle,
+            .mobileButtonBox,
+            .headerImg {
+                display: none;
+            }
+            .buttonBox {
+                position: relative;
+                display: flex;
+                gap: 6px;
+                align-items: flex-start;
+                a {
+                    text-decoration: none;
+                }
+            }
+            .inputBox {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                padding-bottom: 32px;
+                .errorMsg {
+                    font-size: 12px;
+                    color: #DA6264;
+                }
+            }
+        }
+        .loginForm {
+            transform: translateY(1000px);
+            .inputBox {
+                gap: 8px;
+                padding: 0;
+                div:first-child {
+                    padding-bottom: 20px;
+                }
+                .forgetPassword {
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    text-align: left;
+                    width: fit-content;
+                    text-decoration: none;
+                    font-size: 14px;
+                    color: #780909;
+                }
+                
+            }
+        }
+        .imgBox {
+            position: absolute;
+            height: 100%;
+            width: 50%;
+            left: 50%;
+            top: 0;
+            transition: left 1s ease-in-out;
+            img {
+                position: relative;
+                height: 100%;
+                width: 100%;
+                object-fit: cover;
+            }
+        }
+        &.signIn {
+            .registerForm {
+                transform: translateY(-1000px);
+            }
+            .loginForm {
+                transform: translateY(0px);
+            }
+            .imgBox {
+                left: 0px;
+            }
+        }
+    }
+}
+
+@media (min-width: 1440px) {
+    .content {
+        .signBox {
+            width: calc(100% - 260px);
+            height: calc(100% - 260px);
+        }
+    }
+}
+@media (max-width: 1280px) {
+    .content {
+        .signBox {
+            .registerForm,
+            .loginForm {
+                padding: 48px 60px;
+            }
+        }
+    }
+}
+
+@media (max-width: 991px) {
+    .content {
+        padding: 0 0 0 72px;
+        .signBox {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            grid-template-columns: repeat(2, 100%);
+            overflow-y: scroll;
+            .registerForm,
+            .loginForm {
+                padding-top: 182px;
+                .mobileTitle,
+                .mobileButtonBox,
+                .headerImg {
+                    display: block;
+                    align-self: center;
+                    text-align: center;
+                }
+                .buttonBox {
+                    display: none;
+                }
+            }
+            .loginForm  {
+                grid-column: 2;
+            }
+            .imgBox {
+                display: none;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .content {
+        .signBox {
+            .registerForm,
+            .loginForm {
+                padding: 182px 30px 42px 30px;
+            }
+        }
+    }
+
+}

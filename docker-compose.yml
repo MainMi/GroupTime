@@ -1,0 +1,39 @@
+# docker compose up --build
+# Front: http://localhost:3000 | API: http://localhost:5000/api (docs: /api/docs)
+services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build: ./Back-end
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    env_file:
+      - ./Back-end/.env
+    environment:
+      PORT: 5000
+      MONGODB_URL: mongodb://mongo:27017/grouptime
+      FROENT_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: ./Front-end
+      args:
+        REACT_APP_API_URL: http://localhost:5000/api
+        REACT_APP_SECRET_KEY: SecretAESKey
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  mongo-data:

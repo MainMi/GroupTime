@@ -1,0 +1,73 @@
+import urlEnum from "../constants/urlEnum";
+import { fetchAuth } from "../redux/actions/auth-actions";
+import { schedulehAction } from "../redux/slices/schedule-slice";
+
+export function getScheduleWeekInfo(data, navigate) {
+  let { date, groupId } = data;
+
+  return async (dispatch) => {
+    const result = await fetchAuth({
+      url: urlEnum.scheduleWeekInfo,
+      method: 'POST',
+      body: { date, groupId }
+    }, navigate);
+
+    if (result && result.data) {
+      const response = result.data; // { staticWeek, dynamicWeek, staticWeeksCount, countWeek, version }
+      dispatch(schedulehAction.addSchedule({
+        data: response,
+        date: date.toISOString(),
+        groupId,
+        staticWeeksCount: response.staticWeeksCount,
+        version: response.version,
+      }));
+    }
+
+    return result;
+  };
+}
+
+// Lightweight change-detection: returns { data: { version, countWeek }, ok }.
+export function getScheduleVersion(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.scheduleWeekVersion,
+    method: 'POST',
+    body: { date: data.date, groupId: data.groupId },
+  }, navigate);
+}
+
+export function getStaticWeeksList(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.scheduleStaticWeeksList,
+    method: 'POST',
+    body: { groupId: data.groupId }
+  }, navigate);
+}
+
+export function addStaticWeekToGroup(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.scheduleAddStatic,
+    method: 'POST',
+    body: { groupId: data.groupId }
+  }, navigate);
+}
+
+// Delete a static week. The backend resolves the static week from the ISO week
+// of `date` (modulo the static week count), so callers pass a date whose ISO
+// week maps to the target static week index.
+export function deleteStaticWeek(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.scheduleDelete,
+    method: 'POST',
+    body: { groupId: data.groupId, date: data.date, isStatic: true }
+  }, navigate);
+}
+
+// Reorder two static weeks by swapping their order index (countWeek).
+export function swapStaticWeeks(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.scheduleStaticSwap,
+    method: 'POST',
+    body: { groupId: data.groupId, weekId1: data.weekId1, weekId2: data.weekId2 }
+  }, navigate);
+}

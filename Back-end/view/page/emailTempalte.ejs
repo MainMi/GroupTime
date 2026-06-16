@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title : 'GroupTime' %></title>
+</head>
+<body style="margin:0;padding:0;background-color:#FFF1E5;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF1E5;min-height:100vh;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <table width="600" cellpadding="0" cellspacing="0" border="0"
+          style="max-width:600px;width:100%;border-radius:16px;overflow:hidden;border:1px solid #E9C5BC;background:#ffffff;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#E86C6E;padding:24px 32px;">
+              <h1 style="margin:0;color:#FFF1E5;font-size:20px;font-weight:700;">GroupTime</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 32px;">
+              <% if(typeof title !== 'undefined' && title){ %>
+              <h2 style="margin:0 0 16px;color:#AB4749;font-size:24px;font-weight:700;"><%- title %></h2>
+              <% } %>
+              <% if(typeof subtitle !== 'undefined' && subtitle){ %>
+              <p style="margin:0 0 24px;color:#555;font-size:16px;line-height:1.7;"><%- subtitle %></p>
+              <% } %>
+              <p style="margin:24px 0 0;color:#aaa;font-size:13px;">
+                Якщо ви не очікували цього листа — проігноруйте його.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 32px;border-top:1px solid #E9C5BC;text-align:center;background:#FAFAFA;">
+              <p style="margin:0;color:#999;font-size:12px;">© 2026 GroupTime. Всі права захищені.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,14 @@
+.rangeDatePicker {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    .modal {
+        position: absolute;
+        width: 100%;
+        top: 40px;
+        z-index: 100;
+    }
+}

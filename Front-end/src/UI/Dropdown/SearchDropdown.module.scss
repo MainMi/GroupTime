@@ -1,0 +1,101 @@
+.dropdownBox {
+    position: relative;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    .dropdownInput {
+        width: 100%;
+        padding: 9px 12px 8px;
+        background-color: transparent;
+        border: 1px solid #626262;
+        border-radius: 15px;
+        font-size: 14px;
+        transition: background-color 250ms, border 250ms;
+    
+        &.arrowOpen {
+            background-color: #FFADAD;
+            border: 1px solid #626262;
+            outline: none;
+    
+            &:focus,
+            &:focus-visible {
+                background-color: #FFD1D1;
+                border: 1px solid #626262;
+                outline: none;
+            }
+        }
+    }
+    .dropdownArrow {
+        position: absolute;
+        left: calc(100% - 30px);
+    }
+}
+
+
+.options {
+    display: none;
+    position: absolute;
+    width: 100%;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.15);
+    background-color: #FFBEBE;
+    border-radius: 15px;
+    padding: 8px 12px;
+    transform-origin: top;
+    transform: scale(0);
+    transition: transform 250ms 100ms;
+    z-index: 20;
+    &.optionsOpen {
+        transform: scale(1);
+        transition: transform 250ms 250ms;
+    }
+
+    .option {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 4px 8px;
+        list-style: none;
+        cursor: pointer;
+        color: #fff;
+        .userInfo {
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+            h6 {
+                font-size: 14px;
+            }
+        }
+
+        .groupCount {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            img {
+                width: 22px;
+                height: 22px;
+            }
+        }
+
+        &:hover {
+            background-color: #F7A1A2;
+        }
+
+        &.optionSelected {
+            background-color: #F7A1A2;
+        }
+
+        &:focus {
+            outline: none;
+        }
+        &.selected {
+            font-weight: bold;
+        }
+    }
+    &.isOpen {
+        display: grid;
+        transform: scale(1);
+        transition: transform 250ms 250ms;
+    }
+}
+
