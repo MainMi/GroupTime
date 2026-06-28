@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose');
 
 const EventInfosSchema = new Schema({
     teacherName: { type: String },
-    name: { type: String, require: true },
+    name: { type: String, required: true },
     type: { type: String },
     // Color bound to the event type (hex). Rendered in the schedule grid.
     color: { type: String },

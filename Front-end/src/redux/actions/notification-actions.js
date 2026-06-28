@@ -1,6 +1,7 @@
 import { notificationActions } from '../slices/notification-slice';
 
-export const showErrorNotification = (message, duration = 5000) => (dispatch) => {
+// Errors stay on screen longer than other toasts so they aren't missed.
+export const showErrorNotification = (message, duration = 8000) => (dispatch) => {
   dispatch(
     notificationActions.addNotification({
       type: 'error',

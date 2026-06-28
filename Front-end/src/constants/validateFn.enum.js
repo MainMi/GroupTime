@@ -1,17 +1,17 @@
 import regex from "./regex.enum"
 import constants from "./calendarEnum"
 
-// URL pattern from backend: /^(https?:\/\/)?([a-zA-Z0-9-]+\.){1,}[a-zA-Z]{2,}([a-zA-Z0-9-]+\/?)?$/
+// Keep in sync with the backend event validator (link pattern).
+const URL_PATTERN = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
+
 export const isUrlFn = (value) => {
   if (!value || value.trim() === '') return [];
-  const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}([a-zA-Z0-9-]+\/?)?$/;
-  return urlPattern.test(value) ? [] : ['typeError'];
+  return URL_PATTERN.test(value.trim()) ? [] : ['typeError'];
 }
 
 export const isUrlOrEmptyFn = (value) => {
   if (!value || value.trim() === '') return [];
-  const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}([a-zA-Z0-9-]+\/?)?$/;
-  return urlPattern.test(value) ? [] : ['typeError'];
+  return URL_PATTERN.test(value.trim()) ? [] : ['typeError'];
 }
 
 

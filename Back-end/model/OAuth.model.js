@@ -11,7 +11,7 @@ const OAuthSchema = new Schema({
         type: String, unique: true, index: true, required: true
     },
 }, {
-    timeseries: true,
+    timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true }
 });
@@ -23,5 +23,9 @@ OAuthSchema.pre(/^find/, function(next) {
     });
     next();
 });
+
+// TTL: an OAuth session row is useless once the refresh token (30d) has expired,
+// so reap it automatically instead of letting dead tokens accumulate forever.
+OAuthSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
 
 module.exports = model('OAuth', OAuthSchema);

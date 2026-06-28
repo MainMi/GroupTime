@@ -8,16 +8,10 @@ const { PUBLIC_TYPE } = require('../../constant/type/groupTypes.enum');
 const { groupService } = require('../../service/schedule');
 const { getFormattedDate, getFormattedDateWithTime } = require('../helper/getFormattedDate');
 
-// Lightweight API response-time benchmark. It measures the latency of key
-// endpoints over several iterations and prints avg/min/max/p95. Assertions use
-// generous upper bounds (these run against an in-memory Mongo, so they should be
-// fast) — the point is to detect gross regressions, not to enforce tight SLAs.
 const ITERATIONS = 30;
-// Generous ceiling so the suite is not flaky on slow CI machines.
 const MAX_AVG_MS = 750;
 
 const measure = async (label, fn) => {
-    // one warm-up call (JIT, connection pool, query plan cache)
     await fn();
 
     const samples = [];
@@ -78,7 +72,6 @@ describe('API response-time benchmark', () => {
         const groupInfo = await groupService.getGroupByName(group.name);
         group._id = groupInfo._id;
 
-        // seed a static week + event so schedule/week/info returns real data
         await request(app)
             .post('/api/schedule/week/add/static')
             .set({ Authorization: admin.token })

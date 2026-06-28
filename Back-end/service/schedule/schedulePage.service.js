@@ -2,7 +2,7 @@ const { API_SCHEDULE } = require('../../config/config');
 const { getApi } = require('../../helper');
 
 module.exports = {
-    defaultSchedule: async (req, res) => {
-        res.json(await getApi.getUrl(API_SCHEDULE));
-    },
+    // Fetch the external default schedule payload. A service returns data — the
+    // controller is responsible for the request/response.
+    getDefaultSchedule: () => getApi.getUrl(API_SCHEDULE),
 };

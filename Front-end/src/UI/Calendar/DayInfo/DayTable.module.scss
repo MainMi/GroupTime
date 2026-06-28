@@ -18,7 +18,8 @@
                 }
                 &.inRange {
                     background-color: #CCE889;
-                    border-radius: 6px;
+                    border-radius: 0;
+                    width: 100%;
                 }
             }
         }
@@ -58,7 +59,8 @@
             }
             &.inRange {
                 background-color: #FFE4E4;
-                border-radius: 6px;
+                border-radius: 0;
+                width: 100%;
             }
             &.disabled {
                 color: #7C7C7C;

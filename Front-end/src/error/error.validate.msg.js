@@ -1,15 +1,15 @@
-const errorValidateMsg = (nameValue = '', value = 0) => {
-    return {
-        'emptyError': `${nameValue} is not empty`,
-        'maxLength': `${nameValue} charcter is too much length`,
-        'dataError': `${nameValue} ${value} - is not correct`,
-        'emailError': `${nameValue} is incorrect`,
-        'passwordError': `${nameValue} is incorrect`,
-        'phoneError': `${nameValue} is not correct phone number`,
-        'typeError': `${nameValue} is not correct type`,
-        'limitError': `${nameValue} is out of range`
-    }
-}
+import i18n from '../i18n';
+
+const errorValidateMsg = () => ({
+    emptyError: i18n.t('inputValidation.empty'),
+    maxLength: i18n.t('inputValidation.maxLength'),
+    dataError: i18n.t('inputValidation.data'),
+    emailError: i18n.t('inputValidation.email'),
+    passwordError: i18n.t('inputValidation.password'),
+    phoneError: i18n.t('inputValidation.phone'),
+    typeError: i18n.t('inputValidation.type'),
+    limitError: i18n.t('inputValidation.limit'),
+});
 
 export const showErrorMsg = (arr, className) => {
     if (arr.length === 0) {

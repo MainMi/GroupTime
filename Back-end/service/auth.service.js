@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 
@@ -41,8 +42,12 @@ module.exports = {
         }
     },
     generateTokenPair: (encodeData) => {
-        const access_token = jwt.sign(encodeData, JWT_SECRET, { expiresIn: '30m' });
-        const refresh_token = jwt.sign(encodeData, JWT_SECRET_REFRESH, { expiresIn: '30d' });
+        // Unique `jti` per token: without it, two pairs minted for the same user
+        // within the same second are byte-identical, and the unique-indexed OAuth
+        // token columns then reject the duplicate (e.g. login immediately followed
+        // by a refresh). The claim is ignored on verification.
+        const access_token = jwt.sign(encodeData, JWT_SECRET, { expiresIn: '30m', jwtid: crypto.randomBytes(12).toString('hex') });
+        const refresh_token = jwt.sign(encodeData, JWT_SECRET_REFRESH, { expiresIn: '30d', jwtid: crypto.randomBytes(12).toString('hex') });
         return { access_token, refresh_token };
     },
     createOauth: (userId, tokenPair) => OAuthModel.create({ userId, ...tokenPair }),

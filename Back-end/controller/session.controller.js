@@ -8,10 +8,12 @@ module.exports = {
 
             let session;
 
+            // Always scope the session to the requesting user — a chat belongs to one
+            // user, so we must never pick up (or reuse) another user's active session.
             if (sessionId) {
-                session = await sessionService.findSession({ _id: sessionId });
+                session = await sessionService.findSession({ _id: sessionId, userId: user._id });
             } else {
-                session = await sessionService.findSession({ isActive: true });
+                session = await sessionService.findSession({ userId: user._id, isActive: true });
             }
 
             const today = new Date();

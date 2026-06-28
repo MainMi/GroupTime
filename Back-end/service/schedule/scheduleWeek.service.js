@@ -1,8 +1,19 @@
-const { BASIC_SCHEDULE } = require('../../constant/constants.enum');
+const { BASIC_SCHEDULE } = require('../../constant/schedule.enum');
 const groupModel = require('../../model/group.model');
 const scheduleWeekModel = require('../../model/scheduleWeek.model');
 
 module.exports = {
+    // Collect the eventDate ObjectIds referenced by a (non-populated) week document.
+    collectEventDateIds: (week) => {
+        const ids = [];
+        for (const day of (week.schedule || [])) {
+            for (const event of (day.events || [])) {
+                if (event.eventDate) ids.push(event.eventDate);
+            }
+        }
+        return ids;
+    },
+
     findWeek: (
         groupId,
         countWeek,

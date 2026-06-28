@@ -1,6 +1,7 @@
 const { SEARCH_REGEX_OR_FN } = require('../constant/regex.enum');
 const ApiError = require('../error/ErrorHandler');
 const { USERS_NOT_FOUND } = require('../error/errorMsg');
+const { NICKNAME_MAX_BASE_LENGTH, NICKNAME_SUFFIX_ATTEMPTS } = require('../constant/user.enum');
 const userModel = require('../model/user.model');
 
 module.exports = {
@@ -8,6 +9,19 @@ module.exports = {
     getUsers: () => userModel.find().lean(),
     getUsersById: (usersId) => userModel.find({ _id: { $in: usersId } }),
     getUser: (userData) => userModel.findOne(userData).lean(),
+    // Build a unique nickname from an email's local-part, appending a short random
+    // suffix if the base is already taken. General-purpose (e.g. Google sign-up).
+    getUniqueNickname: async (email) => {
+        const base = (email.split('@')[0] || 'user').replace(/[^a-zA-Z0-9_]/g, '').slice(0, NICKNAME_MAX_BASE_LENGTH) || 'user';
+        let nickname = base;
+        for (let i = 0; i < NICKNAME_SUFFIX_ATTEMPTS; i += 1) {
+            // eslint-disable-next-line no-await-in-loop
+            const existing = await userModel.findOne({ nickname }).lean();
+            if (!existing) return nickname;
+            nickname = `${base}_${Math.random().toString(36).slice(2, 6)}`;
+        }
+        return `${base}_${Date.now().toString(36)}`;
+    },
     updateUser: (userId, newData) => userModel.findByIdAndUpdate(userId, { $set: newData }),
     updateUsers: (userIds, newData) => userModel.updateMany(
         { _id: { $in: userIds } },

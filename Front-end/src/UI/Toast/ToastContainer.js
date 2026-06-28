@@ -20,6 +20,7 @@ const ToastContainer = () => {
           id={notif.id}
           type={notif.type}
           message={notif.message}
+          duration={notif.duration}
           onClose={handleClose}
         />
       ))}

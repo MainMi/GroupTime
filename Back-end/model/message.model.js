@@ -6,11 +6,15 @@ const MessageSchema = new Schema({
     content: { type: String, required: true },
     type: { type: String, enum: Object.values(messageTypeEnum), required: true },
     timestamp: { type: Date, default: Date.now },
-    sessionId: { type: String, required: true },
+    sessionId: { type: Schema.Types.ObjectId, ref: 'Session', required: true },
 }, {
-    timeseries: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true }
 });
+
+// History is read per-user, newest first (messageService.findsMessages); and
+// occasionally scoped to a session.
+MessageSchema.index({ userId: 1, timestamp: -1 });
+MessageSchema.index({ sessionId: 1 });
 
 module.exports = model('Message', MessageSchema);

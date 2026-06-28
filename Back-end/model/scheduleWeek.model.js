@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose');
 const { weekEnum } = require('../constant');
 
 const ScheduleWeekSchema = new Schema({
-    groupId: { type: Schema.Types.ObjectId, ref: 'Group', require: true },
+    groupId: { type: Schema.Types.ObjectId, ref: 'Group', required: true },
     countWeek: { type: Number },
     static: { type: Boolean, default: true },
     schedule: [{

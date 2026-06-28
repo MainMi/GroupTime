@@ -2,3 +2,6 @@ node_modules
 .env
 coverage
 *.log
+
+# One-off DB migration / maintenance scripts — local-only, never deployed.
+migrations/

@@ -4,8 +4,9 @@ const { PUBLIC_TYPE } = require('../constant/type/groupTypes.enum');
 const { CONFIRM_USER_TYPE, USER_JOINED_TYPE } = require('../constant/type/emailTypes.enum');
 const { NOT_VERIFIED_TYPE, VERIFIED_TYPE } = require('../constant/type/verificateToken.enum');
 const {
-    USER_ROLE, ADMIN_ROLE, STUDENT_ROLE, HELP_ADMIN_ROLE, OWNER_ROLE,
+    USER_ROLE, ADMIN_ROLE, STUDENT_ROLE, OWNER_ROLE,
 } = require('../constant/user.role.enum');
+const { ASSIGNABLE_GROUP_ROLES } = require('../constant/group.enum');
 const groupModel = require('../model/group.model');
 const ApiError = require('../error/ErrorHandler');
 const {
@@ -15,30 +16,6 @@ const {
     authService, userService, verificateService, emailService, avatarService,
 } = require('../service');
 const { groupService } = require('../service/schedule');
-
-// All roles an admin may assign to a group member. OWNER_ROLE is intentionally
-// excluded — ownership is only granted via the dedicated transfer endpoint.
-const VALID_GROUP_ROLES = [
-    USER_ROLE,
-    STUDENT_ROLE,
-    HELP_ADMIN_ROLE,
-    ADMIN_ROLE
-];
-
-// Resolve the email of a group's owner (used for join notifications).
-// Falls back to an admin for legacy groups created before the owner role existed.
-const findGroupOwnerEmail = async (groupId) => {
-    const ownerVerificate = await verificateService.findVerificateUser({
-        group: groupId,
-        role: OWNER_ROLE
-    }) || await verificateService.findVerificateUser({
-        group: groupId,
-        role: ADMIN_ROLE
-    });
-    if (!ownerVerificate) return null;
-    const owner = await userService.getUser({ _id: ownerVerificate.user });
-    return owner?.email || null;
-};
 
 module.exports = {
     getGroupInfo: async (req, res, next) => {
@@ -127,8 +104,6 @@ module.exports = {
             next(e);
         }
     },
-    // Manager-only: upload a new group picture, add it to the group's gallery and
-    // make it active. Mirrors userController.uploadUserAvatar via avatarService.
     uploadGroupAvatar: async (req, res, next) => {
         try {
             const groupId = req.userInGroup.group._id;
@@ -169,8 +144,6 @@ module.exports = {
     deleteUserInGroup: async (req, res, next) => {
         try {
             const { userInGroup } = req;
-            // The owner can't simply leave — they must transfer ownership first,
-            // otherwise the group would be left without an owner.
             if (userInGroup.role === OWNER_ROLE) {
                 return next(new ApiError(...Object.values(OWNER_CANNOT_LEAVE)));
             }
@@ -221,11 +194,9 @@ module.exports = {
 
                 res.json('User added to group');
 
-                // Public join is instant — send the admin an informational
-                // notification (only if the group enabled email notifications).
                 if (group.parameters?.notifacionFromEmail) {
                     (async () => {
-                        const ownerEmail = await findGroupOwnerEmail(group._id);
+                        const ownerEmail = await groupService.findGroupOwnerEmail(group._id);
                         if (ownerEmail) {
                             await emailService.sendMail(
                                 ownerEmail,
@@ -250,9 +221,6 @@ module.exports = {
             next(e);
         }
     },
-    // Self-join for non-public ("semi-public") groups: create a pending
-    // (NOT_VERIFIED) membership and email the group admin a confirm/decline link.
-    // The membership only becomes active once the admin confirms.
     addUserToGroupPrivate: async (req, res, next) => {
         try {
             const { group, authUser: user } = req;
@@ -284,15 +252,11 @@ module.exports = {
 
             await groupService.updateUserGroup(group._id, verificateId);
 
-            // Respond immediately — don't block the response on email delivery.
             res.json('User added to group');
 
-            // Notify the group admin so they can confirm/decline the request
-            // (unless the group disabled email notifications — then the admin can
-            // only confirm via the site). Fire-and-forget.
             if (group.parameters?.notifacionFromEmail) {
                 (async () => {
-                    const ownerEmail = await findGroupOwnerEmail(group._id);
+                    const ownerEmail = await groupService.findGroupOwnerEmail(group._id);
                     if (ownerEmail) {
                         const confirmURL = `${FROENT_URL}/group/confirm/user/?token=${actionToken}`;
                         const declineURL = `${FROENT_URL}/group/delete/user/?token=${actionToken}`;
@@ -370,10 +334,9 @@ module.exports = {
     setGroupNewRoleUser: async (req, res, next) => {
         try {
             const { role: newRole, userId: user, groupId: group } = req.body;
-            if (!VALID_GROUP_ROLES.includes(newRole)) {
+            if (!ASSIGNABLE_GROUP_ROLES.includes(newRole)) {
                 return next(new ApiError(...Object.values(ROLE_INCORRECT)));
             }
-            // The owner's role can only change through the transfer endpoint.
             const target = await verificateService.findVerificateUser({ user, group });
             if (target?.role === OWNER_ROLE) {
                 return next(new ApiError(...Object.values(OWNER_CANNOT_BE_MODIFIED)));

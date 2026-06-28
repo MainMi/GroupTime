@@ -65,6 +65,9 @@ const urlEnum = {
   // message
   messageSend: `${api}/message/send`,
   messageAnalyze: `${api}/message/analyze`,
+  messageMagic: `${api}/message/magic`,
+  messageOrganize: `${api}/message/organize`,
+  messagePersist: `${api}/message/persist`,
   messageGetLast: `${api}/message/getLast`
 };
 

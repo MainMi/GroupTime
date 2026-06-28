@@ -8,7 +8,7 @@ const { PUBLIC_TYPE } = require('../../../constant/type/groupTypes.enum');
 const { groupService } = require('../../../service/schedule');
 
 const { getFormattedDateWithTime } = require('../../helper/getFormattedDate');
-const scheduleDate = require('../../../helper/scheduleDate');
+const scheduleDate = require('../../../helper/scheduleDate.helper');
 
 // Static week management: reorder (swap) + moving an event between static weeks
 // via the edit endpoint. Static weeks rotate as ISO(date) % staticWeekCount.

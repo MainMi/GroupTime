@@ -40,6 +40,33 @@ const getISOWeekNumber = (d) => {
     return weekNo;
 };
 
+// Distinct ISO week numbers covered by [from, to] (inclusive), stepping by day so
+// short ranges that cross a week boundary are handled. Capped to avoid abuse.
+const isoWeeksInRange = (from, to) => {
+    const start = new Date(from);
+    const end = new Date(to);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
+        return [getISOWeekNumber(start)];
+    }
+    const weeks = new Set();
+    const cursor = new Date(start);
+    let guard = 0;
+    while (cursor <= end && guard < 400) {
+        weeks.add(getISOWeekNumber(cursor));
+        cursor.setDate(cursor.getDate() + 1);
+        guard += 1;
+    }
+    return [...weeks];
+};
+
+// Midpoint (ISO string) between two timestamps — used to slot a reordered week
+// between its neighbours without renumbering the whole sequence.
+const calculateMiddleTimestamp = (earlierTimestamp, laterTimestamp) => {
+    const earlierTime = new Date(earlierTimestamp).getTime();
+    const laterTime = new Date(laterTimestamp).getTime();
+    return new Date((earlierTime + laterTime) / 2).toISOString();
+};
+
 module.exports = {
     calculateScheduleDate: (find = new Date(), start = startYearDate) => {
         const findDate = [
@@ -70,5 +97,7 @@ module.exports = {
         };
     },
     generateRandomTimeSlot,
-    getISOWeekNumber
+    getISOWeekNumber,
+    isoWeeksInRange,
+    calculateMiddleTimestamp
 };

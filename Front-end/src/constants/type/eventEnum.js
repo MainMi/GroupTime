@@ -62,6 +62,9 @@ const eventsConst = {
 // Fallback color used when an event has no bound color (legacy records or unknown type).
 export const DEFAULT_TYPE_COLOR = "#E08AC0";
 
+// Fallback length (minutes) when an event is created without an explicit duration.
+export const DEFAULT_EVENT_DURATION = 90;
+
 // Resolve a color for a type name from the predefined list (case-insensitive).
 export const colorForType = (typeName) => {
     if (!typeName) return DEFAULT_TYPE_COLOR;

@@ -1,8 +1,13 @@
+.scrollArea {
+    width: 100%;
+    overflow-x: auto;
+}
 .weekInfo {
     position: relative;
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     width: 100%;
+    min-width: 720px;
     padding-left: 55px;
     .weekButton {
         position: relative;
@@ -21,6 +26,7 @@
     position: relative;
     display: flex;
     width: 100%;
+    min-width: 720px;
     height: 100%;
     gap: 12px;
     .timeColumn {

@@ -3,18 +3,8 @@
 // duplicated. Works against any model that has `avatar` + `avatarGallery` fields.
 const fileModel = require('../model/file.model');
 const { IMAGE_TYPE } = require('../constant/type/fileType.enum');
-const { uploadFileS3, deleteFileS3 } = require('./file.service');
-
-const MAX_AVATAR_GALLERY = 5;
-
-// Best-effort recovery of the S3 key for files saved before `key` was stored.
-const keyFromLocation = (location) => {
-    try {
-        return decodeURIComponent(new URL(location).pathname).replace(/^\//, '');
-    } catch (e) {
-        return null;
-    }
-};
+const { MAX_AVATAR_GALLERY } = require('../constant/avatar.enum');
+const { uploadFileS3, deleteFileS3, keyFromLocation } = require('./file.service');
 
 const deleteAvatarFile = async (file) => {
     if (!file) return;

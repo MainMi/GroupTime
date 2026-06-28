@@ -116,7 +116,7 @@ module.exports = {
                 return;
             }
 
-            req.swapIndexs = [
+            req.swapIndexes = [
                 weekIdx1,
                 weekIdx2
             ];

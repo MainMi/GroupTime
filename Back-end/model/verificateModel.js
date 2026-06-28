@@ -58,6 +58,8 @@ verificateSchema.pre('findOneAndDelete', async function(next) {
     next();
 });
 
-verificateSchema.index({ user: 1, group: 1 });
+// One membership per (user, group). Unique so duplicates can't reappear — run the
+// schema-consistency migration first to clear any pre-existing duplicates.
+verificateSchema.index({ user: 1, group: 1 }, { unique: true });
 
 module.exports = model('Verificate', verificateSchema);

@@ -2,7 +2,7 @@
 
 const Joi = require('joi');
 const { regexEnum, weekEnum } = require('../../constant');
-const scheduleDate = require('../../helper/scheduleDate');
+const scheduleDate = require('../../helper/scheduleDate.helper');
 const { TIME_REGEX } = require('../../constant/regex.enum');
 
 const customJoi = Joi.extend((joi) => ({

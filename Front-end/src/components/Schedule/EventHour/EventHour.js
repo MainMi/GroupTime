@@ -3,16 +3,11 @@ import classes from './EventHour.module.scss';
 import Button from '../../../UI/Button/Button';
 import { colorForType, DEFAULT_TYPE_COLOR } from '../../../constants/type/eventEnum';
 
-// Resolve the color bound to an event: prefer the color stored on the event,
-// fall back to the predefined type color (legacy records have no color field).
 function getEventColor(event) {
     if (!event?.eventInfo) return DEFAULT_TYPE_COLOR;
     return event.eventInfo.color || colorForType(event.eventInfo.type);
 }
 
-// Build inline styles from a hex color: a light tinted background + a solid
-// accent border (left for static, dashed top for dynamic). Replaces the old
-// fixed SCSS color classes so any type color renders correctly.
 function eventColorStyle(color, isStatic) {
     const style = {
         backgroundColor: `${color}22`,

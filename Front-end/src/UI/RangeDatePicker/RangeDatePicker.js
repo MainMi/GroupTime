@@ -25,7 +25,8 @@ const RangeDatePicker = ({
     const toDateVal = useMemo(() => toDate(to), [to, toDate]);
 
     const display = useMemo(() => {
-        const opts = { year: 'numeric', month: 'long', day: 'numeric' };
+        // Short month keeps a full "from – to" range readable in tight inline layouts.
+        const opts = { year: 'numeric', month: 'short', day: 'numeric' };
         const f = fromDate ? fromDate.toLocaleDateString(undefined, opts) : '';
         const tt = toDateVal ? toDateVal.toLocaleDateString(undefined, opts) : '';
         if (f && tt) return `${f} – ${tt}`;

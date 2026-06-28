@@ -1,10 +1,12 @@
 import { authAction } from '../slices/auth-slice';
+import { messagesAction } from '../slices/message-slice';
 import urlEnum from '../../constants/urlEnum';
 import { getFetchDispatch } from '../../api/apiFetch';
 import { getAccessToken, getRefreshToken, setAuthTokens } from '../../helper/authToken';
 import { showErrorNotification, showInfoNotification } from './notification-actions';
 import { notifyError } from '../../helper/notify';
 import { ERROR_CODES } from '../../constants/httpStatus';
+import { resolveErrorMessage } from '../../helper/errorMessage';
 import i18n from '../../i18n';
 
 const refreshAuthToken = async (headers) => {
@@ -122,9 +124,10 @@ export async function fetchAuth(responseArgm = {}, navigate) {
         }
 
         if (data.status >= 400 && data.status < 600) {
-            notifyError(data?.message || i18n.t('auth.genericError'));
+            const message = resolveErrorMessage(data);
+            notifyError(message);
             console.error(data)
-            return { data, status: response.status, ok: response.ok };
+            return { data: { ...data, message }, status: response.status, ok: response.ok };
         }
 
 
@@ -146,7 +149,7 @@ export const fetchRegister = (body, navigate) => {
 
     const helpFn = (data, navigate, dispatch) => {
         if (data?.errorStatus || (data?.status >= 400)) {
-            dispatch(showErrorNotification(data.message || i18n.t('auth.registerError')));
+            dispatch(showErrorNotification(resolveErrorMessage(data, 'auth.registerError')));
             return;
         }
         dispatch(showInfoNotification(i18n.t('auth.checkEmail')));
@@ -166,10 +169,20 @@ export const fetchRegister = (body, navigate) => {
 // full profile, and land on /profile.
 const handleLoginSuccess = (data, navigate, dispatch) => {
     if (!data?.access_token) {
-        dispatch(showErrorNotification(data?.message || i18n.t('auth.invalidCredentials')));
+        // Wrong-password (4017), unknown-email (4059) and invalid-password (4002)
+        // must read as one generic credentials error, never "user not found".
+        const credentialCodes = [4017, 4059, 4002];
+        const msg = credentialCodes.includes(data?.errorStatus)
+            ? i18n.t('auth.invalidCredentials')
+            : resolveErrorMessage(data, 'auth.invalidCredentials');
+        dispatch(showErrorNotification(msg));
         return;
     }
     const { user, access_token, refresh_token } = data;
+    // Drop any persisted bot history from a previous account so a fresh login on
+    // the same device starts with an empty assistant chat (the persisted store
+    // survives a session that expired without an explicit logout).
+    dispatch(messagesAction.clearMessages());
     dispatch(authAction.updateAuth({
         userInfo: { ...user, password: undefined },
         userToken: access_token,

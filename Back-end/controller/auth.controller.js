@@ -17,28 +17,12 @@ const {
 } = require('../constant/type/emailTypes.enum');
 const { NOT_VERIFIED_TYPE } = require('../constant/type/verificateToken.enum');
 const ApiError = require('../error/ErrorHandler');
-const { USER_IS_ALREADY_GROUP } = require('../error/errorMsg');
-const actionTokenModel = require('../model/actionToken.model');
-const OAuthModel = require('../model/OAuth.model');
+const { USER_IS_ALREADY_GROUP, GOOGLE_CREDENTIAL_MISSING, GOOGLE_EMAIL_NOT_VERIFIED } = require('../error/errorMsg');
 
 const {
-    emailService, userService, authService, verificateService
+    emailService, userService, authService, verificateService, actionTokenService
 } = require('../service');
 const { groupService } = require('../service/schedule');
-
-// Build a unique nickname from a Google email's local-part, appending a short
-// random suffix if the base is already taken.
-const generateUniqueNickname = async (email) => {
-    const base = (email.split('@')[0] || 'user').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20) || 'user';
-    let nickname = base;
-    for (let i = 0; i < 5; i += 1) {
-        // eslint-disable-next-line no-await-in-loop
-        const existing = await userService.getUser({ nickname });
-        if (!existing) return nickname;
-        nickname = `${base}_${Math.random().toString(36).slice(2, 6)}`;
-    }
-    return `${base}_${Date.now().toString(36)}`;
-};
 
 module.exports = {
     login: async (req, res, next) => {
@@ -48,9 +32,6 @@ module.exports = {
             await authService.comparePassword(password, user.password);
 
             const tokenPair = authService.generateTokenPair({ userId: user._id });
-            // Must await: the client immediately calls /auth/userInfo with the new
-            // access token, so the OAuth session row has to exist first or that
-            // request 401s, fails refresh, and bounces the user back to /sign.
             await authService.createOauth(user._id, tokenPair);
 
             req.user = { user, ...tokenPair };
@@ -65,13 +46,11 @@ module.exports = {
             next(e);
         }
     },
-    // Google Identity Services sign-in/up. Verifies the ID token, finds-or-creates
-    // the user, and issues the same JWT pair as password login.
     googleAuth: async (req, res, next) => {
         try {
             const { credential } = req.body;
             if (!credential) {
-                return next(new ApiError(400, 4001, 'Missing Google credential'));
+                return next(new ApiError(...Object.values(GOOGLE_CREDENTIAL_MISSING)));
             }
 
             const payload = await authService.verifyGoogleIdToken(credential);
@@ -84,18 +63,17 @@ module.exports = {
             } = payload;
 
             if (!email || !emailVerified) {
-                return next(new ApiError(401, 4012, 'Google email is not verified'));
+                return next(new ApiError(...Object.values(GOOGLE_EMAIL_NOT_VERIFIED)));
             }
 
             let user = await userService.getUser({ email });
 
             if (user) {
-                // Link the Google account to an existing (e.g. local) user once.
                 if (!user.googleId) {
                     await userService.updateUser(user._id, { googleId });
                 }
             } else {
-                const nickname = await generateUniqueNickname(email);
+                const nickname = await userService.getUniqueNickname(email);
                 user = await userService.createUser({
                     email,
                     firstName: givenName || 'User',
@@ -103,7 +81,6 @@ module.exports = {
                     nickname,
                     googleId,
                     authProvider: 'google',
-                    // Google already verified the email — no confirmation step needed.
                     authorized: true
                 });
             }
@@ -123,7 +100,7 @@ module.exports = {
         try {
             const { user } = req;
 
-            await OAuthModel.deleteMany({ userId: user.userId });
+            await authService.deleteManyParamsToken({ userId: user.userId });
 
             res.json('User is logout');
         } catch (e) {
@@ -163,7 +140,7 @@ module.exports = {
 
             const confirmEmailToken = await authService.generateActionToken({ email: user.email }, CONFIRM_EMAIL);
 
-            await actionTokenModel.create({
+            await actionTokenService.createActionToken({
                 action_token: confirmEmailToken,
                 action_type: CONFIRM_EMAIL,
                 userId: user._id
@@ -186,7 +163,7 @@ module.exports = {
 
             const confirmEmailToken = await authService.generateActionToken({ userId: user._id, groupId, role }, INVITE_USER);
 
-            await actionTokenModel.create({
+            await actionTokenService.createActionToken({
                 action_token: confirmEmailToken,
                 action_type: CONFIRM_EMAIL,
                 userId: user._id
@@ -237,7 +214,7 @@ module.exports = {
             // eslint-disable-next-line object-shorthand
             const confirmUser = await authService.generateActionToken({ email: email }, CONFIRM_USER);
 
-            await actionTokenModel.create({
+            await actionTokenService.createActionToken({
                 action_token: confirmUser,
                 action_type: CONFIRM_ADMIN,
                 userId
@@ -274,7 +251,6 @@ module.exports = {
             const errors = [];
             const emailJobs = [];
 
-            // Phase 1: all DB work, in parallel across users (fast)
             await Promise.all(users.map(async (user, index) => {
                 const {
                     email,
@@ -295,7 +271,7 @@ module.exports = {
                         INVITE_USER
                     );
 
-                    await actionTokenModel.create({
+                    await actionTokenService.createActionToken({
                         action_token: inviteUser,
                         action_type: INVITE_USER,
                         userId
@@ -325,14 +301,12 @@ module.exports = {
                 }
             }));
 
-            // Respond immediately — don't make the client wait on email delivery
             if (errors.length > 0) {
                 res.status(207).json({ message: 'Completed with errors', errors });
             } else {
                 res.json({ message: 'All users invited successfully' });
             }
 
-            // Phase 2: send invite emails in the background (fire-and-forget)
             for (const job of emailJobs) {
                 const confirmUserURL = `${FROENT_URL}/group/confirm/invite/?token=${job.inviteUser}`;
                 const deleteUserURL = `${FROENT_URL}/group/delete/invite/?token=${job.inviteUser}`;
@@ -345,7 +319,6 @@ module.exports = {
                             confirmUserURL,
                             deleteUserURL
                         ],
-                        // Show the recipient details about the GROUP, not their own info.
                         groupInfo: { name: groupName, description: groupDescription }
                     }
                 ).catch((e) => console.error('Invite email failed for', job.email, '-', e.message));

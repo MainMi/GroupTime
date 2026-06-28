@@ -88,6 +88,7 @@ const EventTable = ({
 
     return (
         <>
+            <div className={classes.scrollArea}>
             <div className={classes.weekInfo}>
                 {WEEK_DAY_KEYS.map((dayKey, idx) => (
                     <div
@@ -122,6 +123,7 @@ const EventTable = ({
                         </div>
                     ))}
                 </div>
+            </div>
             </div>
             {isShowEvent && (
                 <ModalShowEvents

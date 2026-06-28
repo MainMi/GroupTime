@@ -9,8 +9,10 @@ import Loader from '../../UI/Loader/Loader';
 import ScheduleFilter from '../../components/Schedule/ScheduleFilter/ScheduleFilter';
 import ModalScheduleSettings from '../../components/Schedule/ModalScheduleSettings/ModalScheduleSettings';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
-import roleEnum, { ROLE_ORDER } from '../../constants/roleEnum';
-import { canEditEvents } from '../../helper/roleHelper';
+import roleEnum from '../../constants/roleEnum';
+import { canEditEvents, canViewSchedule } from '../../helper/roleHelper';
+import { SCHEDULE_TYPE } from '../../constants/scheduleEnum';
+import { colorForType } from '../../constants/type/eventEnum';
 import { EMPTY_FILTER } from '../../helper/scheduleFilter';
 import classes from './Schedule.module.scss';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { fetchUserInfo } from '../../redux/actions/auth-actions';
 import { getISOWeekNumber, atNoon } from '../../helper/dateHelper';
+import { getStorage, setStorage } from '../../helper/storageHelper';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
 import { DEFAULT_CACHE_TTL } from '../../constants/cacheConfig';
 import { getScheduleWeekInfo, getScheduleVersion } from '../../api/scheduleFetch';
@@ -29,11 +32,6 @@ import ScheduleTour from '../../components/Onboarding/ScheduleTour';
 
 import { deleteStaticEvent, deleteDynamicEvent } from '../../api/eventFetch';
 import { showSuccessNotification, showErrorNotification } from '../../redux/actions/notification-actions';
-
-// Viewing the schedule requires STUDENT or above; a plain "user" (e.g. a
-// not-yet-promoted member) has no schedule access. ROLE_ORDER lives in constants.
-const canViewSchedule = (role) =>
-    ROLE_ORDER.indexOf(role) >= ROLE_ORDER.indexOf(roleEnum.STUDENT_ROLE);
 
 // Merge several groups' week data into one, tagging each event with its group
 // so per-event edit/delete still knows the target group in "all groups" mode.
@@ -58,7 +56,6 @@ const SchedulePage = () => {
     const userInfo = useSelector((state) => state.auth.userInfo);
     const schedules = useSelector((state) => state.schedule.schedules);
 
-    // Initialize at noon to avoid UTC-midnight timezone issues (e.g. UTC+3 → day-1 bug)
     const [date, setDate] = useState(() => atNoon(new Date()));
     const [isModalEvent, setIsModalEvent] = useState(false);
     const [isModalSettings, setIsModalSettings] = useState(false);
@@ -67,12 +64,17 @@ const SchedulePage = () => {
     const [timeSheet, setTimeSheet] = useState(1);
     const [existingItem, setExistingItem] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    // 'all' restores immediately; a specific group is resolved by id once userInfo loads.
-    const [selectedGroup, setSelectedGroup] = useState(
-        () => (localStorage.getItem(STORAGE_KEYS.SELECTED_GROUP) === 'all' ? 'all' : 0)
-    );
+
+    const [selectedGroup, setSelectedGroup] = useState(() => {
+        const stored = getStorage(STORAGE_KEYS.SELECTED_GROUP);
+        if (stored === 'all') return 'all';
+        const idx = userInfo?.groups?.findIndex((g) => g.group?._id === stored);
+        return idx != null && idx >= 0 ? idx : 0;
+    });
     const [editEventData, setEditEventData] = useState(null);
     const [activeFilter, setActiveFilter] = useState(EMPTY_FILTER);
+    // >0 shows the "assistant changed N events — refresh the view?" prompt.
+    const [assistantRefreshCount, setAssistantRefreshCount] = useState(0);
 
     // Refs to avoid stale closures without adding to effect deps
     const schedulesRef = useRef(schedules);
@@ -81,6 +83,13 @@ const SchedulePage = () => {
     userInfoRef.current = userInfo;
     const activeFilterRef = useRef(activeFilter);
     activeFilterRef.current = activeFilter;
+    const dateRef = useRef(date);
+    dateRef.current = date;
+    const selectedGroupRef = useRef(selectedGroup);
+    selectedGroupRef.current = selectedGroup;
+    // Tallies assistant-applied changes during one assistant session: total (for cache
+    // invalidation) and how many affect the schedule currently on screen.
+    const assistantChangesRef = useRef({ total: 0, relevant: 0 });
 
     // Restore the persisted group once the user's groups are available, and keep the
     // selection valid: if the stored group was deleted, fall back to the first one.
@@ -88,7 +97,7 @@ const SchedulePage = () => {
     useEffect(() => {
         const groups = userInfo?.groups;
         if (!groups?.length) return;
-        const stored = localStorage.getItem(STORAGE_KEYS.SELECTED_GROUP);
+        const stored = getStorage(STORAGE_KEYS.SELECTED_GROUP);
         if (stored === 'all') {
             setSelectedGroup('all');
         } else if (stored) {
@@ -103,10 +112,10 @@ const SchedulePage = () => {
     useEffect(() => {
         if (!didInitGroupRef.current) return;
         if (selectedGroup === 'all') {
-            localStorage.setItem(STORAGE_KEYS.SELECTED_GROUP, 'all');
+            setStorage(STORAGE_KEYS.SELECTED_GROUP, 'all');
         } else {
             const g = userInfoRef.current?.groups?.[selectedGroup]?.group;
-            if (g?._id) localStorage.setItem(STORAGE_KEYS.SELECTED_GROUP, g._id);
+            if (g?._id) setStorage(STORAGE_KEYS.SELECTED_GROUP, g._id);
         }
     }, [selectedGroup]);
 
@@ -150,8 +159,61 @@ const SchedulePage = () => {
         timeSheet !== calendarEnum.MTD ? timeSheet + 1 : 0
     );
 
-    const toggleModalassistant = useCallback(() => {
-        setIsModalassistant(prev => !prev);
+    // Is `groupId` part of what the schedule is currently showing (single group, or
+    // one of the filtered groups in "all" mode)?
+    const isGroupViewed = useCallback((groupId) => {
+        const ui = userInfoRef.current;
+        const sg = selectedGroupRef.current;
+        if (!ui?.groups || groupId == null) return false;
+        if (sg === 'all') {
+            const ids = activeFilterRef.current?.groups || [];
+            return ui.groups.some((g) => g.group && canViewSchedule(g.role)
+                && (!ids.length || ids.includes(g.group._id))
+                && String(g.group._id) === String(groupId));
+        }
+        const entry = ui.groups[sg];
+        return !!(entry?.group && canViewSchedule(entry.role)
+            && String(entry.group._id) === String(groupId));
+    }, []);
+
+    // An applied change is "relevant" only if it touches the on-screen schedule:
+    // the group must be viewed, and (for one-off events) the date must fall in the
+    // displayed week. Recurring (static) changes affect every week, so they always do.
+    const isChangeRelevant = useCallback((action) => {
+        if (!action?.groupId || !isGroupViewed(action.groupId)) return false;
+        const isStatic = action.scheduleType
+            ? action.scheduleType === SCHEDULE_TYPE.STATIC
+            : !!action.event?.day;
+        if (isStatic) return true;
+        const d = action.event?.date ? new Date(action.event.date) : null;
+        if (!d || Number.isNaN(d.getTime())) return true;
+        return getISOWeekNumber(d) === getISOWeekNumber(dateRef.current);
+    }, [isGroupViewed]);
+
+    // Called once per assistant-applied event change: always invalidate that group's
+    // cached weeks, and tally whether the on-screen view needs refreshing.
+    const handleAssistantMutation = useCallback((action) => {
+        if (action?.groupId) dispatch(schedulehAction.clearGroupSchedules(action.groupId));
+        assistantChangesRef.current.total += 1;
+        if (isChangeRelevant(action)) assistantChangesRef.current.relevant += 1;
+    }, [dispatch, isChangeRelevant]);
+
+    const openAssistant = useCallback(() => {
+        assistantChangesRef.current = { total: 0, relevant: 0 };
+        setIsModalassistant(true);
+    }, []);
+
+    // On close: a single relevant change refreshes silently; several ask first so we
+    // don't reload (and lose scroll position) without the user expecting it.
+    const closeAssistant = useCallback(() => {
+        setIsModalassistant(false);
+        const { relevant } = assistantChangesRef.current;
+        if (relevant >= 2) {
+            setAssistantRefreshCount(relevant);
+        } else if (relevant === 1) {
+            refreshScheduleRef.current(true);
+        }
+        assistantChangesRef.current = { total: 0, relevant: 0 };
     }, []);
 
     const refreshSchedule = useCallback(async (force = false) => {
@@ -308,6 +370,28 @@ const SchedulePage = () => {
 
     const staticWeeksCount = existingItem?.data?.staticWeeksCount ?? 0;
 
+    // Types/tags already used in the group's events, so custom ones created earlier
+    // stay selectable (and Ukrainian tags become searchable) in the event form.
+    const { extraTypes, extraTags } = (() => {
+        const typeMap = new Map();
+        const tagSet = new Set();
+        const scan = (data) => {
+            ['staticWeek', 'dynamicWeek'].forEach((k) => (data?.[k] || []).forEach((day) => (day.events || []).forEach((ev) => {
+                const ei = ev.eventInfo;
+                if (!ei) return;
+                if (ei.type) {
+                    const key = ei.type.toLowerCase();
+                    if (!typeMap.has(key)) typeMap.set(key, { name: ei.type, color: ei.color || colorForType(ei.type) });
+                }
+                const tags = Array.isArray(ei.tag) ? ei.tag : (ei.tag ? [ei.tag] : []);
+                tags.forEach((tg) => tg && tagSet.add(tg));
+            })));
+        };
+        schedules.forEach((s) => scan(s.data));
+        if (existingItem) scan(existingItem.data);
+        return { extraTypes: [...typeMap.values()], extraTags: [...tagSet] };
+    })();
+
     return (
         <div className={classes.schedule}>
             <ScheduleTour enabled={!isLoading} canEdit={canEdit} />
@@ -361,7 +445,7 @@ const SchedulePage = () => {
 
                     <div className={classes.buttonBox}>
                         <span data-tour="schedule-assistant" style={{ display: 'inline-flex' }}>
-                            <ButtonSmall centerImg={logo} onClick={toggleModalassistant} />
+                            <ButtonSmall centerImg={logo} onClick={openAssistant} />
                         </span>
                         <ButtonSmall
                             centerImg={squareIcons[timeSheet]}
@@ -417,6 +501,8 @@ const SchedulePage = () => {
                         staticWeeksCount={staticWeeksCount}
                         periodStartEvent={periodStartEvent}
                         periodEndEvent={periodEndEvent}
+                        extraTypes={extraTypes}
+                        extraTags={extraTags}
                     />
                 )}
 
@@ -445,10 +531,24 @@ const SchedulePage = () => {
 
                 {isModalassistant && (
                     <Modalassistant
-                        modalClose={toggleModalassistant}
+                        modalClose={closeAssistant}
                         groupInfo={groupInfo}
                         userInfo={userInfo}
                         date={date}
+                        onScheduleMutated={handleAssistantMutation}
+                    />
+                )}
+
+                {assistantRefreshCount > 0 && (
+                    <ConfirmModal
+                        title={t('schedule.assistantRefreshTitle')}
+                        message={t('schedule.assistantRefreshMessage', { count: assistantRefreshCount })}
+                        confirmText={t('schedule.refreshNow')}
+                        onConfirm={() => {
+                            setAssistantRefreshCount(0);
+                            refreshScheduleRef.current(true);
+                        }}
+                        onCancel={() => setAssistantRefreshCount(0)}
                     />
                 )}
             </div>

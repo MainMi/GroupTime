@@ -24,8 +24,10 @@ const {
     USERS_NOT_FOUND
 } = require('../error/errorMsg');
 const { userService } = require('../service');
+const { groupService } = require('../service/schedule');
+const { getByPath } = require('../helper/object.helper');
 
-const { USER_ROLE } = userRoleEnum;
+const { USER_ROLE, ADMIN_ROLE } = userRoleEnum;
 
 function permisionRole(currentUserRole, checkRole, objRole) {
     if (objRole) {
@@ -253,5 +255,60 @@ module.exports = {
             next(e);
         }
     },
+    // Like checkGroupUserRole, but the required role is read from the group's
+    // configurable parameter (e.g. `assistantCommandRole`) instead of being fixed.
+    // Falls back to `fallbackRole` when the parameter is unset.
+    //
+    // Single-group mode (default): guards one route, hard-rejects with ACCESS_DENIED.
+    // Requires `req.userInGroup` (set by groupMiddleware.isUserInGroup) and
+    // `req.body.groupId`.
+    //
+    // manyGroups mode (`{ manyGroups: true, groupIdsPath }`): for assistant flows
+    // that target several groups at once. Gating there is per-action and partial, so
+    // this never rejects — it just attaches `req.allowedGroupIds` (the permitted
+    // subset) for the service to filter against. Reads the requested ids from
+    // `groupIdsPath` (default 'groupIds') and the user's already-populated
+    // memberships; an empty selection yields every permitted group.
+    checkGroupParamRole: (paramName, fallbackRole = ADMIN_ROLE, options = {}) => async (req, res, next) => {
+        try {
+            const { manyGroups = false, groupIdsPath = 'groupIds' } = options;
+
+            if (manyGroups) {
+                const requested = (getByPath(req.body, groupIdsPath) || []).map(String);
+                const allowed = new Set();
+                for (const membership of (req.authUser?.groups || [])) {
+                    const groupId = membership.group?._id;
+                    const requiredRole = membership.group?.parameters?.[paramName] || fallbackRole;
+                    if (groupId && permisionRole(membership.role, requiredRole, false)) {
+                        allowed.add(String(groupId));
+                    }
+                }
+                req.allowedGroupIds = requested.length
+                    ? new Set(requested.filter((id) => allowed.has(id)))
+                    : allowed;
+                return next();
+            }
+
+            const { role } = req.userInGroup;
+            const group = await groupService.getGroupParametersById(req.body.groupId);
+            const requiredRole = group?.parameters?.[paramName] || fallbackRole;
+
+            if (!permisionRole(role, requiredRole, false)) {
+                return next(new ApiError(...Object.values(ACCESS_DENIED)));
+            }
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+    // Ready-made gate for assistant command flows (/magic, /organize, /analyze):
+    // checks the configurable `assistantCommandRole` across the targeted groups and
+    // exposes the permitted subset on `req.allowedGroupIds`. `groupIdsPath` locates
+    // the group ids in the request body (e.g. 'groupIds' or 'groundData.groupIds').
+    gateAssistantCommands: (groupIdsPath) => module.exports.checkGroupParamRole(
+        'assistantCommandRole',
+        ADMIN_ROLE,
+        { manyGroups: true, groupIdsPath }
+    ),
     permisionRole
 };

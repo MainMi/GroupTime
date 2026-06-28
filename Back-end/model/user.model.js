@@ -5,9 +5,8 @@ const UserSchema = new Schema({
     nickname: {
         type: String,
         trim: true,
-        index: true,
         required: true,
-        unique: true
+        unique: true // `unique` already creates the index — no separate `index: true`.
     },
     firstName: {
         type: String,

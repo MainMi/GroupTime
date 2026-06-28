@@ -1,4 +1,5 @@
 const ApiError = require('../error/ErrorHandler');
+const { EVENTDATE_NOT_FOUND } = require('../error/errorMsg');
 const {
     scheduleWeekService,
     eventInfoService,
@@ -80,14 +81,10 @@ module.exports = {
                 const oldEventDate = await eventDateService.getOne(eventDateId);
 
                 if (!oldEventDate) {
-                    return next(new ApiError(404, 4058, 'EventDate not found for specified eventDateId'));
+                    return next(new ApiError(...Object.values(EVENTDATE_NOT_FOUND)));
                 }
 
                 if (isStatic) {
-                    // Static event: resolve the target static week from the sent date so
-                    // the event can be moved between static weeks (week reorder/move).
-                    // The static week index is the sent ISO week modulo the static week count,
-                    // mirroring how addStaticEvent / getSchedule resolve the static week.
                     const staticWeeksCount = await scheduleWeekService.countStaticWeeks(groupId);
                     const targetCountWeek = staticWeeksCount > 0
                         ? (date.value.countWeek % staticWeeksCount)
@@ -109,7 +106,6 @@ module.exports = {
                     if (oldEventDate && (oldEventDate.day !== day || oldEventDate.countWeek !== countWeek)) {
                         await scheduleWeekService.deletePair(groupId, oldEventDate.countWeek, oldEventDate.day, eventInfoId, false);
 
-                        // addEvent does not upsert — create the target dynamic week if it doesn't exist yet
                         const existingWeek = await scheduleWeekService.findWeek(groupId, countWeek, false);
                         if (!existingWeek) {
                             await scheduleWeekService.createDynamicWeek(groupId, countWeek);
@@ -119,9 +115,6 @@ module.exports = {
                     }
                 }
             }
-
-            // An edit may only change eventInfo/eventDate docs (not the week doc),
-            // so bump the group's week versions to invalidate client caches.
             await scheduleWeekService.touchGroupWeeks(groupId);
 
             res.status(200).json('Edited!');
@@ -138,7 +131,6 @@ module.exports = {
 
             const { time, day, countWeek } = date.value;
 
-            // Auto-create dynamic week if it doesn't exist
             const existingWeek = await scheduleWeekService.findWeek(groupId, countWeek, false);
             if (!existingWeek) {
                 await scheduleWeekService.createDynamicWeek(groupId, countWeek);
@@ -166,8 +158,6 @@ module.exports = {
 
             await scheduleWeekService.addEvent(groupId, countWeek, day, event, false);
 
-            // Return both ids (consistent with addStaticEvent) so clients can
-            // reference the created eventDate (e.g. for a subsequent edit).
             res.json(event);
         } catch (e) {
             next(e);

@@ -1,12 +1,27 @@
 const { STRONG_PRIVATE_TYPE } = require('../../constant/type/groupTypes.enum');
+const { ADMIN_ROLE, OWNER_ROLE } = require('../../constant/user.role.enum');
 const groupModel = require('../../model/group.model');
+const verificateService = require('../verificate.service');
+const userService = require('../user.service');
 
 module.exports = {
     getAllGroup: () => groupModel.find({}),
+
+    // Resolve the email of a group's owner (used for join notifications). Falls
+    // back to an admin for legacy groups created before the owner role existed.
+    findGroupOwnerEmail: async (groupId) => {
+        const ownerVerificate = await verificateService.findVerificateUser({ group: groupId, role: OWNER_ROLE })
+            || await verificateService.findVerificateUser({ group: groupId, role: ADMIN_ROLE });
+        if (!ownerVerificate) return null;
+        const owner = await userService.getUser({ _id: ownerVerificate.user });
+        return owner?.email || null;
+    },
     getGroupById: (groupId) => groupModel.findById(groupId).populate({
         path: 'users',
         select: '-groups'
     }).populate('avatar', 'location').populate('avatarGallery', 'location'),
+    // Lightweight parameters-only lookup for permission checks (no heavy populate).
+    getGroupParametersById: (groupId) => groupModel.findById(groupId).select('parameters'),
     getGroupByName: (name) => groupModel.findOne({ name }).populate({
         path: 'users',
         select: '-groups'

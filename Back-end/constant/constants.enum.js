@@ -1,14 +1,6 @@
-const { STUDENT_ROLE, HELP_ADMIN_ROLE, ADMIN_ROLE } = require('./user.role.enum');
-const weekEnum = require('./week.enum');
-
+// Truly app-wide cross-cutting values only. Domain-specific constants live in
+// their own domain files (group.enum, schedule.enum, event.enum, avatar.enum…).
 module.exports = {
     CURRENT_YEAR: new Date().getFullYear(),
     CURRENT_MONTH: new Date().getMonth(),
-    BASIC_ROLE_USER: [
-        STUDENT_ROLE,
-        HELP_ADMIN_ROLE,
-        ADMIN_ROLE
-    ],
-    BASIC_SCHEDULE: Array.from(Object.values(weekEnum), (day) => ({ day, events: [] })),
-    MAX_USER_GROUPS: 5,
 };

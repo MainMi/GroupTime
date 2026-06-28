@@ -1,4 +1,5 @@
 module.exports = {
+    actionTokenService: require('./actionToken.service'),
     authService: require('./auth.service'),
     avatarService: require('./avatar.service'),
     emailService: require('./email.service'),
@@ -6,7 +7,7 @@ module.exports = {
     scheduleService: require('./schedule'),
     messageService: require('./assistant/message.service'),
     sessionService: require('./assistant/session.service'),
-    groqService: require('./assistant/groq-service'),
+    groqService: require('./assistant/groq.service'),
     uploadService: require('./upload.service'),
     userService: require('./user.service'),
     verificateService: require('./verificate.service')

@@ -9,6 +9,7 @@ const messageAnalyzeSchema = Joi.object({
     dateTo: Joi.string(),
     selectedDay: Joi.string().allow(null, ''),
     weekLabel: Joi.string().allow(null, ''),
+    lang: Joi.string().allow(null, ''),
 }).or('date', 'dateFrom');
 
 module.exports = messageAnalyzeSchema;

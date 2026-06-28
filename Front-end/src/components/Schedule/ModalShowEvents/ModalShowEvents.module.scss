@@ -12,16 +12,32 @@
 }
 
 .events {
-    flex: 50% 0 0;
-    display: grid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
     width: 100%;
-    height: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 600px));
-    justify-content: center; /* Centers items horizontally */
-    align-content: start; /* Aligns items at the start vertically */
-    gap: 20px;
-    place-items: center;
+    /* Arrows sit outside the card; on small screens the card may scroll. */
+    > .navBtn {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #E88C90;
+        font-size: 30px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: background-color 150ms;
+        &:hover { background: #fff; }
+    }
     .eventInfo {
+        max-width: 600px;
         position: relative;
         width: 100%;
         height: auto;
@@ -62,6 +78,13 @@
                 font-weight: 600;
                 text-transform: capitalize;
             }
+        }
+        .titleBox .counter {
+            flex: 0 0 auto;
+            margin-left: auto;
+            margin-right: 12px;
+            font-weight: 600;
+            color: #336F36;
         }
         .description {
             display: flex;

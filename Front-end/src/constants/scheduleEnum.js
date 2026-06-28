@@ -23,6 +23,18 @@ export const BACKEND_DAY_TO_JSDAY = {
 // Backend weekEnum day values in Monday→Sunday order (for rendering the grid)
 export const ORDERED_BACKEND_DAYS = ['Пн', 'Вв', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
+// Event scheduling kind (mirrors the backend): recurring weekly vs one-off.
+export const SCHEDULE_TYPE = {
+    STATIC: 'static',
+    DYNAMIC: 'dynamic',
+};
+
+// Assistant action intent (mirrors the backend magicAction resolver).
+export const ACTION_KIND = {
+    CREATE: 'create',
+    EDIT: 'edit',
+};
+
 // JS Date.getDay() value → DAYS array index (for Dropdown defaultIndex)
 export const JSDAY_TO_DAYS_INDEX = {
     1: 0,

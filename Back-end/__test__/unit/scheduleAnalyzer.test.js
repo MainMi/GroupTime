@@ -1,4 +1,4 @@
-const { detectScheduleIssues, detectIssuesForGroups } = require('../../helper/scheduleAnalyzer');
+const { detectScheduleIssues, detectIssuesForGroups } = require('../../helper/scheduleAnalyzer.helper');
 
 // Helper to build a populated event the way scheduleWeek population produces it.
 const ev = (name, time, duration, extra = {}) => ({
@@ -26,6 +26,52 @@ describe('scheduleAnalyzer.detectScheduleIssues', () => {
             'Math',
             'Physics'
         ]);
+    });
+
+    test('does not flag an overlap when one event is a regular (non-class) event', () => {
+        const week = {
+            staticWeek: [{
+                day: 'Ср',
+                events: [
+                    ev('Дипломна практика', '8:00', 90, { type: 'Lecture', day: 'Ср' }),
+                    ev('Інформація', '8:00', 90, { type: 'Notification', day: 'Ср' }),
+                ]
+            }]
+        };
+        const issues = detectScheduleIssues(week);
+        expect(issues.some((i) => i.type === 'overlap')).toBe(false);
+    });
+
+    test('still flags an overlap between two attendance-required classes', () => {
+        const week = {
+            staticWeek: [{
+                day: 'Пн',
+                events: [
+                    ev('Math', '8:30', 90, { type: 'Lecture' }),
+                    ev('Physics', '9:30', 90, { type: 'Seminar' }),
+                ]
+            }]
+        };
+        const issues = detectScheduleIssues(week);
+        expect(issues.some((i) => i.type === 'overlap')).toBe(true);
+    });
+
+    test('attaches a shift-time suggestion to an overlap', () => {
+        const week = {
+            staticWeek: [{
+                day: 'Пн',
+                events: [
+                    ev('Math', '8:30', 90), // ends 10:00
+                    ev('Physics', '9:30', 90),
+                ]
+            }]
+        };
+        const overlap = detectScheduleIssues(week).find((i) => i.type === 'overlap');
+        expect(overlap.suggestion).toEqual({
+            action: 'shiftTime',
+            event: 'Physics',
+            newTime: '10:00',
+        });
     });
 
     test('does not flag back-to-back events as overlapping', () => {

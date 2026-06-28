@@ -1,5 +1,5 @@
 const { MAX_GROUP_SEARCH_QUERY_LENGTH, MIN_GROUP_SEARCH_QUERY_LENGTH } = require('../constant/groupSearch');
-const { MAX_USER_GROUPS } = require('../constant/constants.enum');
+const { MAX_USER_GROUPS } = require('../constant/group.enum');
 const { FIND_TYPE } = require('../constant/type/findType.enum');
 const { NOT_FIND_TYPE } = require('../constant/type/findType.enum');
 const { NOT_VERIFIED_TYPE, VERIFIED_TYPE } = require('../constant/type/verificateToken.enum');

@@ -1,19 +1,11 @@
 const { eventDateService } = require('../service/schedule');
 const { fileService } = require('../service');
-const fileModel = require('../model/file.model');
-const { deleteFileS3 } = require('../service/file.service');
+const { deleteFileS3, keyFromLocation } = require('../service/file.service');
 const ApiError = require('../error/ErrorHandler');
-
-const MAX_EVENT_FILES = 5;
-
-// Best-effort recovery of the S3 key for files saved before `key` was stored.
-const keyFromLocation = (location) => {
-    try {
-        return decodeURIComponent(new URL(location).pathname).replace(/^\//, '');
-    } catch (e) {
-        return null;
-    }
-};
+const {
+    EVENTDATE_NOT_FOUND, MAX_EVENT_FILES_FN, PARAMS_IS_NOT_FOUND_FN
+} = require('../error/errorMsg');
+const { MAX_EVENT_FILES } = require('../constant/event.enum');
 
 module.exports = {
     addFileEventDate: async (req, res, next) => {
@@ -23,12 +15,11 @@ module.exports = {
             const eventDate = await eventDateService.getOne(eventDateId);
 
             if (!eventDate) {
-                return next(new ApiError(404, 4058, 'EventDate not found'));
+                return next(new ApiError(...Object.values(EVENTDATE_NOT_FOUND)));
             }
 
-            // Enforce the per-event file limit BEFORE uploading anything.
             if ((eventDate.data?.length || 0) >= MAX_EVENT_FILES) {
-                return next(new ApiError(400, 0, `Max ${MAX_EVENT_FILES} files per event`));
+                return next(new ApiError(...Object.values(MAX_EVENT_FILES_FN(MAX_EVENT_FILES))));
             }
 
             const {
@@ -69,10 +60,10 @@ module.exports = {
             const { eventDateId, fileId } = req.body;
 
             if (!eventDateId || !fileId) {
-                return next(new ApiError(400, 0, 'eventDateId and fileId are required'));
+                return next(new ApiError(...Object.values(PARAMS_IS_NOT_FOUND_FN('eventDateId|fileId'))));
             }
 
-            const file = await fileModel.findById(fileId);
+            const file = await fileService.getFileDB(fileId);
             if (file) {
                 const key = file.key || keyFromLocation(file.location);
                 if (key) {
@@ -82,7 +73,7 @@ module.exports = {
                         console.error('S3 event file delete failed -', e.message);
                     }
                 }
-                await fileModel.findByIdAndDelete(fileId);
+                await fileService.deleteFileDB(fileId);
             }
 
             await eventDateService.removeFileEventDate(fileId, eventDateId);

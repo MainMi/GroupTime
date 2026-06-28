@@ -43,6 +43,15 @@ module.exports = {
         Bucket: S3_BUCKET_NAME,
         Key: key
     }).promise(),
+    // Best-effort recovery of the S3 key for files saved before `key` was stored.
+    keyFromLocation: (location) => {
+        try {
+            return decodeURIComponent(new URL(location).pathname).replace(/^\//, '');
+        } catch (e) {
+            return null;
+        }
+    },
     createFileDB: (fileObject) => fileModel.create(fileObject),
+    getFileDB: (fileId) => fileModel.findById(fileId),
     deleteFileDB: (fileId) => fileModel.findByIdAndDelete(fileId)
 };

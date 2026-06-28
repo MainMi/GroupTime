@@ -25,7 +25,7 @@ router.post(
     '/add/file',
     authMiddleware.checkAccessToken(GROUP_INFO),
     groupMiddleware.isUserInGroup,
-    userMiddleware.checkGroupUserRole(ADMIN_ROLE),
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     userMiddleware.checkValidFileParam('data', FIND_TYPE),
     addFileEventDate
 );
@@ -34,7 +34,7 @@ router.post(
     '/delete/file',
     authMiddleware.checkAccessToken(GROUP_INFO),
     groupMiddleware.isUserInGroup,
-    userMiddleware.checkGroupUserRole(ADMIN_ROLE),
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     deleteFileEventDate
 );
 
@@ -42,7 +42,7 @@ router.post(
     '/add/static',
     authMiddleware.checkAccessToken(GROUP_INFO),
     groupMiddleware.isUserInGroup,
-    userMiddleware.checkGroupUserRole(ADMIN_ROLE),
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     scheduleMiddleware.checkParams(eventValidator.addStaticEvent),
     scheduleMiddleware.isWeekExist(false, false, true),
     addStaticEvent
@@ -52,7 +52,7 @@ router.post(
     '/add/dynamic',
     authMiddleware.checkAccessToken(GROUP_INFO),
     groupMiddleware.isUserInGroup,
-    userMiddleware.checkGroupUserRole(ADMIN_ROLE),
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     scheduleMiddleware.checkParams(eventValidator.addDynamicEvent),
     addDynamicEvent
 );
@@ -61,7 +61,7 @@ router.post(
     '/delete/static',
     authMiddleware.checkAccessToken(GROUP_INFO),
     groupMiddleware.isUserInGroup,
-    userMiddleware.checkGroupUserRole(ADMIN_ROLE),
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     scheduleMiddleware.checkParams(eventValidator.deleteEvent),
     scheduleMiddleware.isEventInfoExist,
     deleteStaticEvent
@@ -71,7 +71,7 @@ router.post(
     '/delete/dynamic',
     authMiddleware.checkAccessToken(GROUP_INFO),
     groupMiddleware.isUserInGroup,
-    userMiddleware.checkGroupUserRole(ADMIN_ROLE),
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     scheduleMiddleware.checkParams(eventValidator.deleteEvent),
     scheduleMiddleware.isEventInfoExist,
     deleteDynamicEvent
@@ -81,7 +81,7 @@ router.post(
     '/edit',
     authMiddleware.checkAccessToken(GROUP_INFO),
     groupMiddleware.isUserInGroup,
-    userMiddleware.checkGroupUserRole(ADMIN_ROLE),
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     scheduleMiddleware.checkParams(eventValidator.editEvent),
     editEvent
 );

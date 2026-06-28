@@ -5,14 +5,14 @@ import Button from '../../../UI/Button/Button';
 import Input from '../../../UI/Input/Input';
 import Modal from '../../../UI/Modal/Modal';
 import Dropdown from '../../../UI/Dropdown/Dropdown';
-import eventsConst, { colorForType } from '../../../constants/type/eventEnum';
+import eventsConst, { colorForType, DEFAULT_EVENT_DURATION } from '../../../constants/type/eventEnum';
 import Textarea from '../../../UI/Textarea/Textarea';
 import TagInput from '../../../UI/TagInput/TagInput';
 import TypeSelect from '../../../UI/TypeSelect/TypeSelect';
 import FileUpload from '../../../UI/FileUpload/FileUpload';
 import DatePicker from '../../../UI/DatePicker/DatePicker';
 import { validateFn, isUrlOrEmptyFn } from '../../../constants/validateFn.enum';
-import { DAYS, BACKEND_DAY_TO_JSDAY, JSDAY_TO_DAYS_INDEX } from '../../../constants/scheduleEnum';
+import { DAYS, BACKEND_DAY_TO_JSDAY, JSDAY_TO_DAYS_INDEX, SCHEDULE_TYPE } from '../../../constants/scheduleEnum';
 import { timeStringToMinutes, getMondayOfISOWeek } from '../../../helper/dateHelper';
 
 import { addStaticEvent, addDynamicEvent, editEvent, addFileToEvent, deleteFileFromEvent } from '../../../api/eventFetch';
@@ -61,6 +61,8 @@ const ModalCreateEvent = ({
     staticWeeksCount = 0,
     periodStartEvent = '8:00',
     periodEndEvent = '21:00',
+    extraTypes = [],
+    extraTags = [],
 }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -96,7 +98,7 @@ const ModalCreateEvent = ({
     const [touched, setTouched] = useState({});
 
     // Schedule type toggle (create mode only)
-    const [scheduleType, setScheduleType] = useState('static');
+    const [scheduleType, setScheduleType] = useState(SCHEDULE_TYPE.STATIC);
 
     // Static mode: day-of-week + week selector
     const [selectedDay, setSelectedDay] = useState('1'); // Mon
@@ -125,7 +127,7 @@ const ModalCreateEvent = ({
             : (rawTag ? String(rawTag).split(',').map((t2) => t2.trim()).filter(Boolean) : []);
         setValueTag(tagArr);
         setValueDescription(editEventData.eventInfo?.description || '');
-        setDuration(editEventData.eventDate?.duration || 90);
+        setDuration(editEventData.eventDate?.duration || DEFAULT_EVENT_DURATION);
         setExistingFiles(editEventData.eventDate?.data || []);
 
         if (editEventData.eventDate?.time) setTime(editEventData.eventDate.time);
@@ -208,13 +210,26 @@ const ModalCreateEvent = ({
     const markTouched = (field) => setTouched((prev) => ({ ...prev, [field]: true }));
 
     // Determines if we show the day-of-week selector (static form) or date picker (dynamic form)
-    const showStaticDayForm = isEditStatic || (!isEditMode && scheduleType === 'static');
+    const showStaticDayForm = isEditStatic || (!isEditMode && scheduleType === SCHEDULE_TYPE.STATIC);
 
     // Localized day options for the day-of-week dropdown.
     const localizedDays = useMemo(
         () => DAYS.map((d) => ({ value: d.value, title: t(DAY_VALUE_TO_KEY[d.value]) })),
         [t]
     );
+
+    // Merge user-created types/tags (from existing events) with the predefined
+    // ones so previously created custom values stay selectable.
+    const typeOptions = useMemo(() => {
+        const seen = new Set(eventsConst.type.map((tp) => tp.name.toLowerCase()));
+        const extra = (extraTypes || []).filter((tp) => tp?.name && !seen.has(tp.name.toLowerCase()));
+        return [...eventsConst.type, ...extra];
+    }, [extraTypes]);
+    const tagSuggestions = useMemo(() => {
+        const seen = new Set(eventsConst.tag.map((s) => s.toLowerCase()));
+        const extra = (extraTags || []).filter((s) => s && !seen.has(s.toLowerCase()));
+        return [...eventsConst.tag, ...extra];
+    }, [extraTags]);
 
     // Upload all staged files to the given eventDate (sequential, best-effort).
     // Returns the number of files that failed to upload so the caller can warn.
@@ -320,7 +335,7 @@ const ModalCreateEvent = ({
                     fileFailures = await uploadStagedFiles(editEventData.eventDate._id);
                 }
 
-            } else if (scheduleType === 'static') {
+            } else if (scheduleType === SCHEDULE_TYPE.STATIC) {
                 const finalDate = await resolveStaticWeekDate();
 
                 response = await addStaticEvent({
@@ -398,15 +413,15 @@ const ModalCreateEvent = ({
                             <div className={classes.toggleRow}>
                                 <Button
                                     type="button"
-                                    typeColor={scheduleType === 'static' ? 'green' : 'noBorder'}
-                                    onClick={() => setScheduleType('static')}
+                                    typeColor={scheduleType === SCHEDULE_TYPE.STATIC ? 'green' : 'noBorder'}
+                                    onClick={() => setScheduleType(SCHEDULE_TYPE.STATIC)}
                                 >
                                     {t('event.static')}
                                 </Button>
                                 <Button
                                     type="button"
-                                    typeColor={scheduleType === 'dynamic' ? 'green' : 'noBorder'}
-                                    onClick={() => setScheduleType('dynamic')}
+                                    typeColor={scheduleType === SCHEDULE_TYPE.DYNAMIC ? 'green' : 'noBorder'}
+                                    onClick={() => setScheduleType(SCHEDULE_TYPE.DYNAMIC)}
                                 >
                                     {t('event.dynamic')}
                                 </Button>
@@ -440,7 +455,7 @@ const ModalCreateEvent = ({
                         <label htmlFor="type">{t('event.type')}</label>
                         <TypeSelect
                             value={valueType}
-                            options={eventsConst.type}
+                            options={typeOptions}
                             onChange={setValueType}
                         />
 
@@ -477,7 +492,7 @@ const ModalCreateEvent = ({
                         <TagInput
                             value={valueTag}
                             onChange={setValueTag}
-                            suggestions={eventsConst.tag}
+                            suggestions={tagSuggestions}
                             placeholder={t('event.tagPlaceholder')}
                         />
 

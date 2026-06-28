@@ -2,22 +2,25 @@ const { Schema, model } = require('mongoose');
 const { weekEnum, eventEnum } = require('../constant');
 
 const EventDateSchema = new Schema({
-    countWeek: { type: String, require: true },
+    // Number to stay consistent with ScheduleWeek.countWeek (also a Number); the
+    // previous String type made every `countWeek !== n` comparison in editEvent
+    // true and forced a needless delete+re-add on each edit.
+    countWeek: { type: Number, required: true },
     day: {
         type: String,
         enum: Object.values(weekEnum),
         default: weekEnum.MONDAY,
-        require: true
+        required: true
     },
     time: {
         type: String,
         default: eventEnum.event1,
-        require: true
+        required: true
     },
     duration: {
         type: Number,
         default: 30,
-        require: true
+        required: true
     },
     data: [{ type: Schema.Types.ObjectId, ref: 'File' }]
 });

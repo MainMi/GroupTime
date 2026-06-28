@@ -1,13 +1,14 @@
 const Joi = require('joi');
 const { groupTypesEnum } = require('../constant');
 const { ADMIN_ROLE } = require('../constant/user.role.enum');
-const { BASIC_ROLE_USER } = require('../constant/constants.enum');
+const { BASIC_ROLE_USER } = require('../constant/group.enum');
 
 const TIME_PATTERN = /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
 
 const ParametersSchema = Joi.object({
     usersLimit: Joi.number().integer().min(0).default(50),
     createEventInfosRole: Joi.string().valid(...Object.values(BASIC_ROLE_USER)).default(ADMIN_ROLE),
+    assistantCommandRole: Joi.string().valid(...Object.values(BASIC_ROLE_USER)).default(ADMIN_ROLE),
     notifacionFromEmail: Joi.boolean().default(true),
     periodStartEvent: Joi.string().pattern(TIME_PATTERN).default('8:00'),
     periodEndEvent: Joi.string().pattern(TIME_PATTERN).default('21:00')

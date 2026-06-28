@@ -7,21 +7,24 @@
 // caller (frontend i18n for the UI, generatePrompt for the AI explanation).
 
 const weekEnum = require('../constant/week.enum');
+const { isClassType } = require('../constant/eventClassTypes.enum');
+const { GAP_THRESHOLD, OVERLOAD_COUNT } = require('../constant/scheduleAnalysis.enum');
+const { parseTimeToMinutes, minutesToTime } = require('./time.helper');
+const { norm } = require('./string.helper');
 
 const DAY_ORDER = Object.values(weekEnum); // ['Пн','Вв','Ср','Чт','Пт','Сб','Вс']
 
-// Thresholds (minutes / counts) — tuned for a university day.
-const GAP_THRESHOLD = 150; // a free window longer than this is flagged
-const OVERLOAD_COUNT = 6; // more events than this in one day is "overloaded"
-
-const parseTimeToMinutes = (time) => {
-    if (typeof time !== 'string') return null;
-    const m = time.match(/(\d{1,2})[:.](\d{2})/);
-    if (!m) return null;
-    return Number(m[1]) * 60 + Number(m[2]);
+// A time overlap is only a real clash between two attendance-required classes
+// ("пари") — informational or general events (notifications, conferences,
+// meetings…) may legitimately share a slot and are never reported as overlapping.
+// Class types live in constant/eventClassTypes.enum.js (shared with the assistant
+// prompt). An event with no type is treated as a class so genuine clashes in
+// legacy/untyped data aren't silently dropped.
+const isClassEntry = (e) => {
+    const type = (e.type || '').trim();
+    if (!type) return true; // unknown/untyped → assume a class so clashes aren't missed
+    return isClassType(type);
 };
-
-const normalizeName = (name) => (name || '').trim().toLowerCase();
 
 // Flatten an event into the bits the checks need.
 const toEntry = (ev) => {
@@ -31,6 +34,7 @@ const toEntry = (ev) => {
     const duration = Number(date.duration) || 0;
     return {
         name: info.name || '',
+        type: info.type || '',
         teacherName: info.teacherName || '',
         place: info.place || '',
         platform: info.platform || '',
@@ -58,9 +62,10 @@ const mergeDays = (weekData) => {
     return byDay;
 };
 
-// Detect issues for a single group's week. `groupName` (optional) is attached to
-// every issue so multi-group results stay distinguishable.
-const detectScheduleIssues = (weekData, groupName) => {
+// Detect issues for a single group's week. `groupName` and `countWeek` (both
+// optional) are attached to every issue so multi-group / multi-week results stay
+// distinguishable and an appliable fix can be resolved against the right week.
+const detectScheduleIssues = (weekData, groupName, countWeek) => {
     const issues = [];
     const byDay = mergeDays(weekData);
 
@@ -72,11 +77,13 @@ const detectScheduleIssues = (weekData, groupName) => {
             .filter((e) => e.start != null)
             .sort((a, b) => a.start - b.start);
 
-        // Overlaps: any event starting before the previous one ends.
+        // Overlaps: a class starting before another class ends. Only reported when
+        // both events are attendance-required classes — regular/informational events
+        // may overlap freely (see isClassEntry / CLASS_TYPES).
         for (let i = 1; i < timed.length; i += 1) {
             const prev = timed[i - 1];
             const cur = timed[i];
-            if (prev.end != null && cur.start < prev.end) {
+            if (prev.end != null && cur.start < prev.end && isClassEntry(prev) && isClassEntry(cur)) {
                 issues.push({
                     type: 'overlap',
                     severity: 'high',
@@ -87,6 +94,9 @@ const detectScheduleIssues = (weekData, groupName) => {
                         cur.name
                     ],
                     meta: { firstTime: prev.time, secondTime: cur.time },
+                    // Concrete, appliable fix: move the second class to start right
+                    // after the first one ends (duration is preserved on apply).
+                    suggestion: { action: 'shiftTime', event: cur.name, newTime: minutesToTime(prev.end) },
                 });
             }
         }
@@ -125,7 +135,7 @@ const detectScheduleIssues = (weekData, groupName) => {
         // Duplicates: same subject name more than once in the day (reported once).
         const counts = new Map(); // key -> { name, count }
         for (const e of entries) {
-            const key = normalizeName(e.name);
+            const key = norm(e.name);
             if (!key) continue;
             const rec = counts.get(key) || { name: e.name, count: 0 };
             rec.count += 1;
@@ -161,20 +171,39 @@ const detectScheduleIssues = (weekData, groupName) => {
                     groupName,
                     events: [e.name],
                     meta: { fields: missing },
+                    // Advisory only — we can't invent the missing values, just point them out.
+                    suggestion: { action: 'fillFields', event: e.name, fields: missing },
                 });
             }
         }
     }
 
-    return issues;
+    return countWeek == null ? issues : issues.map((it) => ({ ...it, countWeek }));
 };
 
-// Analyze several groups at once: [{ weekData, groupName }] -> flat issue list.
-const detectIssuesForGroups = (groups) => (groups || []).flatMap(({ weekData, groupName }) => detectScheduleIssues(weekData, groupName));
+// Analyze several groups at once: [{ weekData, groupName, countWeek }] -> flat
+// issue list.
+const detectIssuesForGroups = (groups) => (groups || [])
+    .flatMap(({ weekData, groupName, countWeek }) => detectScheduleIssues(weekData, groupName, countWeek));
+
+// Collapse identical issues. Scanning several weeks re-reports the same recurring
+// (static) event every week — buildWeekDataByCountWeek resolves the static week by
+// `countWeek % staticWeeksCount`, so adjacent weeks often map to the same one. Two
+// issues are "the same" when their type, day, group, events and meta all match.
+const dedupeIssues = (issues) => {
+    const seen = new Set();
+    return (issues || []).filter((it) => {
+        const key = JSON.stringify([it.type, it.day, it.groupName, it.events, it.meta]);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+};
 
 module.exports = {
     detectScheduleIssues,
     detectIssuesForGroups,
+    dedupeIssues,
     GAP_THRESHOLD,
     OVERLOAD_COUNT,
 };

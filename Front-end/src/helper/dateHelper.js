@@ -101,6 +101,23 @@ export function atNoon(date) {
     return d;
 }
 
+// Range helpers (used by the assistant's time-preset scopes). Each returns a new
+// Date; none mutate the argument.
+export const shiftDays = (date, days) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+};
+export const startOfWeek = (date) => {
+    const d = new Date(date);
+    const dow = d.getDay() === 0 ? 7 : d.getDay();
+    d.setDate(d.getDate() - dow + 1); // Monday
+    return d;
+};
+export const endOfWeek = (date) => shiftDays(startOfWeek(date), 6);
+export const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
+export const endOfMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
 // Monday (local midnight) of the given ISO week in `year`. Uses the Jan-4 anchor
 // (Jan 4 is always in ISO week 1).
 export function getMondayOfISOWeek(isoWeek, year = new Date().getFullYear()) {

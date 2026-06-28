@@ -21,6 +21,11 @@ module.exports = {
         errorStatus: 4004,
         message: 'Params is not file'
     },
+    GOOGLE_CREDENTIAL_MISSING: {
+        status: 400,
+        errorStatus: 4005,
+        message: 'Missing Google credential'
+    },
     NOT_CONFIRM_EMAIL: {
         status: 401,
         errorStatus: 4011,
@@ -51,6 +56,11 @@ module.exports = {
         errorStatus: 4017,
         message: 'Wrong email or passworld'
     },
+    GOOGLE_EMAIL_NOT_VERIFIED: {
+        status: 401,
+        errorStatus: 4018,
+        message: 'Google email is not verified'
+    },
     MAX_GROUP_LIMIT_FN: (limit = 5) => ({
         status: 403,
         errorStatus: 4031,
@@ -80,6 +90,11 @@ module.exports = {
         status: 403,
         errorStatus: 4036,
         message: 'The group owner cannot be modified or removed.'
+    },
+    ASSISTANT_REQUEST_FAILED: {
+        status: 403,
+        errorStatus: 4037,
+        message: 'Assistant request failed'
     },
     GROUP_IS_NOT_CREATED: {
         status: 404,
@@ -161,6 +176,11 @@ module.exports = {
         errorStatus: 4060,
         message: 'Groups not found'
     },
+    EVENTDATE_NOT_FOUND: {
+        status: 404,
+        errorStatus: 4061,
+        message: 'EventDate not found for specified eventDateId'
+    },
     GROUP_IS_ALREADY_CREATED: {
         status: 409,
         errorStatus: 4091,
@@ -186,6 +206,11 @@ module.exports = {
         errorStatus: 4132,
         message: 'File is to big'
     },
+    MAX_EVENT_FILES_FN: (limit) => ({
+        status: 413,
+        errorStatus: 4133,
+        message: `Max ${limit} files per event`
+    }),
     FILE_IS_NOT_VALID_EXTENSION: {
         status: 419,
         errorStatus: 4191,

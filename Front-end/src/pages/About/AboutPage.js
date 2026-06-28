@@ -25,15 +25,6 @@ const AboutPage = () => {
                 <p>{t('about.p4')}</p>
             </div>
         </div>
-        {/* <div className={classes.teamBox}>
-            <h2>Наша Команда</h2>
-            <div className={classes.teamGrid}>
-                <ContactInfo teamName='Mykyta' isContact={true}/>
-                <ContactInfo teamName='Maxim' isContact={true}/>
-                <ContactInfo teamName='Anna' isContact={true}/>
-                <ContactInfo teamName='Uliana' isContact={true}/>
-            </div>
-        </div> */}
         </div>
     </div>
     </>

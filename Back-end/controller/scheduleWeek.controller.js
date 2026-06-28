@@ -1,58 +1,25 @@
-const scheduleDate = require('../helper/scheduleDate');
+const scheduleDate = require('../helper/scheduleDate.helper');
 const {
     scheduleWeekService,
     eventDateService,
     eventInfoService
 } = require('../service/schedule');
 
-// Collect the eventDate ObjectIds referenced by a (non-populated) week document.
-const collectEventDateIds = (week) => {
-    const ids = [];
-    for (const day of (week.schedule || [])) {
-        for (const event of (day.events || [])) {
-            if (event.eventDate) ids.push(event.eventDate);
-        }
-    }
-    return ids;
-};
-
-const calculateMiddleTimestamp = (earlierTimestamp, laterTimestamp) => {
-    const earlierTime = new Date(earlierTimestamp).getTime();
-    const laterTime = new Date(laterTimestamp).getTime();
-
-    const middleTimestamp = new Date((earlierTime + laterTime) / 2);
-
-    return middleTimestamp.toISOString();
-};
-
 module.exports = {
-    calculateMiddleTimestamp,
-
     swapScheduleWeeks: async (req, res, next) => {
         try {
-            const {
-                dynamicWeeks: weeks,
-                swapIndexes: [
-                    weekIdx1,
-                    weekIdx2
-                ]
-            } = req;
+            const { dynamicWeeks: weeks, swapIndexes } = req;
 
+            // Order the indices so the lower one is always slotted first. `let`
+            // (not the previous const) is required — they get swapped in place.
+            let [weekIdx1, weekIdx2] = swapIndexes;
             if (weekIdx1 > weekIdx2) {
-                [
-                    // eslint-disable-next-line no-const-assign
-                    weekIdx1,
-                    // eslint-disable-next-line no-const-assign
-                    weekIdx2
-                ] = [
-                    weekIdx2,
-                    weekIdx1
-                ];
+                [weekIdx1, weekIdx2] = [weekIdx2, weekIdx1];
             }
 
             weeks[weekIdx1].updatedAt = weeks.length === weekIdx2
                 ? new Date()
-                : calculateMiddleTimestamp(
+                : scheduleDate.calculateMiddleTimestamp(
                     weeks[weekIdx1].updatedAtManual,
                     weeks[weekIdx2 + 1].updatedAtManual
                 );
@@ -205,7 +172,7 @@ module.exports = {
                     const w = remaining[i];
                     if (w.countWeek !== i) {
                         await scheduleWeekService.updateCountWeekById(w._id, i);
-                        await eventDateService.setCountWeekManyById(collectEventDateIds(w), i);
+                        await eventDateService.setCountWeekManyById(scheduleWeekService.collectEventDateIds(w), i);
                     }
                 }
             }
@@ -243,8 +210,8 @@ module.exports = {
             await scheduleWeekService.updateCountWeekById(weekId2, count1);
 
             // Keep each event's stored countWeek aligned with its new week index
-            await eventDateService.setCountWeekManyById(collectEventDateIds(week1), count2);
-            await eventDateService.setCountWeekManyById(collectEventDateIds(week2), count1);
+            await eventDateService.setCountWeekManyById(scheduleWeekService.collectEventDateIds(week1), count2);
+            await eventDateService.setCountWeekManyById(scheduleWeekService.collectEventDateIds(week2), count1);
 
             res.json('Swapped!');
         } catch (e) {

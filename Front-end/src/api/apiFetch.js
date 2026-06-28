@@ -1,6 +1,6 @@
 import { notifyError } from '../helper/notify';
 import { HTTP_STATUS, ERROR_CODES } from '../constants/httpStatus';
-import i18n from '../i18n';
+import { resolveErrorMessage } from '../helper/errorMessage';
 
 export const getFetchDispatch = (parameters, navigate, helpFn) => {
     return async (dispatch) => {
@@ -48,11 +48,12 @@ export const getFetch = async (parameters, navigate, helpFn) => {
                 navigate('/sign');
                 return;
             }
+            const message = resolveErrorMessage(data);
             if (!silent) {
-                notifyError(data?.message || i18n.t('auth.genericError'));
+                notifyError(message);
             }
             console.error(data);
-            return { data, status: response.status, ok: response.ok };
+            return { data: { ...data, message }, status: response.status, ok: response.ok };
         }
 
         if (helpFn) {

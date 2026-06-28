@@ -20,4 +20,10 @@ SessionSchema.pre(/^find/, function(next) {
     next();
 });
 
+// Active-session lookup (getActiveSession queries by userId + isActive).
+SessionSchema.index({ userId: 1, isActive: 1 });
+// TTL: drop a session once it has ended. Message history lives in its own
+// collection (keyed by userId), so removing stale sessions loses no chat.
+SessionSchema.index({ endedAt: 1 }, { expireAfterSeconds: 0 });
+
 module.exports = model('Session', SessionSchema);
