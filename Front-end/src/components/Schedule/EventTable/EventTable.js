@@ -93,6 +93,15 @@ const EventTable = ({
         return d;
     }, [date]);
 
+    // Column index of "today" within the displayed week (−1 if the week doesn't
+    // contain today) — used to gently highlight the current day.
+    const todayIdx = useMemo(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diff = Math.round((today - weekMonday) / 86400000);
+        return diff >= 0 && diff <= 6 ? diff : -1;
+    }, [weekMonday]);
+
     const handleDragStart = ({ active }) => setActiveEvent(active.data.current?.ev || null);
 
     const handleDragEnd = ({ active, over }) => {
@@ -223,7 +232,7 @@ const EventTable = ({
                     <div
                         key={dayKey}
                         onClick={() => setMobileDay(idx)}
-                        className={`${classes.weekButton} ${idx === selectedDayIdx ? classes.selected : ''} ${dayCount < 7 && isDayVisible(idx) ? classes.mobileActive : ''}`}
+                        className={`${classes.weekButton} ${idx === selectedDayIdx ? classes.selected : ''} ${idx === todayIdx ? classes.today : ''} ${dayCount < 7 && isDayVisible(idx) ? classes.mobileActive : ''}`}
                     >
                         <span className={classes.dayFull}>{t(dayKey)}</span>
                         <span className={classes.dayShort}>{t(WEEK_DAY_SHORT_KEYS[idx])}</span>
@@ -244,7 +253,7 @@ const EventTable = ({
                 >
                     {ORDERED_BACKEND_DAYS.map((day, dayIdx) => (
                         isDayVisible(dayIdx) && (
-                            <div className={classes.eventRows} key={day}>
+                            <div className={`${classes.eventRows} ${dayIdx === todayIdx ? classes.today : ''}`} key={day}>
                                 {timeSchedule.map((time, idx) => {
                                     return (
                                         <EventsHour
