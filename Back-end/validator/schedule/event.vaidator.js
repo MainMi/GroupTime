@@ -122,10 +122,15 @@ const importEvents = Joi.object({
     ics: Joi.string().min(10).max(2000000).required()
 });
 
+const subscribeCalendar = Joi.object({
+    groupId: Joi.string().required()
+});
+
 module.exports = {
     addStaticEvent,
     deleteEvent,
     editEvent,
     addDynamicEvent,
-    importEvents
+    importEvents,
+    subscribeCalendar
 };

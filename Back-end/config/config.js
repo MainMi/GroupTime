@@ -3,6 +3,9 @@ module.exports = {
     LOG_LEVEL: process.env.LOG_LEVEL || '',
     PORT: process.env.PORT || 5000,
     FROENT_URL: (process.env.FROENT_URL || 'http://localhost:3000').replace(/\/+$/, ''),
+    // Public base URL of THIS API, used to build absolute .ics subscription links
+    // that calendar apps (Google/Outlook) fetch directly. No trailing slash.
+    SELF_URL: (process.env.SELF_URL || `http://localhost:${process.env.PORT || 5000}`).replace(/\/+$/, ''),
     MONGODB_URL: process.env.MONGODB_URL,
 
     API_SCHEDULE: process.env.API_SCHEDULE || ' ',

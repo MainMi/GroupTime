@@ -6,5 +6,6 @@ module.exports = {
     scheduleService: require('./scheduleWeek.service'),
     eventDateService: require('./eventDate.service'),
     scheduleWeekService: require('./scheduleWeek.service'),
-    importService: require('./import.service')
+    importService: require('./import.service'),
+    exportService: require('./export.service')
 };

@@ -49,6 +49,16 @@ const getISOWeekYear = (d) => {
     return date.getUTCFullYear();
 };
 
+// UTC Monday 00:00 of the ISO week containing `d`. Anchors year-less week numbers
+// back to a concrete calendar date when expanding a schedule into dated events.
+const getISOWeekMonday = (d) => {
+    const date = new Date(d);
+    const day = date.getUTCDay() || 7; // Sunday (0) -> 7 so Monday is day 1
+    date.setUTCDate(date.getUTCDate() - (day - 1));
+    date.setUTCHours(0, 0, 0, 0);
+    return date;
+};
+
 // Distinct ISO week numbers covered by [from, to] (inclusive), stepping by day so
 // short ranges that cross a week boundary are handled. Capped to avoid abuse.
 const isoWeeksInRange = (from, to) => {
@@ -108,6 +118,7 @@ module.exports = {
     generateRandomTimeSlot,
     getISOWeekNumber,
     getISOWeekYear,
+    getISOWeekMonday,
     isoWeeksInRange,
     calculateMiddleTimestamp
 };

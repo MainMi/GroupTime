@@ -474,7 +474,17 @@
     "weekDeleted": "Week deleted!",
     "weekDeleteError": "Failed to delete the week.",
     "deleteWeekTitle": "Delete week",
-    "deleteWeekMessage": "Delete this static week along with all its events? This action cannot be undone."
+    "deleteWeekMessage": "Delete this static week along with all its events? This action cannot be undone.",
+    "calendarExport": "Calendar subscription (.ics)",
+    "calendarHint": "Get a link and add it to Google Calendar, Outlook or Apple Calendar — your schedule will stay in sync automatically.",
+    "getCalendarLink": "Get link",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "downloadIcs": "Download .ics",
+    "regenerateLink": "Regenerate link",
+    "calendarRegenerated": "Link regenerated. The old one no longer works.",
+    "calendarError": "Couldn't get the calendar link.",
+    "copyError": "Couldn't copy. Please copy it manually."
   },
   "event": {
     "eventType": "Event type",

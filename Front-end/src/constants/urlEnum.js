@@ -63,6 +63,10 @@ const urlEnum = {
   eventDeleteFile: `${api}/schedule/event/delete/file`,
   eventImport: `${api}/schedule/event/import`,
 
+  // calendar export / subscription
+  calendarSubscribe: `${api}/schedule/export/subscribe`,
+  calendarRevoke: `${api}/schedule/export/revoke`,
+
   // message
   messageSend: `${api}/message/send`,
   messageAnalyze: `${api}/message/analyze`,

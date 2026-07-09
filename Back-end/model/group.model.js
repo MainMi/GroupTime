@@ -42,7 +42,10 @@ const GroupSchema = new Schema({
         type: ParametersSchema,
         default: () => ({})
     },
-    userCount: { type: Number, default: 0 }
+    userCount: { type: Number, default: 0 },
+    // Opaque token embedded in the group's .ics subscription URL. Absent until a
+    // member first requests the link; regenerating it revokes existing feeds.
+    calendarToken: { type: String, index: true, sparse: true }
 }, {
     timestamps: true,
     toObject: { virtuals: true },

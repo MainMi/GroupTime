@@ -1,5 +1,7 @@
+const { nanoid } = require('nanoid');
 const { STRONG_PRIVATE_TYPE, PERSONAL_TYPE } = require('../../constant/type/groupTypes.enum');
 const { ADMIN_ROLE, OWNER_ROLE } = require('../../constant/user.role.enum');
+const { CALENDAR_TOKEN_SIZE } = require('../../constant/export.enum');
 const groupModel = require('../../model/group.model');
 const verificateService = require('../verificate.service');
 const userService = require('../user.service');
@@ -51,6 +53,27 @@ module.exports = {
         select: '-groups'
     }),
     deleteGroup: (groupId) => groupModel.findByIdAndDelete(groupId),
+
+    // Subscription token for the group's .ics feed. Created lazily the first time
+    // a member asks for the link, then reused so the URL is stable.
+    getOrCreateCalendarToken: async (groupId) => {
+        const group = await groupModel.findById(groupId).select('calendarToken');
+        if (!group) return null;
+        if (group.calendarToken) return group.calendarToken;
+        const token = nanoid(CALENDAR_TOKEN_SIZE);
+        await groupModel.findByIdAndUpdate(groupId, { $set: { calendarToken: token } });
+        return token;
+    },
+    // Rotate the token, invalidating any calendars already subscribed to the old URL.
+    regenerateCalendarToken: async (groupId) => {
+        const token = nanoid(CALENDAR_TOKEN_SIZE);
+        await groupModel.findByIdAndUpdate(groupId, { $set: { calendarToken: token } });
+        return token;
+    },
+    // Resolve a group from its subscription token (the .ics feed is token-authed,
+    // no login) — only the fields the feed builder needs.
+    findGroupByCalendarToken: (token) => groupModel.findOne({ calendarToken: token }).select('_id name parameters'),
+
     findGroups: async (queryData) => {
         const {
             query = '',

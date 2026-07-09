@@ -126,6 +126,23 @@ module.exports = {
 
     findAllWeeks: (groupId) => scheduleWeekModel.find({ groupId }),
 
+    // All static templates for a group, sorted so array position == the index
+    // findStaticWeekByIndex would resolve (i.e. countWeek % staticWeeksCount).
+    // Events populated — used by the .ics export to expand the whole window in
+    // one query instead of one per week.
+    findAllStaticWeeksPopulated: (groupId, readPref) => applyRead(scheduleWeekModel
+        .find({ groupId, static: true })
+        .sort({ countWeek: 1 })
+        .lean(), readPref)
+        .populate(weekEventsPopulate(readPref)),
+
+    // Populated dynamic weeks for a batch of ISO week numbers (one query for the
+    // whole export window).
+    findDynamicWeeksByCountWeeks: (groupId, countWeeks, readPref) => applyRead(scheduleWeekModel
+        .find({ groupId, static: false, countWeek: { $in: countWeeks } })
+        .lean(), readPref)
+        .populate(weekEventsPopulate(readPref)),
+
     // Bump every week's `updatedAt` for a group. Used after an event *edit*
     // (which only mutates the eventInfo/eventDate docs, not the week itself) so
     // the cache version still changes and clients re-fetch. `timestamps:false`

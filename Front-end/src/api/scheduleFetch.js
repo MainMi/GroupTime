@@ -71,3 +71,22 @@ export function swapStaticWeeks(data, navigate) {
     body: { groupId: data.groupId, weekId1: data.weekId1, weekId2: data.weekId2 }
   }, navigate);
 }
+
+// Get the group's .ics subscription link (created on first request). Returns
+// { data: { url, token }, ok }.
+export function getCalendarSubscribeUrl(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.calendarSubscribe,
+    method: 'POST',
+    body: { groupId: data.groupId }
+  }, navigate);
+}
+
+// Rotate the group's subscription token, revoking any existing feed URL.
+export function regenerateCalendarSubscribeUrl(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.calendarRevoke,
+    method: 'POST',
+    body: { groupId: data.groupId }
+  }, navigate);
+}
