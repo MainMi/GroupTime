@@ -11,6 +11,10 @@ coverage/
 # Local notes, experiments and anything not part of the project
 _local/
 
+# Telegram bot — kept out of version control for now (self-contained service,
+# has its own package.json and reads TELEGRAM_BOT_TOKEN from Back-end/.env)
+/telegram-bot/
+
 # Docs and Claude Code working files
 *.md
 CLAUDE.md

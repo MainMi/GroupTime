@@ -9,6 +9,7 @@ module.exports = {
     sessionService: require('./assistant/session.service'),
     groqService: require('./assistant/groq.service'),
     tokenCacheService: require('./tokenCache.service'),
+    reminderService: require('./reminder.service'),
     uploadService: require('./upload.service'),
     userService: require('./user.service'),
     verificateService: require('./verificate.service')

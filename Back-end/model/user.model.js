@@ -56,6 +56,9 @@ const UserSchema = new Schema({
     // stored in the group's timezone (group.parameters.gmt) and shifted by
     // (user.gmt - group.gmt) for display.
     gmt: { type: Number, default: 0 },
+    // Telegram chat id set by the (gitignored) bot after the user links their
+    // account via the /start deep-link. Presence = reminders can go to Telegram.
+    telegramChatId: { type: String, default: '' },
     phone: { type: String, default: '' },
     contacts: {
         Github: { type: String, default: '' },

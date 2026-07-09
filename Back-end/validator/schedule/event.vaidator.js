@@ -4,6 +4,9 @@ const Joi = require('joi');
 const { regexEnum, weekEnum } = require('../../constant');
 const scheduleDate = require('../../helper/scheduleDate.helper');
 const { TIME_REGEX } = require('../../constant/regex.enum');
+const {
+    REMINDER_CHANNELS, MIN_REMINDER_OFFSET, MAX_REMINDER_OFFSET,
+} = require('../../constant/reminder.enum');
 
 const customJoi = Joi.extend((joi) => ({
     type: 'stringDate',
@@ -126,11 +129,35 @@ const subscribeCalendar = Joi.object({
     groupId: Joi.string().required()
 });
 
+const setReminder = Joi.object({
+    groupId: Joi.string().required(),
+    eventInfoId: Joi.string().required(),
+    eventDateId: Joi.string().required(),
+    offsetMinutes: Joi.number().integer().min(MIN_REMINDER_OFFSET).max(MAX_REMINDER_OFFSET)
+        .required(),
+    channels: Joi.array().items(Joi.string().valid(...Object.values(REMINDER_CHANNELS)))
+        .min(1)
+        .single()
+        .default([REMINDER_CHANNELS.EMAIL]),
+    isStatic: Joi.boolean().required()
+});
+
+const listReminders = Joi.object({
+    groupId: Joi.string().required()
+});
+
+const deleteReminder = Joi.object({
+    reminderId: Joi.string().required()
+});
+
 module.exports = {
     addStaticEvent,
     deleteEvent,
     editEvent,
     addDynamicEvent,
     importEvents,
-    subscribeCalendar
+    subscribeCalendar,
+    setReminder,
+    listReminders,
+    deleteReminder
 };

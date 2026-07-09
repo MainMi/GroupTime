@@ -30,4 +30,13 @@ module.exports = {
     DEFAULT_MODEL: process.env.DEFAULT_MODEL || '',
 
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
+
+    // Telegram reminders. The bot itself lives in the gitignored /telegram-bot
+    // service; the API only builds the deep-link and relays messages to it.
+    // BOT_USERNAME builds t.me/<username>?start=<token>; BOT_URL is the relay
+    // base; the two secrets must match the bot's env.
+    TELEGRAM_BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME || '',
+    TELEGRAM_BOT_URL: (process.env.TELEGRAM_BOT_URL || '').replace(/\/+$/, ''),
+    TELEGRAM_LINK_SECRET: process.env.TELEGRAM_LINK_SECRET || 'telegram-link-secret',
+    TELEGRAM_RELAY_SECRET: process.env.TELEGRAM_RELAY_SECRET || '',
 };

@@ -59,6 +59,42 @@ const getISOWeekMonday = (d) => {
     return date;
 };
 
+// Next absolute datetime (UTC) an event occurs strictly after `from`, or null.
+// Times are group wall-clock at `gmtHours`, so the instant is wall-clock minus
+// the offset (same convention as the .ics export). For static (recurring) events
+// the occurrence repeats in every ISO week where isoWeek % staticCount == the
+// event's static index (its countWeek); dynamic events occur once, in the ISO
+// week equal to their countWeek.
+const nextEventOccurrence = (ev, gmtHours = 0, from = new Date()) => {
+    const {
+        isStatic, countWeek, staticCount, dayIndex, minutes,
+    } = ev;
+    if (dayIndex < 0 || minutes == null || Number.isNaN(minutes)) return null;
+
+    const startMonday = getISOWeekMonday(from);
+    const horizon = isStatic ? Math.max(staticCount || 1, 1) + 1 : 60;
+    for (let i = 0; i < horizon; i += 1) {
+        const monday = new Date(startMonday.getTime() + i * 7 * 86400000);
+        const isoWeek = getISOWeekNumber(monday);
+        const applies = isStatic
+            ? (staticCount > 0 && isoWeek % staticCount === countWeek)
+            : (isoWeek === countWeek);
+        if (applies) {
+            const dayDate = new Date(monday.getTime() + dayIndex * 86400000);
+            const wallMs = Date.UTC(
+                dayDate.getUTCFullYear(),
+                dayDate.getUTCMonth(),
+                dayDate.getUTCDate(),
+                Math.floor(minutes / 60),
+                minutes % 60,
+            );
+            const dt = new Date(wallMs - gmtHours * 3600000);
+            if (dt > from) return dt;
+        }
+    }
+    return null;
+};
+
 // Distinct ISO week numbers covered by [from, to] (inclusive), stepping by day so
 // short ranges that cross a week boundary are handled. Capped to avoid abuse.
 const isoWeeksInRange = (from, to) => {
@@ -119,6 +155,7 @@ module.exports = {
     getISOWeekNumber,
     getISOWeekYear,
     getISOWeekMonday,
+    nextEventOccurrence,
     isoWeeksInRange,
     calculateMiddleTimestamp
 };

@@ -8,6 +8,16 @@ module.exports = {
             subtitle: 'Тут ви зможете дивитися , змінювати , додавати розклад та дз , мати інструменти які допоможуть в начанні та багато іншого...'
         }
     },
+    // Event reminder. `title`/`subtitle` are overridden per-send with the actual
+    // event and time by reminder.service.
+    reminder: {
+        renderType: 'emailTempalte.ejs',
+        subject: 'Нагадування про подію — GroupTime',
+        data: {
+            title: 'Нагадування про подію',
+            subtitle: ''
+        }
+    },
     confirmEmail: {
         renderType: 'emailConfirmTemplate.ejs',
         subject: 'Підтвердіть вашу почту',
