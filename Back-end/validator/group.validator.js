@@ -11,7 +11,10 @@ const ParametersSchema = Joi.object({
     assistantCommandRole: Joi.string().valid(...Object.values(BASIC_ROLE_USER)).default(ADMIN_ROLE),
     notifacionFromEmail: Joi.boolean().default(true),
     periodStartEvent: Joi.string().pattern(TIME_PATTERN).default('8:00'),
-    periodEndEvent: Joi.string().pattern(TIME_PATTERN).default('21:00')
+    periodEndEvent: Joi.string().pattern(TIME_PATTERN).default('21:00'),
+    // GMT offset (hours) the group's schedule times are stored in.
+    gmt: Joi.number().integer().min(-12).max(14)
+        .default(0)
 });
 
 const GroupSchema = Joi.object({

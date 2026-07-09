@@ -133,7 +133,7 @@ const GroupCreate = () => {
                             <Dropdown
                                 id="typeGroup"
                                 label={t('group.selectType')}
-                                arrValue={Object.values(groupTypeEnum)}
+                                arrValue={Object.values(groupTypeEnum).filter((type) => type !== groupTypeEnum.PERSONAL_TYPE)}
                                 defaultIndex={0}
                                 changeValueHandler={changePrivateTypeHandler}
                             />

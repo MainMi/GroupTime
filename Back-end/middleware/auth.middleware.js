@@ -10,7 +10,7 @@ const {
 
 const OAuthModel = require('../model/OAuth.model');
 
-const { authService } = require('../service');
+const { authService, tokenCacheService } = require('../service');
 const { authValidator, emailValidator } = require('../validator');
 const { REFRESH } = require('../constant/type/tokenType.enum');
 const { populateGroupsDetail } = require('../service/user.service');
@@ -65,6 +65,14 @@ module.exports = {
 
             authService.validateToken(token);
 
+            // Resolving the token costs 2-3 Atlas round-trips — reuse the recent
+            // result for identical requests (short TTL, invalidated on logout).
+            const cachedUser = tokenCacheService.get(token, fetchUserType);
+            if (cachedUser) {
+                req.authUser = cachedUser;
+                return next();
+            }
+
             let tokenData = await OAuthModel.findOne({ access_token: token }).populate('userId').exec();
 
             if (!tokenData || !tokenData.userId) {
@@ -85,6 +93,7 @@ module.exports = {
             tokenData = tokenData.toObject();
 
             req.authUser = tokenData.userId;
+            tokenCacheService.set(token, fetchUserType, tokenData.userId);
 
             next();
         } catch (e) {

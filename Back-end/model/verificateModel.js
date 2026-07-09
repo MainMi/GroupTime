@@ -3,6 +3,16 @@ const { verificateTokenEnum, userRoleEnum } = require('../constant');
 const groupModel = require('./group.model');
 const { VERIFIED_TYPE } = require('../constant/type/verificateToken.enum');
 const userModel = require('./user.model');
+const tokenCacheService = require('../service/tokenCache.service');
+
+// Membership mutations (join / leave / role change) invalidate the affected
+// user's cached auth entries (their groups/roles changed) and the group's
+// members' entries (embedded user lists/counts changed).
+const invalidateMembership = (doc) => {
+    if (!doc) return;
+    tokenCacheService.invalidateUser(doc.user);
+    tokenCacheService.invalidateGroup(doc.group);
+};
 
 const verificateSchema = new Schema({
     group: { type: Schema.Types.ObjectId, required: true, ref: 'Group' },
@@ -56,6 +66,25 @@ verificateSchema.pre('findOneAndDelete', async function(next) {
     });
 
     next();
+});
+
+verificateSchema.post('save', function() {
+    invalidateMembership(this);
+});
+verificateSchema.post('findOneAndUpdate', invalidateMembership);
+verificateSchema.post('findOneAndDelete', invalidateMembership);
+
+// deleteMany has no doc in its hooks — capture the affected memberships first
+// (rare path: group deletion cascade).
+verificateSchema.pre('deleteMany', async function(next) {
+    this._affectedMemberships = await this.model
+        .find(this.getQuery())
+        .select('user group')
+        .lean();
+    next();
+});
+verificateSchema.post('deleteMany', function() {
+    (this._affectedMemberships || []).forEach(invalidateMembership);
 });
 
 // One membership per (user, group). Unique so duplicates can't reappear — run the

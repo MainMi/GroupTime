@@ -266,7 +266,20 @@
     "assistantRefreshMessage": "The assistant changed {{count}} events. Refresh the schedule view to see the changes?",
     "refreshNow": "Refresh",
     "deleteEventTitle": "Delete event",
-    "deleteEventMessage": "Are you sure you want to delete this event?"
+    "deleteEventMessage": "Are you sure you want to delete this event?",
+    "untitled": "Untitled",
+    "moreEvents": "+{{count}}",
+    "personalName": "My schedule",
+    "personalDesc": "Personal schedule",
+    "createPersonal": "Create personal schedule",
+    "creatingPersonal": "Creating schedule...",
+    "personalBadge": "Personal",
+    "import": "Import (.ics)",
+    "importing": "Importing...",
+    "imported": "Imported events: {{count}}",
+    "importError": "Could not import events. Check the .ics file.",
+    "moveError": "Could not move the event.",
+    "createPersonalError": "Could not create the personal schedule."
   },
   "profile": {
     "age": "Age",
@@ -342,6 +355,7 @@
   "profileEdit": {
     "title": "Edit profile",
     "mainInfo": "Main information",
+    "gmt": "Time zone (GMT)",
     "firstName": "First name",
     "firstNamePlaceholder": "Enter your first name",
     "lastName": "Last name",
@@ -387,6 +401,15 @@
     "friday": "Friday",
     "saturday": "Saturday",
     "sunday": "Sunday"
+  },
+  "daysShort": {
+    "monday": "Mon",
+    "tuesday": "Tue",
+    "wednesday": "Wed",
+    "thursday": "Thu",
+    "friday": "Fri",
+    "saturday": "Sat",
+    "sunday": "Sun"
   },
   "actionToken": {
     "unknownAction": "Unknown confirmation action.",
@@ -437,6 +460,7 @@
   "scheduleSettings": {
     "title": "Schedule settings",
     "displayRange": "Display range",
+    "gmt": "Group time zone",
     "from": "From",
     "to": "To",
     "saving": "Saving…",

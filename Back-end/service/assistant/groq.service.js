@@ -1,13 +1,9 @@
 const Groq = require('groq-sdk');
-
 const { GROQ_API_KEY, DEFAULT_MODEL } = require('../../config/config');
 const { generatePrompt } = require('../../helper');
 const ApiError = require('../../error/ErrorHandler');
-<<<<<<< HEAD
 const { ASSISTANT_REQUEST_FAILED } = require('../../error/errorMsg');
 const { GROQ_TEMPERATURE } = require('../../constant/assistant.enum');
-=======
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
@@ -19,16 +15,11 @@ module.exports = {
             const completion = await groq.chat.completions.create({
                 messages: [{ role: 'user', content: promt }],
                 model,
-<<<<<<< HEAD
                 temperature: GROQ_TEMPERATURE.chat,
-=======
-                temperature: 1.4,
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
             });
 
             return completion.choices[0]?.message?.content || 'No response from Groq';
         } catch (e) {
-<<<<<<< HEAD
             throw new ApiError(...Object.values(ASSISTANT_REQUEST_FAILED));
         }
     },
@@ -81,9 +72,6 @@ module.exports = {
             }
         } catch (e) {
             throw new ApiError(...Object.values(ASSISTANT_REQUEST_FAILED));
-=======
-            throw new ApiError(403, 4032, e);
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
         }
     },
 
@@ -96,20 +84,12 @@ module.exports = {
             const completion = await groq.chat.completions.create({
                 messages: [{ role: 'user', content: promt }],
                 model,
-<<<<<<< HEAD
                 temperature: GROQ_TEMPERATURE.analysis,
-=======
-                temperature: 0.7,
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
             });
 
             return completion.choices[0]?.message?.content || 'No response from Groq';
         } catch (e) {
-<<<<<<< HEAD
             throw new ApiError(...Object.values(ASSISTANT_REQUEST_FAILED));
-=======
-            throw new ApiError(403, 4032, e);
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
         }
     }
 };

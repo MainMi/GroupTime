@@ -9,6 +9,8 @@ const UpdateUserSchema = Joi.object({
         .min(2)
         .max(30),
     birthday: Joi.date(),
+    // Display timezone as a GMT offset in hours (see user.model `gmt`).
+    gmt: Joi.number().integer().min(-12).max(14),
     phone: Joi.string().regex(regexEnum.REGEXP_PHONE).allow(''),
     contacts: Joi.object({
         Github: Joi.string().allow(''),

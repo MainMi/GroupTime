@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 const { userRoleEnum } = require('../constant');
+const tokenCacheService = require('../service/tokenCache.service');
 
 const UserSchema = new Schema({
     nickname: {
@@ -51,6 +52,10 @@ const UserSchema = new Schema({
     // Whether the user finished the whole in-app onboarding tour (all sections).
     // Synced from the frontend so tours don't reappear on other devices.
     tourCompleted: { type: Boolean, default: false },
+    // Display timezone as a GMT offset in hours (-12..14). Schedule times are
+    // stored in the group's timezone (group.parameters.gmt) and shifted by
+    // (user.gmt - group.gmt) for display.
+    gmt: { type: Number, default: 0 },
     phone: { type: String, default: '' },
     contacts: {
         Github: { type: String, default: '' },
@@ -65,6 +70,14 @@ const UserSchema = new Schema({
 
 UserSchema.virtual('fullName').get(function() {
     return `${this.firstName} ${this.lastName}`.trim();
+});
+
+// Any user write (profile edit, avatar, group/count sync from Verificate hooks)
+// drops the user's cached auth entries so the change is visible on the next
+// request. Centralized here so callers can't forget it. NOTE: updateMany
+// bypasses this hook — its callers invalidate explicitly (see user.service).
+UserSchema.post('findOneAndUpdate', (doc) => {
+    if (doc) tokenCacheService.invalidateUser(doc._id);
 });
 
 // UserSchema.pre(/^find/, function(next) {

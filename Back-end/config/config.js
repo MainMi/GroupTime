@@ -1,4 +1,6 @@
 module.exports = {
+    NODE_ENV: process.env.NODE_ENV || '',
+    LOG_LEVEL: process.env.LOG_LEVEL || '',
     PORT: process.env.PORT || 5000,
     FROENT_URL: (process.env.FROENT_URL || 'http://localhost:3000').replace(/\/+$/, ''),
     MONGODB_URL: process.env.MONGODB_URL,

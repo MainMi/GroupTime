@@ -1,21 +1,7 @@
-<<<<<<< HEAD
 const { DAY_NAMES_UK } = require('../constant/week.text');
 const { languageRule, INTERNAL_RULES } = require('../constant/promptText');
 
 const dayName = (code) => DAY_NAMES_UK[code] || code;
-=======
-const DAY_NAMES = {
-    Пн: 'Понеділок',
-    Вв: 'Вівторок',
-    Ср: 'Середа',
-    Чт: 'Четвер',
-    Пт: "П'ятниця",
-    Сб: 'Субота',
-    Вс: 'Неділя',
-};
-
-const dayName = (code) => DAY_NAMES[code] || code;
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
 
 function formatDayEvents(dayObj) {
     if (!dayObj.events?.length) return null;
@@ -71,15 +57,10 @@ function formatGroupsSchedule(data) {
         return formatSchedule(groups[0].weekData);
     }
 
-<<<<<<< HEAD
     // Chat context labels groups as `groupName`, the /magic context as `name` —
     // accept either so multi-group headers never collapse to «—».
     return groups
         .map((g) => `=== Група «${g.name || g.groupName || '—'}» ===\n${formatSchedule(g.weekData)}`)
-=======
-    return groups
-        .map((g) => `=== Група «${g.name || '—'}» ===\n${formatSchedule(g.weekData)}`)
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
         .join('\n\n');
 }
 
@@ -93,17 +74,12 @@ function issuesToText(issues) {
     return issues.map((it) => {
         const where = `${dayName(it.day)}${it.groupName ? ` (${it.groupName})` : ''}`;
         switch (it.type) {
-<<<<<<< HEAD
             case 'overlap': {
                 const fix = it.suggestion?.newTime
                     ? ` Можна перенести «${it.suggestion.event}» на ${it.suggestion.newTime}.`
                     : '';
                 return `- Накладання у ${where}: «${it.events[0]}» (${it.meta?.firstTime}) і «${it.events[1]}» (${it.meta?.secondTime}) перетинаються за часом.${fix}`;
             }
-=======
-            case 'overlap':
-                return `- Накладання у ${where}: «${it.events[0]}» (${it.meta?.firstTime}) і «${it.events[1]}» (${it.meta?.secondTime}) перетинаються за часом.`;
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
             case 'gap':
                 return `- Велике вікно у ${where}: ${it.meta?.minutes} хв між «${it.events[0]}» і «${it.events[1]}».`;
             case 'overload':
@@ -120,7 +96,6 @@ function issuesToText(issues) {
     }).join('\n');
 }
 
-<<<<<<< HEAD
 function formatHistory(history) {
     if (!Array.isArray(history) || !history.length) return '';
     const lines = history
@@ -129,8 +104,6 @@ function formatHistory(history) {
     return lines.length ? `\nПопередня розмова:\n${lines.join('\n')}\n` : '';
 }
 
-=======
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
 function nowContext() {
     const now = new Date();
     return {
@@ -141,10 +114,6 @@ function nowContext() {
 }
 
 module.exports = {
-<<<<<<< HEAD
-=======
-    DAY_NAMES,
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
     issuesToText,
 
     questionWithData: (question, data = {}) => {
@@ -152,13 +121,9 @@ module.exports = {
         const scheduleText = formatGroupsSchedule(data);
         const dayFilter = data.selectedDay ? `\nКористувача цікавить день: ${dayName(data.selectedDay)}.` : '';
 
-<<<<<<< HEAD
         return `Ти — дружній AI-асистент для керуванням розкладу.
 
 ${languageRule(data.lang)}
-=======
-        return `Ти — дружній AI-асистент для університетського розкладу. Відповідай виключно українською мовою.
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
 
 Поточний час: ${dn}, ${dateStr}, ${timeStr}.
 
@@ -167,11 +132,7 @@ ${languageRule(data.lang)}
 
 Розклад:
 ${scheduleText}${dayFilter}
-<<<<<<< HEAD
 ${formatHistory(data.history)}
-=======
-
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
 Питання: "${question}"
 
 Інструкція:
@@ -180,15 +141,11 @@ ${formatHistory(data.history)}
 - Якщо подій кілька груп — уточнюй, про яку групу йдеться.
 - Якщо питається про найближчу подію — визнач її на основі поточного часу і дня.
 - Не переказуй структуру даних та не згадуй JSON.
-<<<<<<< HEAD
 - Якщо інформації немає — скажи чесно.
 - Якщо користувач просить створити, відредагувати чи видалити подію — НЕ роби цього у звичайній відповіді. Чемно попроси повторити прохання, почавши його з команди «/magic» (наприклад: «/magic створи подію …»).
 - Час від часу (не щоразу) доречно нагадати, що події створюються та редагуються командою «/magic».
 
 ${INTERNAL_RULES}`;
-=======
-- Якщо інформації немає — скажи чесно.`;
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
     },
 
     // Prompt for the "detect problems" feature: the deterministic analyzer found
@@ -197,13 +154,9 @@ ${INTERNAL_RULES}`;
         const { dayName: dn, dateStr, timeStr } = nowContext();
         const issuesText = issuesToText(issues);
 
-<<<<<<< HEAD
         return `Ти — AI-асистент для керуванням розкладу.
 
 ${languageRule(data.lang)}
-=======
-        return `Ти — AI-асистент для університетського розкладу. Відповідай виключно українською мовою.
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
 
 Поточний час: ${dn}, ${dateStr}, ${timeStr}.
 
@@ -214,7 +167,6 @@ ${issuesText}
 - Якщо проблем немає — коротко підтвердь, що розклад виглядає добре.
 - Інакше поясни знайдені проблеми простими словами, згрупуй за днями.
 - Дай 1–2 практичні поради, як це виправити.
-<<<<<<< HEAD
 - Будь дружнім і лаконічним. Не вигадуй проблем, яких немає у списку.
 
 ${INTERNAL_RULES}`;
@@ -317,8 +269,5 @@ ${scheduleText}
 - Якщо подія вже добре протегована або доречних тегів немає — не додавай її до "actions".
 - Якщо пропонувати нічого — поверни "actions": [].
 - Поверни тільки JSON.`;
-=======
-- Будь дружнім і лаконічним. Не вигадуй проблем, яких немає у списку.`;
->>>>>>> 06e77f52213d4457f5991beb1d9775aa4258bcf3
     },
 };

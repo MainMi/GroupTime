@@ -3,6 +3,7 @@ const ApiError = require('../error/ErrorHandler');
 const { USERS_NOT_FOUND } = require('../error/errorMsg');
 const { NICKNAME_MAX_BASE_LENGTH, NICKNAME_SUFFIX_ATTEMPTS } = require('../constant/user.enum');
 const userModel = require('../model/user.model');
+const tokenCacheService = require('./tokenCache.service');
 
 module.exports = {
     createUser: (user) => userModel.create(user),
@@ -22,11 +23,13 @@ module.exports = {
         }
         return `${base}_${Date.now().toString(36)}`;
     },
+    // Auth-cache invalidation happens in the user model's findOneAndUpdate hook.
     updateUser: (userId, newData) => userModel.findByIdAndUpdate(userId, { $set: newData }),
+    // updateMany bypasses the model hook — invalidate explicitly.
     updateUsers: (userIds, newData) => userModel.updateMany(
         { _id: { $in: userIds } },
         newData
-    ),
+    ).then((res) => { userIds.forEach((id) => tokenCacheService.invalidateUser(id)); return res; }),
     getUsersQuery: async (queryData) => {
         const {
             limit = 20,

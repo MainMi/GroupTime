@@ -20,7 +20,7 @@ const ApiError = require('../error/ErrorHandler');
 const { USER_IS_ALREADY_GROUP, GOOGLE_CREDENTIAL_MISSING, GOOGLE_EMAIL_NOT_VERIFIED } = require('../error/errorMsg');
 
 const {
-    emailService, userService, authService, verificateService, actionTokenService
+    emailService, userService, authService, verificateService, actionTokenService, tokenCacheService
 } = require('../service');
 const { groupService } = require('../service/schedule');
 
@@ -101,6 +101,8 @@ module.exports = {
             const { user } = req;
 
             await authService.deleteManyParamsToken({ userId: user.userId });
+            // Drop the revoked tokens from the auth cache immediately.
+            tokenCacheService.invalidateUser(user.userId);
 
             res.json('User is logout');
         } catch (e) {

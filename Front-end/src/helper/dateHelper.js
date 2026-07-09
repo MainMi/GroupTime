@@ -93,6 +93,18 @@ export function timeStringToMinutes(timeStr) {
     return (h || 0) * 60 + (m || 0);
 }
 
+// Shift an 'HH:MM' string by deltaMinutes (may be negative). Returns the wrapped
+// time plus how many day boundaries the shift crossed (…-1/0/+1…) — used for
+// timezone display offsets, where a shifted event can land on another weekday.
+export function shiftTimeString(timeStr, deltaMinutes) {
+    const total = timeStringToMinutes(timeStr) + deltaMinutes;
+    const dayShift = Math.floor(total / 1440);
+    const normalized = ((total % 1440) + 1440) % 1440;
+    const h = String(Math.floor(normalized / 60)).padStart(2, '0');
+    const m = String(normalized % 60).padStart(2, '0');
+    return { time: `${h}:${m}`, dayShift };
+}
+
 // Return a copy of `date` set to local noon — avoids UTC-midnight day rollover
 // (e.g. UTC+3 turning a midnight date into the previous day).
 export function atNoon(date) {

@@ -1,6 +1,6 @@
 const { FROENT_URL } = require('../config/config');
 const { CONFIRM_USER } = require('../constant/type/actionTokenTypes.enum');
-const { PUBLIC_TYPE } = require('../constant/type/groupTypes.enum');
+const { PUBLIC_TYPE, PERSONAL_TYPE } = require('../constant/type/groupTypes.enum');
 const { CONFIRM_USER_TYPE, USER_JOINED_TYPE } = require('../constant/type/emailTypes.enum');
 const { NOT_VERIFIED_TYPE, VERIFIED_TYPE } = require('../constant/type/verificateToken.enum');
 const {
@@ -63,6 +63,15 @@ module.exports = {
             } = req.body;
 
             const { _id, groups } = req.authUser;
+
+            // A user has at most one personal schedule — return the existing one
+            // instead of creating a duplicate (makes the create button idempotent).
+            if (type === PERSONAL_TYPE) {
+                const existingPersonal = await groupService.findUserPersonalGroup(_id);
+                if (existingPersonal) {
+                    return res.status(200).json(existingPersonal);
+                }
+            }
 
             const group = await groupService.createGroup({
                 type,

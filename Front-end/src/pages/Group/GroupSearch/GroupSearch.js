@@ -10,7 +10,8 @@ import useInput from '../../../hooks/useInput';
 import validateFn from '../../../constants/validateFn.enum';
 import Input from '../../../UI/Input/Input';
 import { notifyError } from '../../../helper/notify';
-import { searchGroups } from '../../../api/groupFetch';
+import { searchGroups, createGroup } from '../../../api/groupFetch';
+import groupTypeEnum from '../../../constants/type/groupTypeEnum';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { fetchUserInfo } from '../../../redux/actions/auth-actions';
@@ -55,6 +56,36 @@ const GroupSearch = () => {
     const [groupsInfo, setGroupsInfo] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
+    const [creatingPersonal, setCreatingPersonal] = useState(false);
+
+    // The backend keeps personal groups one-per-user; hide the button once one exists.
+    const hasPersonal = (userInfo?.groups || []).some(
+        (g) => g?.group?.type === groupTypeEnum.PERSONAL_TYPE
+    );
+
+    // Create a personal schedule: a single-owner group of type `personal` that is
+    // hidden from search but usable exactly like any group on the schedule page.
+    const handleCreatePersonal = async () => {
+        if (creatingPersonal) return;
+        setCreatingPersonal(true);
+        try {
+            const { ok } = await createGroup({
+                name: t('schedule.personalName'),
+                description: t('schedule.personalDesc'),
+                type: groupTypeEnum.PERSONAL_TYPE,
+            });
+            if (ok) {
+                await dispatch(fetchUserInfo(navigate));
+                navigate('/schedule');
+            } else {
+                notifyError(t('schedule.createPersonalError'));
+            }
+        } catch (e) {
+            notifyError(t('schedule.createPersonalError'));
+        } finally {
+            setCreatingPersonal(false);
+        }
+    };
 
     useEffect(() => {
         if (!userInfo?.nickname) {
@@ -143,6 +174,16 @@ const GroupSearch = () => {
                     <span data-tour="group-create" style={{ display: 'inline-flex' }}>
                         <Button onClick={() => navigate('/groups/edit')}>{t('group.createButton')}</Button>
                     </span>
+                    {!hasPersonal && (
+                        <Button
+                            typeColor="green"
+                            beforeImg="plus"
+                            onClick={handleCreatePersonal}
+                            disabled={creatingPersonal}
+                        >
+                            {creatingPersonal ? t('schedule.creatingPersonal') : t('schedule.createPersonal')}
+                        </Button>
+                    )}
                 </div>
             </div>
             <GroupTour enabled={!loading} />

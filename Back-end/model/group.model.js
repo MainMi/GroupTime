@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 const { groupTypesEnum } = require('../constant');
+const tokenCacheService = require('../service/tokenCache.service');
 const { BASIC_ROLE_USER } = require('../constant/group.enum');
 const { ADMIN_ROLE } = require('../constant/user.role.enum');
 
@@ -12,7 +13,10 @@ const ParametersSchema = new Schema({
     notifacionFromEmail: { type: Boolean, default: true },
     // Visible time range of the schedule table (e.g. '8:00'–'21:00').
     periodStartEvent: { type: String, default: '8:00' },
-    periodEndEvent: { type: String, default: '21:00' }
+    periodEndEvent: { type: String, default: '21:00' },
+    // Timezone the group's schedule times are stored in, as a GMT offset in
+    // hours. Display shifts times by (user.gmt - this) per viewer.
+    gmt: { type: Number, default: 0 }
 });
 
 const GroupSchema = new Schema({
@@ -46,5 +50,15 @@ const GroupSchema = new Schema({
 });
 
 GroupSchema.index({ name: 'text' });
+
+// Cached authUsers embed group details (incl. `parameters` used for
+// authorization) — any group write evicts exactly the members' cached entries.
+// Centralized here so edit/avatar/membership paths can't forget it.
+GroupSchema.post('findOneAndUpdate', (doc) => {
+    if (doc) tokenCacheService.invalidateGroup(doc._id);
+});
+GroupSchema.post('findOneAndDelete', (doc) => {
+    if (doc) tokenCacheService.invalidateGroup(doc._id);
+});
 
 module.exports = model('Group', GroupSchema);

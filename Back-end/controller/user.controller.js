@@ -31,7 +31,7 @@ module.exports = {
         try {
             const { _id } = req.authUser;
             const {
-                firstName, lastName, phone, birthday, contacts
+                firstName, lastName, phone, birthday, contacts, gmt
             } = req.body;
 
             const updateData = {};
@@ -40,6 +40,7 @@ module.exports = {
             if (phone !== undefined) updateData.phone = phone;
             if (birthday !== undefined) updateData.birthday = new Date(birthday);
             if (contacts !== undefined) updateData.contacts = contacts;
+            if (gmt !== undefined) updateData.gmt = gmt;
 
             await userService.updateUser(_id, updateData);
             res.json({ message: 'Profile updated' });

@@ -1,4 +1,4 @@
-const { STRONG_PRIVATE_TYPE } = require('../../constant/type/groupTypes.enum');
+const { STRONG_PRIVATE_TYPE, PERSONAL_TYPE } = require('../../constant/type/groupTypes.enum');
 const { ADMIN_ROLE, OWNER_ROLE } = require('../../constant/user.role.enum');
 const groupModel = require('../../model/group.model');
 const verificateService = require('../verificate.service');
@@ -27,6 +27,16 @@ module.exports = {
         select: '-groups'
     }).populate('avatar', 'location').populate('avatarGallery', 'location'),
     createGroup: (groupObject) => groupModel.create(groupObject),
+    // The user's personal schedule group, if any. Personal groups are single-owner
+    // and one-per-user — createGroup uses this to stay idempotent for them.
+    findUserPersonalGroup: async (userId) => {
+        const memberships = await verificateService.findVerificateUsers({ user: userId });
+        if (!memberships.length) return null;
+        return groupModel.findOne({
+            _id: { $in: memberships.map((m) => m.group) },
+            type: PERSONAL_TYPE
+        }).lean();
+    },
     updateGroup: (groupId, newData) => groupModel.findByIdAndUpdate(
         groupId,
         { $set: newData },
@@ -54,7 +64,12 @@ module.exports = {
                 { name: { $regex: query, $options: 'i' } },
                 { description: { $regex: query, $options: 'i' } }
             ],
-            type: { $ne: STRONG_PRIVATE_TYPE }
+            type: {
+                $nin: [
+                    STRONG_PRIVATE_TYPE,
+                    PERSONAL_TYPE
+                ]
+            }
         };
 
         const count = await groupModel.countDocuments(filter);

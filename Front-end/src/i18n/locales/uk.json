@@ -266,7 +266,20 @@
     "assistantRefreshMessage": "Асистент змінив події ({{count}}). Оновити перегляд розкладу, щоб побачити зміни?",
     "refreshNow": "Оновити",
     "deleteEventTitle": "Видалити подію",
-    "deleteEventMessage": "Ви впевнені, що хочете видалити цю подію?"
+    "deleteEventMessage": "Ви впевнені, що хочете видалити цю подію?",
+    "untitled": "Без назви",
+    "moreEvents": "+{{count}}",
+    "personalName": "Мій розклад",
+    "personalDesc": "Персональний розклад",
+    "createPersonal": "Створити персональний розклад",
+    "creatingPersonal": "Створення розкладу...",
+    "personalBadge": "Особистий",
+    "import": "Імпорт (.ics)",
+    "importing": "Імпортування...",
+    "imported": "Імпортовано подій: {{count}}",
+    "importError": "Не вдалося імпортувати події. Перевірте файл .ics.",
+    "moveError": "Не вдалося перемістити подію.",
+    "createPersonalError": "Не вдалося створити персональний розклад."
   },
   "profile": {
     "age": "Вік",
@@ -342,6 +355,7 @@
   "profileEdit": {
     "title": "Редагування профілю",
     "mainInfo": "Основна інформація",
+    "gmt": "Часовий пояс (GMT)",
     "firstName": "Ім'я",
     "firstNamePlaceholder": "Введіть ім'я",
     "lastName": "Прізвище",
@@ -387,6 +401,15 @@
     "friday": "П'ятниця",
     "saturday": "Субота",
     "sunday": "Неділя"
+  },
+  "daysShort": {
+    "monday": "Пн",
+    "tuesday": "Вт",
+    "wednesday": "Ср",
+    "thursday": "Чт",
+    "friday": "Пт",
+    "saturday": "Сб",
+    "sunday": "Нд"
   },
   "actionToken": {
     "unknownAction": "Невідома дія підтвердження.",
@@ -437,6 +460,7 @@
   "scheduleSettings": {
     "title": "Налаштування розкладу",
     "displayRange": "Діапазон відображення",
+    "gmt": "Часовий пояс групи",
     "from": "З",
     "to": "До",
     "saving": "Зберігаємо…",

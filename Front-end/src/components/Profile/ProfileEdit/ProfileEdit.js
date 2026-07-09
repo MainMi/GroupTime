@@ -6,10 +6,17 @@ import { useTranslation } from 'react-i18next';
 import classes from './ProfileEdit.module.scss';
 import Input from '../../../UI/Input/Input';
 import Button from '../../../UI/Button/Button';
+import Dropdown from '../../../UI/Dropdown/Dropdown';
 import { updateUserProfile } from '../../../api/userFetch';
 import { fetchUserInfo } from '../../../redux/actions/auth-actions';
 import { showSuccessNotification, showErrorNotification } from '../../../redux/actions/notification-actions';
 import buttonsImages from '../../../static/image/buttonIcons';
+
+// GMT offsets -12..+14 as Dropdown items ('GMT+2' shown, '2' as the value).
+const GMT_OPTIONS = Array.from({ length: 27 }, (_, i) => {
+    const v = i - 12;
+    return { title: `GMT${v >= 0 ? '+' : ''}${v}`, value: String(v) };
+});
 
 const ProfileEdit = ({ onClose }) => {
     const dispatch = useDispatch();
@@ -23,6 +30,7 @@ const ProfileEdit = ({ onClose }) => {
     const [github,     setGithub]     = useState(userInfo.contacts?.Github    || '');
     const [instagram,  setInstagram]  = useState(userInfo.contacts?.Instagram || '');
     const [telegram,   setTelegram]   = useState(userInfo.contacts?.Telegram  || '');
+    const [gmt,        setGmt]        = useState(Number.isFinite(userInfo.gmt) ? userInfo.gmt : 0);
     const [isSaving,   setIsSaving]   = useState(false);
     const [saved,      setSaved]      = useState(false);
 
@@ -35,6 +43,7 @@ const ProfileEdit = ({ onClose }) => {
             firstName: firstName.trim(),
             lastName:  lastName.trim(),
             phone:     phone.trim(),
+            gmt,
             contacts: {
                 Github:    github.trim(),
                 Instagram: instagram.trim(),
@@ -60,7 +69,7 @@ const ProfileEdit = ({ onClose }) => {
         } finally {
             setIsSaving(false);
         }
-    }, [isSaving, firstName, lastName, phone, github, instagram, telegram, dispatch, navigate, onClose, t]);
+    }, [isSaving, firstName, lastName, phone, gmt, github, instagram, telegram, dispatch, navigate, onClose, t]);
 
     return (
         <div className={classes.overlay} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -99,6 +108,18 @@ const ProfileEdit = ({ onClose }) => {
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="+380..."
+                        />
+                    </div>
+                    <div className={classes.row}>
+                        <label htmlFor="pe-gmt">{t('profileEdit.gmt')}</label>
+                        <Dropdown
+                            id="pe-gmt"
+                            arrValue={GMT_OPTIONS}
+                            defaultIndex={gmt + 12}
+                            changeValueHandler={(val) => {
+                                const parsed = parseInt(val, 10);
+                                setGmt(Number.isNaN(parsed) ? 0 : parsed);
+                            }}
                         />
                     </div>
                 </div>
