@@ -10,6 +10,9 @@
     "test:load": "node ./scripts/loadTest.js",
     "benchmark:model": "node ./scripts/modelBenchmark.js"
   },
+  "lint-staged": {
+    "*.js": "eslint --fix"
+  },
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
     "@sendgrid/mail": "^7.7.0",

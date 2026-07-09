@@ -1,0 +1,14 @@
+{
+  "name": "grouptime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GroupTime monorepo tooling root: git hooks (husky) + staged-file linting (lint-staged). App code lives in Back-end/ and Front-end/, each with its own package.json.",
+  "scripts": {
+    "prepare": "husky",
+    "lint": "npm run lint --prefix Back-end --if-present && npm run lint --prefix Front-end --if-present"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2"
+  }
+}
