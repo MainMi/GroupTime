@@ -21,6 +21,7 @@ import { uploadUserAvatar, selectUserAvatar, deleteUserAvatar } from '../../api/
 import { countValidGroups } from '../../helper/groupHelper';
 
 const GroupsCards = ({ userGroups, checkInvite = false }) => {
+    const { t } = useTranslation();
     return userGroups.map((groupInfo) => {
         const { group } = groupInfo;
         let isVerificate = false
@@ -36,7 +37,7 @@ const GroupsCards = ({ userGroups, checkInvite = false }) => {
             status={groupInfo.type}
             usersCount={group.userCount}
             maxCount={group.parameters.usersLimit}
-            statusName={groupInfo.role}
+            statusName={groupInfo.role ? t(`roles.${groupInfo.role}`) : groupInfo.type}
             isVerificate={isVerificate}
             actionToken={groupInfo.actionToken}
             isView={true}

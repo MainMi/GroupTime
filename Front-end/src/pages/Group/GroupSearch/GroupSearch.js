@@ -19,24 +19,36 @@ import GroupTour from '../../../components/Onboarding/GroupTour';
 import groupEnum from '../../../constants/groupEnum';
 
 const GroupsCards = ({ groups, userGroups }) => {
-    const groupIds = userGroups?.map((verificate) => verificate.group._id || verificate.group.id) || [];
-    
+    const { t } = useTranslation();
+    // Map a joined group's id -> the viewer's role in it, so "my groups" show the
+    // role while search results the viewer hasn't joined keep showing the type.
+    const roleByGroup = {};
+    (userGroups || []).forEach((verificate) => {
+        const gid = verificate.group?._id || verificate.group?.id;
+        if (gid) roleByGroup[String(gid)] = verificate.role;
+    });
+    const groupIds = Object.keys(roleByGroup);
+
     return (
         <div className={classes.groupsBox}>
-            {groups.map((group) => (
-                <GroupCard
-                    id={group._id}
-                    key={group._id}
-                    avatar={group.avatar}
-                    title={group.name}
-                    description={group.description}
-                    status={group.type}
-                    usersCount={group.userCount}
-                    maxCount={group.parameters?.usersLimit}
-                    type='add'
-                    isView={groupIds.includes(group._id)}
-                />
-            ))}
+            {groups.map((group) => {
+                const role = roleByGroup[String(group._id)];
+                return (
+                    <GroupCard
+                        id={group._id}
+                        key={group._id}
+                        avatar={group.avatar}
+                        title={group.name}
+                        description={group.description}
+                        status={group.type}
+                        statusName={role ? t(`roles.${role}`) : group.type}
+                        usersCount={group.userCount}
+                        maxCount={group.parameters?.usersLimit}
+                        type='add'
+                        isView={groupIds.includes(String(group._id))}
+                    />
+                );
+            })}
         </div>
     );
 };

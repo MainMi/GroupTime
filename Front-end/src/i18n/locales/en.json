@@ -1,4 +1,11 @@
 {
+  "roles": {
+    "user": "Member",
+    "student": "Student",
+    "help_admin": "Co-admin",
+    "admin": "Admin",
+    "owner": "Owner"
+  },
   "common": {
     "cancel": "Cancel",
     "save": "Save",
