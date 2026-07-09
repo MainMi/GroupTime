@@ -2,7 +2,51 @@ const { BASIC_SCHEDULE } = require('../../constant/schedule.enum');
 const groupModel = require('../../model/group.model');
 const scheduleWeekModel = require('../../model/scheduleWeek.model');
 
+// Route read-only schedule reads to a replica-set secondary when the caller opts
+// in (the public GET schedule endpoints). Write paths and the assistant/analyzer
+// omit it and keep reading from the primary to avoid replication-lag staleness.
+const READ_SECONDARY = 'secondaryPreferred';
+const applyRead = (query, readPref) => (readPref ? query.read(readPref) : query);
+
+// Shared populate spec for a week's events (static and dynamic finders must stay
+// identical or the two endpoints drift). Mongoose does NOT propagate the parent
+// query's read preference into populate() sub-queries, so when a read preference
+// is requested each populate level opts in explicitly via `options`.
+const weekEventsPopulate = (readPref) => {
+    const options = readPref ? { readPreference: readPref } : {};
+    return {
+        path: 'schedule.events',
+        populate: [
+            {
+                path: 'eventInfo',
+                select: 'name teacherName type color place platform link tag description createdBy',
+                model: 'eventInfo',
+                options,
+                populate: {
+                    path: 'createdBy',
+                    select: 'nickname firstName lastName avatar',
+                    options,
+                    populate: { path: 'avatar', select: 'location', options }
+                }
+            },
+            {
+                path: 'eventDate',
+                select: 'countWeek day time duration data',
+                model: 'eventDate',
+                options,
+                populate: {
+                    path: 'data',
+                    select: 'name size location minetypes key',
+                    model: 'File',
+                    options
+                }
+            }
+        ]
+    };
+};
+
 module.exports = {
+    READ_SECONDARY,
     // Collect the eventDate ObjectIds referenced by a (non-populated) week document.
     collectEventDateIds: (week) => {
         const ids = [];
@@ -29,6 +73,23 @@ module.exports = {
         .populate('schedule.events.eventInfo')
         .populate('schedule.events.eventDate'),
 
+    // Cheap existence probe — unlike findWeek it fetches nothing and populates
+    // nothing (findWeek pulls every event in the week, which bulk callers like
+    // the .ics import must not pay per event).
+    weekExists: (groupId, countWeek, isStatic = true) => scheduleWeekModel.exists(
+        { groupId, countWeek, static: isStatic }
+    ),
+
+    // Which of the given week numbers already exist for the group — one query
+    // instead of a weekExists probe per week (bulk callers like the .ics import).
+    findExistingWeekNumbers: async (groupId, countWeeks, isStatic = true) => {
+        const weeks = await scheduleWeekModel
+            .find({ groupId, static: isStatic, countWeek: { $in: countWeeks } })
+            .select('countWeek')
+            .lean();
+        return new Set(weeks.map((week) => week.countWeek));
+    },
+
     deleteById: (weekId) => scheduleWeekModel.deleteOne({ _id: weekId }),
 
     findById: (weekId) => scheduleWeekModel.findById(weekId),
@@ -44,62 +105,24 @@ module.exports = {
         { $pull: { 'schedule.static': weekId } }
     ),
 
-    countStaticWeeks: (groupId) => scheduleWeekModel.countDocuments({ groupId, static: true }),
+    countStaticWeeks: (groupId, readPref) => applyRead(scheduleWeekModel.countDocuments({ groupId, static: true }), readPref),
 
     findAllDynamicWeeks: (groupId) => scheduleWeekModel.find({ groupId, static: false }),
     findAllStaticWeeks: (groupId) => scheduleWeekModel.find({ groupId, static: true }),
 
-    findStaticWeekByIndex: (groupId, index) => scheduleWeekModel.findOne({ groupId, static: true })
+    findStaticWeekByIndex: (groupId, index, readPref) => applyRead(scheduleWeekModel.findOne({ groupId, static: true })
         .sort({ countWeek: 1 })
         .skip(index)
-        .lean()
-        .populate({
-            path: 'schedule.events',
-            populate: [
-                {
-                    path: 'eventInfo',
-                    select: 'name teacherName type color place platform link tag description',
-                    model: 'eventInfo'
-                },
-                {
-                    path: 'eventDate',
-                    select: 'countWeek day time duration data',
-                    model: 'eventDate',
-                    populate: {
-                        path: 'data',
-                        select: 'name size location minetypes key',
-                        model: 'File'
-                    }
-                }
-            ]
-        }),
+        .lean(), readPref)
+        .populate(weekEventsPopulate(readPref)),
 
-    findDynamicWeekByCountWeek: (groupId, countWeek) => scheduleWeekModel.findOne({
+    findDynamicWeekByCountWeek: (groupId, countWeek, readPref) => applyRead(scheduleWeekModel.findOne({
         groupId,
         countWeek,
         static: false
     })
-        .lean()
-        .populate({
-            path: 'schedule.events',
-            populate: [
-                {
-                    path: 'eventInfo',
-                    select: 'name teacherName type color place platform link tag description',
-                    model: 'eventInfo'
-                },
-                {
-                    path: 'eventDate',
-                    select: 'countWeek day time duration data',
-                    model: 'eventDate',
-                    populate: {
-                        path: 'data',
-                        select: 'name size location minetypes key',
-                        model: 'File'
-                    }
-                }
-            ]
-        }),
+        .lean(), readPref)
+        .populate(weekEventsPopulate(readPref)),
 
     findAllWeeks: (groupId) => scheduleWeekModel.find({ groupId }),
 
@@ -116,25 +139,32 @@ module.exports = {
 
     // The cache version for a group's week = the newest updatedAt across its
     // resolved static + dynamic week documents (ms epoch, 0 if none).
-    getWeekVersionByCountWeek: async (groupId, countWeek) => {
-        const staticCount = await scheduleWeekModel.countDocuments({ groupId, static: true });
-
-        let staticUpdated = 0;
-        if (staticCount > 0) {
-            const sw = await scheduleWeekModel
-                .findOne({ groupId, static: true })
-                .sort({ countWeek: 1 })
-                .skip(countWeek % staticCount)
-                .select('updatedAt')
-                .lean();
-            staticUpdated = sw?.updatedAt ? new Date(sw.updatedAt).getTime() : 0;
-        }
-
-        const dw = await scheduleWeekModel
-            .findOne({ groupId, countWeek, static: false })
-            .select('updatedAt')
-            .lean();
-        const dynamicUpdated = dw?.updatedAt ? new Date(dw.updatedAt).getTime() : 0;
+    getWeekVersionByCountWeek: async (groupId, countWeek, readPref) => {
+        // The static chain and the dynamic lookup are independent — run them in
+        // parallel; each awaited query is a full Atlas round-trip (~150ms+).
+        const [
+            staticUpdated,
+            dynamicUpdated
+        ] = await Promise.all([
+            (async () => {
+                const staticCount = await applyRead(scheduleWeekModel.countDocuments({ groupId, static: true }), readPref);
+                if (staticCount <= 0) return 0;
+                const sw = await applyRead(scheduleWeekModel
+                    .findOne({ groupId, static: true })
+                    .sort({ countWeek: 1 })
+                    .skip(countWeek % staticCount)
+                    .select('updatedAt')
+                    .lean(), readPref);
+                return sw?.updatedAt ? new Date(sw.updatedAt).getTime() : 0;
+            })(),
+            (async () => {
+                const dw = await applyRead(scheduleWeekModel
+                    .findOne({ groupId, countWeek, static: false })
+                    .select('updatedAt')
+                    .lean(), readPref);
+                return dw?.updatedAt ? new Date(dw.updatedAt).getTime() : 0;
+            })(),
+        ]);
 
         return Math.max(staticUpdated, dynamicUpdated);
     },
@@ -205,6 +235,19 @@ module.exports = {
         {
             new: true
         }
+    ),
+
+    // Bulk variant of addEvent: one write per (week, day) slot instead of one
+    // per event. `slots` is [{ countWeek, day, events: [{eventInfo, eventDate}] }].
+    addEventsBulk: (groupId, slots, isStatic) => scheduleWeekModel.bulkWrite(
+        slots.map(({ countWeek, day, events }) => ({
+            updateOne: {
+                filter: {
+                    groupId, countWeek, static: isStatic, 'schedule.day': day
+                },
+                update: { $push: { 'schedule.$.events': { $each: events } } }
+            }
+        }))
     ),
 
     deletePair: (

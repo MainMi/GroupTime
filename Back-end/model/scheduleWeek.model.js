@@ -22,6 +22,11 @@ const ScheduleWeekSchema = new Schema({
     timestamps: true
 });
 
-ScheduleWeekSchema.index({ groupId: 1, countWeek: 1, static: 1 });
+// Equality on { groupId, static } with a sort/range on countWeek — this ordering
+// (sort field last) serves findStaticWeekByIndex's sort+skip, findDynamicWeekByCountWeek,
+// countDocuments({ groupId, static }) and the equality lookups (findWeek/addEvent) as
+// index scans. The old { groupId, countWeek, static } ordering was fully covered by
+// this one and has been removed — drop it manually in Atlas (Mongoose won't).
+ScheduleWeekSchema.index({ groupId: 1, static: 1, countWeek: 1 });
 
 module.exports = model('ScheduleWeek', ScheduleWeekSchema);

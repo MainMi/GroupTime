@@ -17,6 +17,10 @@ module.exports = {
         }
     ),
 
+    // Bulk variant of addEventDate for importers; docs are plain
+    // { countWeek, day, time, duration } objects, inserted in order.
+    addEventDates: (eventDates) => eventDateModel.insertMany(eventDates),
+
     updateEventDate: (eventDateId, updateData) => eventDateModel.updateOne(
         { _id: eventDateId },
         { $set: updateData }

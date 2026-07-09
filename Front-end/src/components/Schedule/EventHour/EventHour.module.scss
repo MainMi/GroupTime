@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as bp;
+
 .eventHour {
     position: relative;
     display: flex;
@@ -5,12 +7,26 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 150px;
+    // Grid items default to min-width:auto (min-content floor). Without this the
+    // card's unbreakable footer content forces the whole cell wider than its day
+    // column and cards bleed into the neighbouring day.
+    min-width: 0;
+    // Height is driven by --slot-h (set on .tableBox) so the event cells and the
+    // time-label column always share the exact same row height and stay aligned,
+    // regardless of how many time slots the current granularity produces.
+    height: var(--slot-h, 150px);
     border-top: 1px solid var(--clr-border);
     border-left: 1px solid var(--clr-border);
     padding: 5px;
 
     &:last-child { border-bottom: 1px solid var(--clr-border); }
+
+    // Highlight a slot while an event is dragged over it.
+    &.dropOver {
+        background-color: var(--clr-green-bg, #eaf3d9);
+        outline: 2px dashed var(--clr-green-active, #8ea94b);
+        outline-offset: -3px;
+    }
 
     .event {
         position: relative;
@@ -18,7 +34,10 @@
         flex-direction: column;
         justify-content: center;
         width: 100%;
+        min-width: 0;
+        max-width: 100%;
         height: 100%;
+        overflow: hidden;
         background-color: var(--clr-primary-bg);
         border: 1px solid var(--clr-primary-bg2);
         border-radius: 5px;
@@ -30,7 +49,7 @@
         z-index: 5;
         box-shadow: 1px 2px 4px 0px var(--clr-shadow);
 
-        &:hover { transform: scale(1.1); }
+        &:hover { transform: scale(1.05); }
 
         /* Static events get a left accent border */
         &.static {
@@ -41,40 +60,58 @@
             border-top: 2px dashed var(--clr-border);
         }
 
-        &.lightGreen {
-            background-color: var(--clr-green-bg);
-            border: 1px solid var(--clr-green-active);
-            &.static  { border-left: 3px solid var(--clr-green-active); }
-            &.dynamic { border-top: 2px dashed var(--clr-green-active); }
-            .time   { color: var(--clr-green-dark); }
-            .button { background-color: var(--clr-green-hover); border-color: var(--clr-green-hover); }
-        }
-        &.green {
-            background-color: var(--clr-green-event);
-            border: 1px solid var(--clr-green-border);
-            &.static  { border-left: 3px solid var(--clr-green-border); }
-            &.dynamic { border-top: 2px dashed var(--clr-green-border); }
-            .time   { color: var(--clr-green-dark); }
-            .button { background-color: var(--clr-green-border); border-color: var(--clr-green-border); }
-        }
-        &.red {
-            background-color: var(--clr-primary-light);
-            border: 1px solid var(--clr-primary-active);
-            &.static  { border-left: 3px solid var(--clr-primary-active); }
-            &.dynamic { border-top: 2px dashed var(--clr-primary-active); }
-            .time   { color: var(--clr-primary-dark); }
-            .button { background-color: var(--clr-primary-active); border-color: var(--clr-primary-active); }
-        }
-
         .title {
             font-size: 13px;
             font-weight: bold;
             padding: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         .time {
             font-size: 12px;
             color: var(--clr-primary-dark);
             font-weight: normal;
+        }
+        .groupChip {
+            align-self: flex-start;
+            max-width: 100%;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--clr-primary-dark);
+            background-color: var(--clr-primary-bg2);
+            border-radius: 8px;
+            padding: 1px 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            // Must be shrinkable and wrappable — its nowrap children are what
+            // used to blow the card past its day column.
+            min-width: 0;
+            flex-wrap: wrap;
+            gap: 4px 6px;
+            margin-top: auto;
+        }
+        .origin {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 0;
+            .originAvatar { flex: 0 0 auto; }
+            .originLabel {
+                font-size: 11px;
+                color: var(--clr-primary-dark);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
         .button {
             font-size: 12px !important;
@@ -84,32 +121,65 @@
             padding: 3px 8px;
             box-shadow: 0px 2px 4px var(--clr-shadow);
             width: max-content;
+            max-width: 100%;
+            overflow: hidden;
+            flex: 0 1 auto;
         }
     }
 
-    .eventIcon {
-        position: relative;
+    /* Compact list of several events in one slot */
+    .stack {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        text-align: center;
-        align-items: center;
+        gap: 4px;
         width: 100%;
+        min-width: 0;
+        max-width: 100%;
         height: 100%;
+        padding: 8px;
+        background-color: var(--clr-primary-bg);
+        border: 1px solid var(--clr-primary-bg2);
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 1px 2px 4px 0px var(--clr-shadow);
+        transition: transform 250ms;
+        overflow: hidden;
 
-        &:hover .event {
-            &.first, &.second, &.third { transform: translate(0, 0); }
-        }
+        &:hover { transform: scale(1.05); }
 
-        .event {
-            &.first, &.second, &.third {
-                position: absolute;
-                width: 90%;
-                height: 90%;
-                transform: translate(-5px, -5px);
+        .stackRow {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 0;
+            font-size: 11px;
+            .dot {
+                flex: 0 0 auto;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
             }
-            &.second { transform: translate(0, 0); }
-            &.third  { transform: translate(5px, 5px); }
+            .stackTime {
+                flex: 0 0 auto;
+                color: var(--clr-primary-dark);
+                font-weight: 600;
+            }
+            .stackName {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+        .morePill {
+            align-self: flex-start;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            background-color: var(--clr-primary-active);
+            border-radius: 10px;
+            padding: 1px 8px;
         }
     }
 }

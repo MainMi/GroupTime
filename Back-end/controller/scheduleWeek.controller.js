@@ -12,9 +12,18 @@ module.exports = {
 
             // Order the indices so the lower one is always slotted first. `let`
             // (not the previous const) is required — they get swapped in place.
-            let [weekIdx1, weekIdx2] = swapIndexes;
+            let [
+                weekIdx1,
+                weekIdx2
+            ] = swapIndexes;
             if (weekIdx1 > weekIdx2) {
-                [weekIdx1, weekIdx2] = [weekIdx2, weekIdx1];
+                [
+                    weekIdx1,
+                    weekIdx2
+                ] = [
+                    weekIdx2,
+                    weekIdx1
+                ];
             }
 
             weeks[weekIdx1].updatedAt = weeks.length === weekIdx2
@@ -41,15 +50,21 @@ module.exports = {
 
             const countWeek = scheduleDate.getISOWeekNumber(dateObj);
 
-            const staticWeeksCount = await scheduleWeekService.countStaticWeeks(groupId);
-            let staticWeek = null;
-
-            if (staticWeeksCount > 0) {
-                const staticWeekIndex = countWeek % staticWeeksCount;
-                staticWeek = await scheduleWeekService.findStaticWeekByIndex(groupId, staticWeekIndex);
-            }
-
-            const dynamicWeek = await scheduleWeekService.findDynamicWeekByCountWeek(groupId, countWeek);
+            const { READ_SECONDARY } = scheduleWeekService;
+            // Static-week chain and dynamic-week lookup are independent — run them
+            // in parallel (each awaited query costs a full Atlas round-trip).
+            const [
+                { staticWeeksCount, staticWeek },
+                dynamicWeek
+            ] = await Promise.all([
+                (async () => {
+                    const count = await scheduleWeekService.countStaticWeeks(groupId, READ_SECONDARY);
+                    if (count <= 0) return { staticWeeksCount: count, staticWeek: null };
+                    const week = await scheduleWeekService.findStaticWeekByIndex(groupId, countWeek % count, READ_SECONDARY);
+                    return { staticWeeksCount: count, staticWeek: week };
+                })(),
+                scheduleWeekService.findDynamicWeekByCountWeek(groupId, countWeek, READ_SECONDARY),
+            ]);
 
             const result = {};
 
@@ -83,7 +98,11 @@ module.exports = {
         try {
             const { date, groupId } = req.body;
             const countWeek = scheduleDate.getISOWeekNumber(new Date(date));
-            const version = await scheduleWeekService.getWeekVersionByCountWeek(groupId, countWeek);
+            const version = await scheduleWeekService.getWeekVersionByCountWeek(
+                groupId,
+                countWeek,
+                scheduleWeekService.READ_SECONDARY,
+            );
             res.json({ version, countWeek });
         } catch (e) {
             next(e);
@@ -168,6 +187,7 @@ module.exports = {
             if (scheduleWeek.static) {
                 const remaining = await scheduleWeekService.findAllStaticWeeks(groupId);
                 remaining.sort((a, b) => a.countWeek - b.countWeek);
+                /* eslint-disable no-await-in-loop -- renumber sequentially to bound concurrent Atlas writes */
                 for (let i = 0; i < remaining.length; i += 1) {
                     const w = remaining[i];
                     if (w.countWeek !== i) {
@@ -175,6 +195,7 @@ module.exports = {
                         await eventDateService.setCountWeekManyById(scheduleWeekService.collectEventDateIds(w), i);
                     }
                 }
+                /* eslint-enable no-await-in-loop */
             }
 
             res.json('Deleted!');

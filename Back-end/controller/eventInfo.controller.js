@@ -4,7 +4,8 @@ const {
     scheduleWeekService,
     eventInfoService,
     eventDateService,
-
+    importService,
+    groupService,
 } = require('../service/schedule');
 
 module.exports = {
@@ -28,7 +29,8 @@ module.exports = {
                 link,
                 tag,
                 description,
-                duration
+                duration,
+                createdBy: req.authUser._id
             });
 
             const eventDate = await eventDateService.addEventDate(day, time, duration, countWeek);
@@ -72,13 +74,20 @@ module.exports = {
                 duration, date, isStatic = false
             } = req.body;
 
-            await eventInfoService.updateEventInfo(eventInfoId, {
-                teacherName, name, type, color, place, platform, link, tag, description
-            });
+            // The info update and the old-date lookup are independent — run them in
+            // parallel to save an Atlas round-trip.
+            const [
+                , oldEventDateEarly
+            ] = await Promise.all([
+                eventInfoService.updateEventInfo(eventInfoId, {
+                    teacherName, name, type, color, place, platform, link, tag, description
+                }),
+                (eventDateId && date) ? eventDateService.getOne(eventDateId) : null,
+            ]);
 
             if (eventDateId && date) {
                 const { time, day } = date.value;
-                const oldEventDate = await eventDateService.getOne(eventDateId);
+                const oldEventDate = oldEventDateEarly;
 
                 if (!oldEventDate) {
                     return next(new ApiError(...Object.values(EVENTDATE_NOT_FOUND)));
@@ -94,8 +103,20 @@ module.exports = {
                         time, duration, day, countWeek: targetCountWeek
                     });
                     if (oldEventDate && (oldEventDate.day !== day || oldEventDate.countWeek !== targetCountWeek)) {
-                        await scheduleWeekService.deletePair(groupId, oldEventDate.countWeek, oldEventDate.day, eventInfoId, true);
-                        await scheduleWeekService.addEvent(groupId, targetCountWeek, day, { eventInfo: eventInfoId, eventDate: eventDateId }, true);
+                        await scheduleWeekService.deletePair(
+                            groupId,
+                            oldEventDate.countWeek,
+                            oldEventDate.day,
+                            eventInfoId,
+                            true,
+                        );
+                        await scheduleWeekService.addEvent(
+                            groupId,
+                            targetCountWeek,
+                            day,
+                            { eventInfo: eventInfoId, eventDate: eventDateId },
+                            true,
+                        );
                     }
                 } else {
                     // Dynamic event: use countWeek from the sent date
@@ -104,14 +125,26 @@ module.exports = {
                         time, duration, day, countWeek
                     });
                     if (oldEventDate && (oldEventDate.day !== day || oldEventDate.countWeek !== countWeek)) {
-                        await scheduleWeekService.deletePair(groupId, oldEventDate.countWeek, oldEventDate.day, eventInfoId, false);
+                        await scheduleWeekService.deletePair(
+                            groupId,
+                            oldEventDate.countWeek,
+                            oldEventDate.day,
+                            eventInfoId,
+                            false,
+                        );
 
                         const existingWeek = await scheduleWeekService.findWeek(groupId, countWeek, false);
                         if (!existingWeek) {
                             await scheduleWeekService.createDynamicWeek(groupId, countWeek);
                         }
 
-                        await scheduleWeekService.addEvent(groupId, countWeek, day, { eventInfo: eventInfoId, eventDate: eventDateId }, false);
+                        await scheduleWeekService.addEvent(
+                            groupId,
+                            countWeek,
+                            day,
+                            { eventInfo: eventInfoId, eventDate: eventDateId },
+                            false,
+                        );
                     }
                 }
             }
@@ -146,7 +179,8 @@ module.exports = {
                 link,
                 tag,
                 description,
-                duration
+                duration,
+                createdBy: req.authUser._id
             });
 
             const eventDate = await eventDateService.addEventDate(day, time, duration, countWeek);
@@ -177,6 +211,26 @@ module.exports = {
             await scheduleWeekService.deletePair(groupId, countWeek, day, eventInfoId, false);
 
             res.json('Deleted!');
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    // Import events from a raw .ics payload (Google/Outlook/Apple exports). Each
+    // calendar event becomes a one-off (dynamic) event in the target group.
+    importEvents: async (req, res, next) => {
+        try {
+            const { groupId, ics } = req.body;
+            const events = importService.parseIcs(ics);
+            let imported = 0;
+            if (events.length) {
+                // .ics datetimes are absolute (UTC); interpret them as wall-clock
+                // time in the group's timezone, not the server's.
+                const group = await groupService.getGroupParametersById(groupId);
+                const gmt = group?.parameters?.gmt || 0;
+                imported = await importService.importEvents(groupId, events, req.authUser._id, gmt);
+            }
+            res.json({ imported, parsed: events.length });
         } catch (e) {
             next(e);
         }

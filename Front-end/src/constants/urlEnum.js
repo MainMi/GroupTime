@@ -61,6 +61,7 @@ const urlEnum = {
   eventDeleteDynamic: `${api}/schedule/event/delete/dynamic`,
   eventAddFile: `${api}/schedule/event/add/file`,
   eventDeleteFile: `${api}/schedule/event/delete/file`,
+  eventImport: `${api}/schedule/event/import`,
 
   // message
   messageSend: `${api}/message/send`,

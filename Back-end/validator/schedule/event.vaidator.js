@@ -15,7 +15,12 @@ const customJoi = Joi.extend((joi) => ({
     coerce: {
         from: 'string',
         method(value, helpers) {
-            const dateObj = new Date(value);
+            // The client sends Date.prototype.toString() output whose wall-clock
+            // part is already the group's local time; the trailing "GMT±HHMM (…)"
+            // is just the browser's offset. Strip it so the wall-clock survives
+            // parsing regardless of the server's timezone.
+            const wallClock = value.replace(/\sGMT[+-]\d{4}(\s\(.+\))?$/, '');
+            const dateObj = new Date(wallClock);
             if (Number.isNaN(dateObj.getTime())) {
                 return { value, errors: helpers.error('stringDate.base') };
             }
@@ -111,9 +116,16 @@ const editEvent = customJoi.object({
 
 const addDynamicEvent = customJoi.object(eventSchemaBase);
 
+const importEvents = Joi.object({
+    groupId: Joi.string().required(),
+    // Raw .ics text (cap at ~2MB to bound parse work).
+    ics: Joi.string().min(10).max(2000000).required()
+});
+
 module.exports = {
     addStaticEvent,
     deleteEvent,
     editEvent,
-    addDynamicEvent
+    addDynamicEvent,
+    importEvents
 };

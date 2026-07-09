@@ -26,6 +26,9 @@ const inFlightWeeks = new Map();
 // Half-hour options ('0:00','0:30'..'23:30') so ranges like 8:30–21:00 are possible.
 const HOUR_OPTIONS = Array.from({ length: 48 }, (_, i) => `${Math.floor(i / 2)}:${i % 2 ? '30' : '00'}`);
 
+// GMT offsets -12..+14 — the timezone the group's schedule times are stored in.
+const GMT_OPTIONS = Array.from({ length: 27 }, (_, i) => i - 12);
+
 // Build a date (Monday, noon) whose ISO week maps to the given static week index.
 // The backend resolves a static week as ISO(date) % staticWeekCount, so we pick
 // ISO week = index (or the total count when index === 0).
@@ -42,6 +45,7 @@ const ModalScheduleSettings = ({ modalClose, groupId, parameters = {}, refreshSc
     // --- Time range section ---
     const [startTime, setStartTime] = useState(parameters.periodStartEvent || '8:00');
     const [endTime, setEndTime] = useState(parameters.periodEndEvent || '21:00');
+    const [gmt, setGmt] = useState(Number.isFinite(parameters.gmt) ? parameters.gmt : 0);
     const [isSavingRange, setIsSavingRange] = useState(false);
     const rangeInvalid = timeStringToMinutes(startTime) >= timeStringToMinutes(endTime);
 
@@ -95,7 +99,9 @@ const ModalScheduleSettings = ({ modalClose, groupId, parameters = {}, refreshSc
             // send the full merged object to preserve the other parameters.
             await dispatch(editGroup({
                 groupId,
-                parameters: { ...parameters, periodStartEvent: startTime, periodEndEvent: endTime },
+                parameters: {
+                    ...parameters, periodStartEvent: startTime, periodEndEvent: endTime, gmt,
+                },
             }));
             dispatch(showSuccessNotification(t('scheduleSettings.settingsSaved')));
             // Refresh userInfo so the table picks up the new range, then the schedule.
@@ -106,7 +112,7 @@ const ModalScheduleSettings = ({ modalClose, groupId, parameters = {}, refreshSc
         } finally {
             setIsSavingRange(false);
         }
-    }, [rangeInvalid, isSavingRange, dispatch, groupId, parameters, startTime, endTime, navigate, refreshSchedule, t]);
+    }, [rangeInvalid, isSavingRange, dispatch, groupId, parameters, startTime, endTime, gmt, navigate, refreshSchedule, t]);
 
     const handleSwap = useCallback(async (i, j) => {
         if (isBusy || j < 0 || j >= weeks.length) return;
@@ -181,6 +187,19 @@ const ModalScheduleSettings = ({ modalClose, groupId, parameters = {}, refreshSc
                                 disabled={isSavingRange}
                             >
                                 {HOUR_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </label>
+                        <label className={classes.field}>
+                            <span>{t('scheduleSettings.gmt')}</span>
+                            <select
+                                className={classes.select}
+                                value={gmt}
+                                onChange={(e) => setGmt(Number(e.target.value))}
+                                disabled={isSavingRange}
+                            >
+                                {GMT_OPTIONS.map((v) => (
+                                    <option key={v} value={v}>{`GMT${v >= 0 ? '+' : ''}${v}`}</option>
+                                ))}
                             </select>
                         </label>
                         <Button

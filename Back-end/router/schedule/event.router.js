@@ -14,7 +14,8 @@ const {
     addDynamicEvent,
     deleteStaticEvent,
     deleteDynamicEvent,
-    editEvent
+    editEvent,
+    importEvents
 } = require('../../controller/eventInfo.controller');
 
 const { addFileEventDate, deleteFileEventDate } = require('../../controller/eventDate.controller');
@@ -84,6 +85,15 @@ router.post(
     userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     scheduleMiddleware.checkParams(eventValidator.editEvent),
     editEvent
+);
+
+router.post(
+    '/import',
+    authMiddleware.checkAccessToken(GROUP_INFO),
+    groupMiddleware.isUserInGroup,
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
+    scheduleMiddleware.checkParams(eventValidator.importEvents),
+    importEvents
 );
 
 module.exports = router;

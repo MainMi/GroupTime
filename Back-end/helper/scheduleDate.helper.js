@@ -40,6 +40,15 @@ const getISOWeekNumber = (d) => {
     return weekNo;
 };
 
+// ISO week-numbering year for a date. Differs from the calendar year around New
+// Year (e.g. 2027-01-01 belongs to ISO year 2026, week 53) — pair it with
+// getISOWeekNumber whenever week numbers from different years could collide.
+const getISOWeekYear = (d) => {
+    const date = new Date(d);
+    date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+    return date.getUTCFullYear();
+};
+
 // Distinct ISO week numbers covered by [from, to] (inclusive), stepping by day so
 // short ranges that cross a week boundary are handled. Capped to avoid abuse.
 const isoWeeksInRange = (from, to) => {
@@ -98,6 +107,7 @@ module.exports = {
     },
     generateRandomTimeSlot,
     getISOWeekNumber,
+    getISOWeekYear,
     isoWeeksInRange,
     calculateMiddleTimestamp
 };

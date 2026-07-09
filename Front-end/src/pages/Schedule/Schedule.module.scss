@@ -1,15 +1,32 @@
+@use '../../styles/breakpoints' as bp;
+
 .schedule {
     position: relative;
     display: grid;
     width: 100%;
+    max-width: 100%;
     min-height: 100vh;
-    grid-template-columns: auto 1fr;
+    // minmax(0, …) lets the content column shrink below its min-content so the
+    // inner .scrollArea scrolls instead of the whole page overflowing.
+    grid-template-columns: auto minmax(0, 1fr);
+    // Clear the fixed 72px left nav (on mobile the nav moves to the bottom bar,
+    // so the offset moves with it — see the mobile block below).
     padding-left: 72px;
+
+    @include bp.tablet {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    @include bp.mobile {
+        padding-left: 0;
+        padding-bottom: calc(var(--bottom-nav-h, 64px) + 12px);
+    }
     .filterBar {
         position: relative;
         display: flex;
         flex-direction: column;
         width: 100%;
+        min-width: 0;
         height: 100%;
         background-color: #ACCA62;
         padding: 36px 32px 0 32px;
@@ -28,6 +45,11 @@
         display: flex;
         flex-direction: column;
         width: 100%;
+        // Let this column shrink so its inner .scrollArea scrolls instead of the
+        // table pushing the page wider than the viewport.
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
         height: 100%;
         padding: 40px 36px 20px 12px;
         gap: 20px;
@@ -176,5 +198,30 @@
             }
         }
     }
-    
+
+    @include bp.tablet {
+        .filterBar {
+            padding: 20px 16px 16px 16px;
+        }
+        .eventTable {
+            padding: 24px 16px 20px 16px;
+            .title { font-size: 28px; padding-left: 0; }
+            .settingBar {
+                flex-wrap: wrap;
+                gap: 12px;
+                padding-left: 0;
+            }
+            .weekInfo { padding-left: 0; }
+        }
+    }
+
+    @include bp.mobile {
+        .eventTable {
+            padding: 16px 10px 16px 10px;
+            gap: 14px;
+            .title { font-size: 22px; }
+            .settingBar .monthHandler .monthTitle { font-size: 18px; }
+            .buttonBox { flex-wrap: wrap; }
+        }
+    }
 }

@@ -1,0 +1,25 @@
+// Shared responsive breakpoints. Import with:
+//   @use '../../styles/breakpoints' as bp;  (adjust the relative path)
+// then: @include bp.mobile { ... }
+
+$mobile: 640px;
+$tablet: 900px;
+$desktop: 1200px;
+
+@mixin mobile {
+    @media (max-width: $mobile) {
+        @content;
+    }
+}
+
+@mixin tablet {
+    @media (max-width: $tablet) {
+        @content;
+    }
+}
+
+@mixin desktop-down {
+    @media (max-width: $desktop) {
+        @content;
+    }
+}

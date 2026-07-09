@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import EventTable from '../../components/Schedule/EventTable/EventTable';
 import ModalCreateEvent from '../../components/Schedule/ModalCreateEvent/ModalCreateEvent';
 import Button from '../../UI/Button/Button';
@@ -12,6 +12,7 @@ import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import roleEnum from '../../constants/roleEnum';
 import { canEditEvents, canViewSchedule } from '../../helper/roleHelper';
 import { SCHEDULE_TYPE } from '../../constants/scheduleEnum';
+import groupTypeEnum from '../../constants/type/groupTypeEnum';
 import { colorForType } from '../../constants/type/eventEnum';
 import { EMPTY_FILTER } from '../../helper/scheduleFilter';
 import classes from './Schedule.module.scss';
@@ -30,7 +31,7 @@ import logo from '../../static/image/globalcons/logo.svg';
 import Modalassistant from '../../components/Schedule/ModalAssitent/ModalAssitent';
 import ScheduleTour from '../../components/Onboarding/ScheduleTour';
 
-import { deleteStaticEvent, deleteDynamicEvent } from '../../api/eventFetch';
+import { deleteStaticEvent, deleteDynamicEvent, editEvent, importEvents } from '../../api/eventFetch';
 import { showSuccessNotification, showErrorNotification } from '../../redux/actions/notification-actions';
 
 // Merge several groups' week data into one, tagging each event with its group
@@ -38,12 +39,12 @@ import { showSuccessNotification, showErrorNotification } from '../../redux/acti
 const mergeScheduleData = (parts) => {
     const staticWeek = [];
     const dynamicWeek = [];
-    parts.forEach(({ data, groupId, groupName }) => {
+    parts.forEach(({ data, groupId, groupName, groupAvatar }) => {
         (data?.staticWeek || []).forEach((day) => {
-            staticWeek.push({ ...day, events: (day.events || []).map((ev) => ({ ...ev, groupId, groupName })) });
+            staticWeek.push({ ...day, events: (day.events || []).map((ev) => ({ ...ev, groupId, groupName, groupAvatar })) });
         });
         (data?.dynamicWeek || []).forEach((day) => {
-            dynamicWeek.push({ ...day, events: (day.events || []).map((ev) => ({ ...ev, groupId, groupName })) });
+            dynamicWeek.push({ ...day, events: (day.events || []).map((ev) => ({ ...ev, groupId, groupName, groupAvatar })) });
         });
     });
     return { staticWeek, dynamicWeek };
@@ -262,7 +263,7 @@ const SchedulePage = () => {
                     if (cached) {
                         const fresh = (Date.now() - (cached.fetchedAt || 0)) < DEFAULT_CACHE_TTL;
                         if (fresh) {
-                            return { data: cached.data, groupId: gidStr, groupName: g.name };
+                            return { data: cached.data, groupId: gidStr, groupName: g.name, groupAvatar: g.avatar?.location };
                         }
                         // Stale by time — verify against the server version.
                         if (cached.version != null) {
@@ -270,13 +271,13 @@ const SchedulePage = () => {
                             const remoteVersion = vres?.data?.version;
                             if (remoteVersion != null && remoteVersion === cached.version) {
                                 dispatch(schedulehAction.touchSchedule({ isoWeek, groupId: gidStr }));
-                                return { data: cached.data, groupId: gidStr, groupName: g.name };
+                                return { data: cached.data, groupId: gidStr, groupName: g.name, groupAvatar: g.avatar?.location };
                             }
                         }
                     }
                 }
                 const res = await dispatch(getScheduleWeekInfo({ date, groupId }, navigate));
-                return { data: res?.data || {}, groupId: gidStr, groupName: g.name };
+                return { data: res?.data || {}, groupId: gidStr, groupName: g.name, groupAvatar: g.avatar?.location };
             }));
 
             if (selectedGroup === 'all') {
@@ -309,6 +310,36 @@ const SchedulePage = () => {
         setIsModalEvent(true);
     }, []);
 
+    // Import events from a chosen .ics file (Google/Outlook/Apple export). Reads
+    // the file as text and posts it; each calendar entry becomes a one-off event.
+    const importInputRef = useRef(null);
+    const [isImporting, setIsImporting] = useState(false);
+    const handleImportFile = useCallback(async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        const groupId = userInfoRef.current?.groups?.[selectedGroupRef.current]?.group?._id;
+        if (!groupId) {
+            dispatch(showErrorNotification(t('schedule.selectGroupToEdit')));
+            return;
+        }
+        setIsImporting(true);
+        try {
+            const ics = await file.text();
+            const res = await importEvents({ groupId, ics }, navigate);
+            if (res && res.ok !== false) {
+                dispatch(showSuccessNotification(t('schedule.imported', { count: res.data?.imported ?? 0 })));
+                refreshScheduleRef.current(true);
+            } else {
+                dispatch(showErrorNotification(t('schedule.importError')));
+            }
+        } catch (error) {
+            dispatch(showErrorNotification(t('schedule.importError')));
+        } finally {
+            setIsImporting(false);
+        }
+    }, [dispatch, navigate, t]);
+
     // Open a confirmation modal before deleting an event
     const requestDeleteEvent = useCallback((ev) => {
         setEventToDelete(ev);
@@ -335,12 +366,81 @@ const SchedulePage = () => {
         }
     }, [dispatch, navigate, selectedGroup]);
 
+    // Reschedule an event by drag-and-drop: send only the identifiers and the new
+    // date. The eventInfo fields are not re-sent, so a move can't overwrite a
+    // teammate's concurrent edit or trip validation on legacy field values.
+    // Static events stay in their static week.
+    const handleMoveEvent = useCallback(async (ev, targetDate) => {
+        try {
+            const groupId = ev.groupId || userInfoRef.current.groups[selectedGroup]?.group?._id;
+            if (!groupId) {
+                dispatch(showErrorNotification(t('schedule.selectGroupToEdit')));
+                return;
+            }
+            const res = await editEvent({
+                groupId,
+                isStatic: !!ev.isStatic,
+                eventInfoId: ev.eventInfo._id,
+                eventDateId: ev.eventDate._id,
+                duration: ev.eventDate.duration,
+                date: targetDate.toString(),
+            }, navigate);
+            if (res && res.ok !== false) {
+                dispatch(showSuccessNotification(t('event.updated')));
+                refreshScheduleRef.current(true);
+            } else {
+                dispatch(showErrorNotification(t('schedule.moveError')));
+            }
+        } catch (error) {
+            dispatch(showErrorNotification(t('schedule.moveError')));
+        }
+    }, [dispatch, navigate, selectedGroup, t]);
+
+    const isAllMode = selectedGroup === 'all';
+    const selectedGroupInfo = !isAllMode ? userInfo?.groups?.[selectedGroup]?.group : null;
+
+    // Memoized: these flow into the React.memo'd EventsHour grid (~100 cells), so
+    // a fresh identity on every render would defeat that memoization entirely.
+    const groupsNames = useMemo(() => [
+        ...(userInfo?.groups || []).map((group, idx) => ({
+            title: group.group.type === groupTypeEnum.PERSONAL_TYPE
+                ? `★ ${group.group.name}`
+                : group.group.name,
+            value: String(idx),
+        })),
+        { title: t('schedule.allGroups'), value: 'all' },
+    ], [userInfo, t]);
+
+    // Lightweight group context for single-group cards (author fallback → group icon).
+    const groupMeta = useMemo(() => (!isAllMode && selectedGroupInfo
+        ? {
+            name: selectedGroupInfo.name,
+            avatar: selectedGroupInfo.avatar?.location,
+            isPersonal: selectedGroupInfo.type === groupTypeEnum.PERSONAL_TYPE,
+        }
+        : null), [isAllMode, selectedGroupInfo]);
+
+    // Viewer timezone: schedule times are stored in the group's timezone
+    // (group.parameters.gmt); the table shifts them by (user gmt − group gmt).
+    const userGmt = Number.isFinite(userInfo?.gmt) ? userInfo.gmt : 0;
+    const gmtDelta = userGmt - (Number.isFinite(selectedGroupInfo?.parameters?.gmt)
+        ? selectedGroupInfo.parameters.gmt
+        : 0);
+    // Per-group deltas for "all groups" mode, where each event carries its groupId.
+    const gmtDeltaByGroup = useMemo(() => {
+        const map = {};
+        (userInfo?.groups || []).forEach(({ group }) => {
+            if (!group?._id) return;
+            const groupGmt = Number.isFinite(group.parameters?.gmt) ? group.parameters.gmt : 0;
+            map[String(group._id)] = userGmt - groupGmt;
+        });
+        return map;
+    }, [userInfo, userGmt]);
+
     if (!userInfo?.nickname) {
         return <Loader />;
     }
 
-    const isAllMode = selectedGroup === 'all';
-    const selectedGroupInfo = !isAllMode ? userInfo.groups[selectedGroup]?.group : null;
     const selectedGroupRole = !isAllMode ? userInfo.groups[selectedGroup]?.role : null;
     const isGroupAdmin = selectedGroupRole === roleEnum.ADMIN_ROLE
         || selectedGroupRole === roleEnum.OWNER_ROLE;
@@ -350,11 +450,6 @@ const SchedulePage = () => {
     const groupInfo = selectedGroupInfo || { name: isAllMode ? t('schedule.allGroups') : '', _id: null, parameters: {} };
     const periodStartEvent = groupInfo.parameters?.periodStartEvent || '8:00';
     const periodEndEvent = groupInfo.parameters?.periodEndEvent || '21:00';
-
-    const groupsNames = [
-        ...userInfo.groups.map((group, idx) => ({ title: group.group.name, value: String(idx) })),
-        { title: t('schedule.allGroups'), value: 'all' },
-    ];
 
     // Group options for the "all groups" multi-select in the filter
     const groupFilterOptions = userInfo.groups
@@ -461,6 +556,25 @@ const SchedulePage = () => {
                             />
                         )}
                         {canEdit && (
+                            <>
+                                <input
+                                    ref={importInputRef}
+                                    type="file"
+                                    accept=".ics,text/calendar"
+                                    style={{ display: 'none' }}
+                                    onChange={handleImportFile}
+                                />
+                                <Button
+                                    typeColor="green"
+                                    beforeImg="plus"
+                                    onClick={() => importInputRef.current?.click()}
+                                    disabled={isImporting}
+                                >
+                                    {isImporting ? t('schedule.importing') : t('schedule.import')}
+                                </Button>
+                            </>
+                        )}
+                        {canEdit && (
                             <span data-tour="schedule-create" style={{ display: 'inline-flex' }}>
                                 <Button afterImg="plus" onClick={handleOpenCreateModal}>
                                     {t('schedule.createEvent')}
@@ -484,8 +598,13 @@ const SchedulePage = () => {
                         periodEndEvent={periodEndEvent}
                         scheduleWeek={existingItem}
                         activeFilter={activeFilter}
+                        groupMeta={groupMeta}
+                        isAllMode={isAllMode}
+                        gmtDelta={gmtDelta}
+                        gmtDeltaByGroup={gmtDeltaByGroup}
                         onEditEvent={canEdit ? (ev) => { setEditEventData(ev); setIsModalEvent(true); } : undefined}
                         onDeleteEvent={canEdit ? requestDeleteEvent : undefined}
+                        onMoveEvent={canEdit ? handleMoveEvent : undefined}
                     />
                 ) : (
                     <div className={classes.emptyState}>{t('schedule.noEvents')}</div>

@@ -80,6 +80,15 @@ export async function addFileToEvent(formData, navigate) {
   }
 }
 
+// Імпорт подій з .ics (Google/Outlook/Apple Calendar)
+export function importEvents(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.eventImport,
+    method: 'POST',
+    body: data,
+  }, navigate);
+}
+
 // Видалення файлу з події
 export function deleteFileFromEvent(data, navigate) {
   return fetchAuth({
