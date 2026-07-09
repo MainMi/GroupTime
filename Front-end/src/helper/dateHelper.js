@@ -46,6 +46,27 @@ export default function generateTimeArray(periodStart, periodEnd, stepMinutes) {
     return timeArray;
 }
 
+// Like generateTimeArray but shifts the whole window by deltaMinutes (the
+// viewer's timezone offset) and wraps labels across midnight, so the grid stays
+// aligned with events that were shifted by the same delta. Works in minute-space
+// (unlike generateTimeArray, which throws once a shifted window crosses 24:00).
+export function generateShiftedTimeArray(periodStart, periodEnd, stepMinutes, deltaMinutes = 0) {
+    if (typeof stepMinutes !== 'number' || isNaN(stepMinutes) || stepMinutes <= 0) {
+        throw new Error(`stepMinutes can't be negative Your time: ${stepMinutes}`);
+    }
+    const startMin = timeStringToMinutes(periodStart) + deltaMinutes;
+    const endMin = timeStringToMinutes(periodEnd) + deltaMinutes;
+    if (startMin > endMin) {
+        throw new Error(`periodStart (${periodStart}) cant be late that periodEnd (${periodEnd}).`);
+    }
+    const arr = [];
+    for (let m = startMin; m <= endMin; m += stepMinutes) {
+        const w = ((m % 1440) + 1440) % 1440;
+        arr.push(`${String(Math.floor(w / 60)).padStart(2, '0')}:${String(w % 60).padStart(2, '0')}`);
+    }
+    return arr;
+}
+
 export function formatTime(date) {
     let hours = date.getHours();
     let minutes = date.getMinutes();

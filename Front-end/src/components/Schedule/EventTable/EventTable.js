@@ -4,7 +4,7 @@ import {
     DndContext, DragOverlay, PointerSensor, useSensor, useSensors, pointerWithin,
 } from '@dnd-kit/core';
 import classes from './EventTable.module.scss';
-import generateTimeArray, { getEventIntervals, addTime, shiftTimeString } from '../../../helper/dateHelper';
+import { generateShiftedTimeArray, getEventIntervals, addTime, shiftTimeString } from '../../../helper/dateHelper';
 import EventsHour from '../EventHour/EventHour';
 import ModalShowEvents from '../ModalShowEvents/ModalShowEvents';
 import { ORDERED_BACKEND_DAYS } from '../../../constants/scheduleEnum';
@@ -61,10 +61,14 @@ const EventTable = ({
         return gmtDelta || 0;
     }, [gmtDelta, gmtDeltaByGroup]);
 
-    const timeSchedule = generateTimeArray(
+    // Grid rows are shifted into the viewer's timezone by the same delta applied
+    // to events, so the layout is identical for every viewer and only the clock
+    // labels differ (a morning group event no longer falls outside the window).
+    const timeSchedule = generateShiftedTimeArray(
         periodStartEvent,
         periodEndEvent,
-        timeSheet
+        timeSheet,
+        gmtDelta * 60
     );
 
     const weekDates = useMemo(() => {
