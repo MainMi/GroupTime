@@ -9,5 +9,6 @@ module.exports = {
     importService: require('./import.service'),
     exportService: require('./export.service'),
     availabilityService: require('./availability.service'),
-    recurrenceService: require('./recurrence.service')
+    recurrenceService: require('./recurrence.service'),
+    rsvpService: require('./rsvp.service')
 };

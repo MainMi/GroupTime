@@ -645,6 +645,7 @@ const SchedulePage = () => {
                         scheduleWeek={existingItem}
                         activeFilter={activeFilter}
                         groupMeta={groupMeta}
+                        groupId={!isAllMode ? groupInfo._id : null}
                         isAllMode={isAllMode}
                         gmtDelta={gmtDelta}
                         gmtDeltaByGroup={gmtDeltaByGroup}

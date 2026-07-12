@@ -7,6 +7,7 @@ const { TIME_REGEX } = require('../../constant/regex.enum');
 const {
     REMINDER_CHANNELS, MIN_REMINDER_OFFSET, MAX_REMINDER_OFFSET,
 } = require('../../constant/reminder.enum');
+const { RSVP_STATUSES, RSVP_NONE } = require('../../constant/rsvp.enum');
 
 const customJoi = Joi.extend((joi) => ({
     type: 'stringDate',
@@ -155,6 +156,17 @@ const listReminders = Joi.object({
     groupId: Joi.string().required()
 });
 
+const setRsvp = Joi.object({
+    groupId: Joi.string().required(),
+    eventInfoId: Joi.string().required(),
+    status: Joi.string().valid(...RSVP_STATUSES, RSVP_NONE).required()
+});
+
+const getRsvp = Joi.object({
+    groupId: Joi.string().required(),
+    eventInfoId: Joi.string().required()
+});
+
 const deleteReminder = Joi.object({
     reminderId: Joi.string().required()
 });
@@ -169,5 +181,7 @@ module.exports = {
     subscribeCalendar,
     setReminder,
     listReminders,
-    deleteReminder
+    deleteReminder,
+    setRsvp,
+    getRsvp
 };

@@ -72,6 +72,10 @@ const urlEnum = {
   availabilitySlots: `${api}/schedule/availability/slots`,
   availabilityMember: `${api}/schedule/availability/member`,
 
+  // RSVP (event attendance)
+  rsvpSet: `${api}/schedule/rsvp/set`,
+  rsvpGet: `${api}/schedule/rsvp/get`,
+
   // message
   messageSend: `${api}/message/send`,
   messageAnalyze: `${api}/message/analyze`,

@@ -115,3 +115,82 @@
         }
     }
 }
+
+.rsvpBox {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.rsvpButtons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rsvpBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #bbb;
+    background: #fff;
+    color: #555;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+}
+
+.rsvpCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.08);
+    font-size: 12px;
+    color: inherit !important;
+}
+
+.rsvp_going {
+    border-color: #336F36;
+    color: #336F36;
+}
+
+.rsvp_maybe {
+    border-color: #C99700;
+    color: #A97F00;
+}
+
+.rsvp_declined {
+    border-color: #C0555A;
+    color: #B0454A;
+}
+
+.rsvpActive.rsvp_going {
+    background: #336F36;
+    color: #fff;
+}
+
+.rsvpActive.rsvp_maybe {
+    background: #C99700;
+    color: #fff;
+}
+
+.rsvpActive.rsvp_declined {
+    background: #C0555A;
+    color: #fff;
+}
+
+.rsvpActive .rsvpCount {
+    background: rgba(255, 255, 255, 0.25);
+}
