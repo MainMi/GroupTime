@@ -18,7 +18,7 @@ import verificateType from '../../constants/type/verificateTokenEnum';
 import ProfileEdit from '../../components/Profile/ProfileEdit/ProfileEdit';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import { uploadUserAvatar, selectUserAvatar, deleteUserAvatar } from '../../api/fileFetch';
-import { countValidGroups } from '../../helper/groupHelper';
+import { countValidGroups, groupLabel } from '../../helper/groupHelper';
 
 const GroupsCards = ({ userGroups, checkInvite = false }) => {
     const { t } = useTranslation();
@@ -32,7 +32,7 @@ const GroupsCards = ({ userGroups, checkInvite = false }) => {
             key={groupInfo._id}
             id={group._id}
             avatar={group.avatar}
-            title={group.name}
+            title={groupLabel(group, t)}
             description={group.description}
             status={groupInfo.type}
             usersCount={group.userCount}

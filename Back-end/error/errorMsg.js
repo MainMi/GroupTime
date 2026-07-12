@@ -71,6 +71,11 @@ module.exports = {
         errorStatus: 4032,
         message: 'Number of people in a group maximum'
     },
+    PERSONAL_GROUP_FORBIDDEN: {
+        status: 403,
+        errorStatus: 4033,
+        message: 'This action is not allowed for a personal schedule'
+    },
     ACCESS_DENIED: {
         status: 403,
         errorStatus: 4033,

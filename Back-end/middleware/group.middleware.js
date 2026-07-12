@@ -3,10 +3,14 @@ const { MAX_USER_GROUPS } = require('../constant/group.enum');
 const { FIND_TYPE } = require('../constant/type/findType.enum');
 const { NOT_FIND_TYPE } = require('../constant/type/findType.enum');
 const { NOT_VERIFIED_TYPE, VERIFIED_TYPE } = require('../constant/type/verificateToken.enum');
+const { PERSONAL_TYPE } = require('../constant/type/groupTypes.enum');
 const { ADMIN_ROLE } = require('../constant/user.role.enum');
 const ApiError = require('../error/ErrorHandler');
 const {
-    GROUP_IS_ALREADY_CREATED, GROUP_IS_NOT_CREATED, MAX_GROUP_LIMIT_FN, MAX_PEOPLE_LIMIT, IS_GROUP_NOT_VEREFICATE, USER_IS_ALREADY_GROUP, USER_IN_ANY_GROUP_NOT_FOUND, USER_IN_GROUP_NOT_FOUND, PARAMS_IS_NOT_FOUND_FN, SEARCH_GROUP_INVALID_QUERY, PARAMS_IS_NOT_FOUND
+    GROUP_IS_ALREADY_CREATED, GROUP_IS_NOT_CREATED, MAX_GROUP_LIMIT_FN, MAX_PEOPLE_LIMIT,
+    IS_GROUP_NOT_VEREFICATE, USER_IS_ALREADY_GROUP, USER_IN_ANY_GROUP_NOT_FOUND,
+    USER_IN_GROUP_NOT_FOUND, PARAMS_IS_NOT_FOUND_FN, SEARCH_GROUP_INVALID_QUERY,
+    PARAMS_IS_NOT_FOUND, PERSONAL_GROUP_FORBIDDEN
 } = require('../error/errorMsg');
 const { verificateService } = require('../service');
 const { groupService } = require('../service/schedule');
@@ -89,7 +93,7 @@ module.exports = {
             next(e);
         }
     },
-    isUserInGroup: async (req, res, next) => {
+    isUserInGroup: (req, res, next) => {
         try {
             const { groups, groupCount, _id: userId } = req.authUser;
             const { groupId } = req.body;
@@ -108,7 +112,7 @@ module.exports = {
             next(e);
         }
     },
-    isVerificateUser: async (req, res, next) => {
+    isVerificateUser: (req, res, next) => {
         try {
             const { userInGroup } = req;
             if (userInGroup.type !== VERIFIED_TYPE) {
@@ -120,12 +124,30 @@ module.exports = {
             next(e);
         }
     },
-    isMaxUserGroups: (req, res, next) => {
+    isMaxUserGroups: async (req, res, next) => {
         try {
-            const { groupCount } = req.authUser;
+            const { groupCount, _id } = req.authUser;
 
-            if (groupCount + 1 > MAX_USER_GROUPS) {
+            // The personal schedule is a group under the hood but must not count
+            // toward the limit — subtract it (a user has at most one).
+            const personal = await groupService.findUserPersonalGroup(_id);
+            const effectiveCount = groupCount - (personal ? 1 : 0);
+
+            if (effectiveCount + 1 > MAX_USER_GROUPS) {
                 return next(new ApiError(...Object.values(MAX_GROUP_LIMIT_FN(MAX_USER_GROUPS))));
+            }
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    // Block people-oriented actions (inviting/joining) on a personal schedule —
+    // it's a hidden, single-owner group. Expects req.group (loaded by isGroupFind).
+    rejectPersonalGroup: (req, res, next) => {
+        try {
+            if (req.group?.type === PERSONAL_TYPE) {
+                return next(new ApiError(...Object.values(PERSONAL_GROUP_FORBIDDEN)));
             }
             next();
         } catch (e) {
@@ -182,7 +204,7 @@ module.exports = {
         }
     },
 
-    isSearchValid: async (req, res, next) => {
+    isSearchValid: (req, res, next) => {
         try {
             const { query } = req.query;
             if (!query) {

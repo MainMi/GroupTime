@@ -12,6 +12,7 @@ import Input from '../../../UI/Input/Input';
 import { notifyError } from '../../../helper/notify';
 import { searchGroups, createGroup } from '../../../api/groupFetch';
 import groupTypeEnum from '../../../constants/type/groupTypeEnum';
+import { groupLabel } from '../../../helper/groupHelper';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { fetchUserInfo } from '../../../redux/actions/auth-actions';
@@ -38,7 +39,7 @@ const GroupsCards = ({ groups, userGroups }) => {
                         id={group._id}
                         key={group._id}
                         avatar={group.avatar}
-                        title={group.name}
+                        title={groupLabel(group, t)}
                         description={group.description}
                         status={group.type}
                         statusName={role ? t(`roles.${role}`) : group.type}

@@ -377,8 +377,10 @@ const SchedulePage = () => {
     // a fresh identity on every render would defeat that memoization entirely.
     const groupsNames = useMemo(() => [
         ...(userInfo?.groups || []).map((group, idx) => ({
+            // Personal schedules use a localized label so switching language
+            // re-labels them (their stored name is fixed at creation).
             title: group.group.type === groupTypeEnum.PERSONAL_TYPE
-                ? `★ ${group.group.name}`
+                ? `★ ${t('schedule.personalName')}`
                 : group.group.name,
             value: String(idx),
         })),
