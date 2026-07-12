@@ -8,6 +8,7 @@ import Dropdown from '../../UI/Dropdown/Dropdown';
 import Loader from '../../UI/Loader/Loader';
 import ScheduleFilter from '../../components/Schedule/ScheduleFilter/ScheduleFilter';
 import ModalScheduleSettings from '../../components/Schedule/ModalScheduleSettings/ModalScheduleSettings';
+import ModalImportExport from '../../components/Schedule/ModalImportExport/ModalImportExport';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import roleEnum from '../../constants/roleEnum';
 import { canEditEvents, canViewSchedule } from '../../helper/roleHelper';
@@ -31,7 +32,7 @@ import logo from '../../static/image/globalcons/logo.svg';
 import Modalassistant from '../../components/Schedule/ModalAssitent/ModalAssitent';
 import ScheduleTour from '../../components/Onboarding/ScheduleTour';
 
-import { deleteStaticEvent, deleteDynamicEvent, editEvent, importEvents } from '../../api/eventFetch';
+import { deleteStaticEvent, deleteDynamicEvent, editEvent } from '../../api/eventFetch';
 import { showSuccessNotification, showErrorNotification } from '../../redux/actions/notification-actions';
 
 // Merge several groups' week data into one, tagging each event with its group
@@ -310,35 +311,8 @@ const SchedulePage = () => {
         setIsModalEvent(true);
     }, []);
 
-    // Import events from a chosen .ics file (Google/Outlook/Apple export). Reads
-    // the file as text and posts it; each calendar entry becomes a one-off event.
-    const importInputRef = useRef(null);
-    const [isImporting, setIsImporting] = useState(false);
-    const handleImportFile = useCallback(async (e) => {
-        const file = e.target.files?.[0];
-        e.target.value = '';
-        if (!file) return;
-        const groupId = userInfoRef.current?.groups?.[selectedGroupRef.current]?.group?._id;
-        if (!groupId) {
-            dispatch(showErrorNotification(t('schedule.selectGroupToEdit')));
-            return;
-        }
-        setIsImporting(true);
-        try {
-            const ics = await file.text();
-            const res = await importEvents({ groupId, ics }, navigate);
-            if (res && res.ok !== false) {
-                dispatch(showSuccessNotification(t('schedule.imported', { count: res.data?.imported ?? 0 })));
-                refreshScheduleRef.current(true);
-            } else {
-                dispatch(showErrorNotification(t('schedule.importError')));
-            }
-        } catch (error) {
-            dispatch(showErrorNotification(t('schedule.importError')));
-        } finally {
-            setIsImporting(false);
-        }
-    }, [dispatch, navigate, t]);
+    // Import/export (.ics) lives in its own modal — one entry point for both.
+    const [isImportExport, setIsImportExport] = useState(false);
 
     // Open a confirmation modal before deleting an event
     const requestDeleteEvent = useCallback((ev) => {
@@ -555,24 +529,13 @@ const SchedulePage = () => {
                                 isDisable={isAllMode}
                             />
                         )}
-                        {canEdit && (
-                            <>
-                                <input
-                                    ref={importInputRef}
-                                    type="file"
-                                    accept=".ics,text/calendar"
-                                    style={{ display: 'none' }}
-                                    onChange={handleImportFile}
-                                />
-                                <Button
-                                    typeColor="green"
-                                    beforeImg="plus"
-                                    onClick={() => importInputRef.current?.click()}
-                                    disabled={isImporting}
-                                >
-                                    {isImporting ? t('schedule.importing') : t('schedule.import')}
-                                </Button>
-                            </>
+                        {!isAllMode && groupInfo._id && (
+                            <Button
+                                typeColor="green"
+                                onClick={() => setIsImportExport(true)}
+                            >
+                                {t('schedule.importExport')}
+                            </Button>
                         )}
                         {canEdit && (
                             <span data-tour="schedule-create" style={{ display: 'inline-flex' }}>
@@ -630,6 +593,15 @@ const SchedulePage = () => {
                         modalClose={() => setIsModalSettings(false)}
                         groupId={groupInfo._id}
                         parameters={groupInfo.parameters || {}}
+                        refreshSchedule={() => refreshScheduleRef.current(true)}
+                    />
+                )}
+
+                {isImportExport && (
+                    <ModalImportExport
+                        modalClose={() => setIsImportExport(false)}
+                        groupId={groupInfo._id}
+                        canImport={canEdit}
                         refreshSchedule={() => refreshScheduleRef.current(true)}
                     />
                 )}

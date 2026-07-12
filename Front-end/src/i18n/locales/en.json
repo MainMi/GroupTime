@@ -285,6 +285,10 @@
     "importing": "Importing...",
     "imported": "Imported events: {{count}}",
     "importError": "Could not import events. Check the .ics file.",
+    "importExport": "Import / Export",
+    "importTitle": "Import from .ics",
+    "importHint": "Upload an .ics file from Google Calendar, Outlook or Apple Calendar — its events are added to the schedule.",
+    "importChoose": "Choose .ics file",
     "moveError": "Could not move the event.",
     "createPersonalError": "Could not create the personal schedule."
   },

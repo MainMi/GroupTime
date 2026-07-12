@@ -285,6 +285,10 @@
     "importing": "Імпортування...",
     "imported": "Імпортовано подій: {{count}}",
     "importError": "Не вдалося імпортувати події. Перевірте файл .ics.",
+    "importExport": "Імпорт / Експорт",
+    "importTitle": "Імпорт з .ics",
+    "importHint": "Завантажте файл .ics з Google Calendar, Outlook чи Apple Calendar — події додадуться до розкладу.",
+    "importChoose": "Обрати файл .ics",
     "moveError": "Не вдалося перемістити подію.",
     "createPersonalError": "Не вдалося створити персональний розклад."
   },

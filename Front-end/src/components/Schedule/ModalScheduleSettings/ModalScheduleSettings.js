@@ -12,8 +12,6 @@ import {
     getStaticWeeksList,
     deleteStaticWeek,
     swapStaticWeeks,
-    getCalendarSubscribeUrl,
-    regenerateCalendarSubscribeUrl,
 } from '../../../api/scheduleFetch';
 import { editGroup } from '../../../api/groupFetch';
 import { fetchUserInfo } from '../../../redux/actions/auth-actions';
@@ -60,11 +58,6 @@ const ModalScheduleSettings = ({ modalClose, groupId, parameters = {}, refreshSc
     const [isLoading, setIsLoading] = useState(() => !Array.isArray(cachedWeeks));
     const [isBusy, setIsBusy] = useState(false);
     const [weekToDelete, setWeekToDelete] = useState(null);
-
-    // --- Calendar subscription section ---
-    const [calUrl, setCalUrl] = useState('');
-    const [calLoading, setCalLoading] = useState(false);
-    const [copied, setCopied] = useState(false);
 
     // Fetch the static weeks list once per group and cache it. Pass force=true to
     // bypass the cache (after a static week swap/delete, which changes the list).
@@ -142,48 +135,6 @@ const ModalScheduleSettings = ({ modalClose, groupId, parameters = {}, refreshSc
             setIsBusy(false);
         }
     }, [isBusy, weeks, groupId, navigate, loadWeeks, refreshSchedule, dispatch, t]);
-
-    const handleGetCalUrl = useCallback(async () => {
-        if (calLoading) return;
-        setCalLoading(true);
-        try {
-            const res = await getCalendarSubscribeUrl({ groupId }, navigate);
-            if (res?.data?.url) setCalUrl(res.data.url);
-            else dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
-        } catch (e) {
-            dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
-        } finally {
-            setCalLoading(false);
-        }
-    }, [calLoading, groupId, navigate, dispatch, t]);
-
-    const handleCopyCalUrl = useCallback(async () => {
-        try {
-            await navigator.clipboard.writeText(calUrl);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-        } catch (e) {
-            dispatch(showErrorNotification(t('scheduleSettings.copyError')));
-        }
-    }, [calUrl, dispatch, t]);
-
-    const handleRegenerateCal = useCallback(async () => {
-        if (calLoading) return;
-        setCalLoading(true);
-        try {
-            const res = await regenerateCalendarSubscribeUrl({ groupId }, navigate);
-            if (res?.data?.url) {
-                setCalUrl(res.data.url);
-                dispatch(showSuccessNotification(t('scheduleSettings.calendarRegenerated')));
-            } else {
-                dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
-            }
-        } catch (e) {
-            dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
-        } finally {
-            setCalLoading(false);
-        }
-    }, [calLoading, groupId, navigate, dispatch, t]);
 
     const handleDeleteConfirmed = useCallback(async () => {
         if (!weekToDelete) return;
@@ -300,44 +251,6 @@ const ModalScheduleSettings = ({ modalClose, groupId, parameters = {}, refreshSc
                                 </li>
                             ))}
                         </ul>
-                    )}
-                </section>
-
-                <section className={classes.section}>
-                    <h4 className={classes.sectionTitle}>{t('scheduleSettings.calendarExport')}</h4>
-                    <p className={classes.note}>{t('scheduleSettings.calendarHint')}</p>
-                    {!calUrl ? (
-                        <Button typeColor="green" onClick={handleGetCalUrl} disabled={calLoading}>
-                            {calLoading ? t('scheduleSettings.saving') : t('scheduleSettings.getCalendarLink')}
-                        </Button>
-                    ) : (
-                        <>
-                            <div className={classes.calRow}>
-                                <input
-                                    className={classes.calInput}
-                                    type="text"
-                                    readOnly
-                                    value={calUrl}
-                                    onFocus={(e) => e.target.select()}
-                                />
-                                <Button typeColor="green" onClick={handleCopyCalUrl}>
-                                    {copied ? t('scheduleSettings.copied') : t('scheduleSettings.copy')}
-                                </Button>
-                            </div>
-                            <div className={classes.calActions}>
-                                <a className={classes.calLink} href={calUrl} target="_blank" rel="noreferrer">
-                                    {t('scheduleSettings.downloadIcs')}
-                                </a>
-                                <button
-                                    type="button"
-                                    className={classes.calLinkBtn}
-                                    onClick={handleRegenerateCal}
-                                    disabled={calLoading}
-                                >
-                                    {t('scheduleSettings.regenerateLink')}
-                                </button>
-                            </div>
-                        </>
                     )}
                 </section>
 
