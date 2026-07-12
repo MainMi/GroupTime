@@ -76,6 +76,9 @@ const urlEnum = {
   rsvpSet: `${api}/schedule/rsvp/set`,
   rsvpGet: `${api}/schedule/rsvp/get`,
 
+  // public read-only schedule (shared by token, no auth)
+  schedulePublic: `${api}/schedule/public`,
+
   // message
   messageSend: `${api}/message/send`,
   messageAnalyze: `${api}/message/analyze`,

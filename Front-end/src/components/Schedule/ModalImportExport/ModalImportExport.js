@@ -21,8 +21,15 @@ const ModalImportExport = ({ modalClose, groupId, canImport, refreshSchedule }) 
     const [isImporting, setIsImporting] = useState(false);
 
     const [calUrl, setCalUrl] = useState('');
+    const [publicUrl, setPublicUrl] = useState('');
     const [calLoading, setCalLoading] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [copiedPublic, setCopiedPublic] = useState(false);
+
+    // The .ics feed and the read-only web view share the group's one share token.
+    const webLinkFromToken = (tokenValue) => (tokenValue
+        ? `${window.location.origin}/schedule/public/${tokenValue}`
+        : '');
 
     const handleImportFile = useCallback(async (e) => {
         const file = e.target.files?.[0];
@@ -50,8 +57,10 @@ const ModalImportExport = ({ modalClose, groupId, canImport, refreshSchedule }) 
         setCalLoading(true);
         try {
             const res = await getCalendarSubscribeUrl({ groupId }, navigate);
-            if (res?.data?.url) setCalUrl(res.data.url);
-            else dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
+            if (res?.data?.url) {
+                setCalUrl(res.data.url);
+                setPublicUrl(webLinkFromToken(res.data.token));
+            } else dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
         } catch (err) {
             dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
         } finally {
@@ -69,6 +78,16 @@ const ModalImportExport = ({ modalClose, groupId, canImport, refreshSchedule }) 
         }
     }, [calUrl, dispatch, t]);
 
+    const handleCopyPublicUrl = useCallback(async () => {
+        try {
+            await navigator.clipboard.writeText(publicUrl);
+            setCopiedPublic(true);
+            setTimeout(() => setCopiedPublic(false), 1500);
+        } catch (err) {
+            dispatch(showErrorNotification(t('scheduleSettings.copyError')));
+        }
+    }, [publicUrl, dispatch, t]);
+
     const handleRegenerateCal = useCallback(async () => {
         if (calLoading) return;
         setCalLoading(true);
@@ -76,6 +95,7 @@ const ModalImportExport = ({ modalClose, groupId, canImport, refreshSchedule }) 
             const res = await regenerateCalendarSubscribeUrl({ groupId }, navigate);
             if (res?.data?.url) {
                 setCalUrl(res.data.url);
+                setPublicUrl(webLinkFromToken(res.data.token));
                 dispatch(showSuccessNotification(t('scheduleSettings.calendarRegenerated')));
             } else {
                 dispatch(showErrorNotification(t('scheduleSettings.calendarError')));
@@ -150,6 +170,28 @@ const ModalImportExport = ({ modalClose, groupId, canImport, refreshSchedule }) 
                         </>
                     )}
                 </section>
+
+                {publicUrl && (
+                    <section className={classes.section}>
+                        <h4 className={classes.sectionTitle}>{t('scheduleSettings.publicLink')}</h4>
+                        <p className={classes.note}>{t('scheduleSettings.publicHint')}</p>
+                        <div className={classes.calRow}>
+                            <input
+                                className={classes.calInput}
+                                type="text"
+                                readOnly
+                                value={publicUrl}
+                                onFocus={(e) => e.target.select()}
+                            />
+                            <Button typeColor="green" onClick={handleCopyPublicUrl}>
+                                {copiedPublic ? t('scheduleSettings.copied') : t('scheduleSettings.copy')}
+                            </Button>
+                        </div>
+                        <a className={classes.calLink} href={publicUrl} target="_blank" rel="noreferrer">
+                            {t('scheduleSettings.openPublic')}
+                        </a>
+                    </section>
+                )}
 
                 <div className={classes.buttonGroup}>
                     <Button type="button" typeColor="noBorder" onClick={modalClose}>

@@ -524,7 +524,14 @@
     "regenerateLink": "Regenerate link",
     "calendarRegenerated": "Link regenerated. The old one no longer works.",
     "calendarError": "Couldn't get the calendar link.",
-    "copyError": "Couldn't copy. Please copy it manually."
+    "copyError": "Couldn't copy. Please copy it manually.",
+    "publicLink": "Public link (view only)",
+    "publicHint": "Anyone with this link can view the schedule without signing up. Regenerating the link disables the old one.",
+    "openPublic": "Open public schedule"
+  },
+  "publicSchedule": {
+    "readOnly": "Public schedule",
+    "notFound": "Schedule not found, or the link is no longer valid."
   },
   "event": {
     "eventType": "Event type",

@@ -8,6 +8,7 @@ import GroupSearch from './pages/Group/GroupSearch/GroupSearch';
 import GroupInfo from './pages/Group/GroupInfo/GroupInfo';
 import GroupCreate from './pages/Group/GroupCreate/GroupCreate';
 import SchedulePage from './pages/Schedule/SchedulePage';
+import PublicSchedulePage from './pages/Schedule/PublicSchedulePage';
 import ActionTokenPage from './pages/ActionToken/ActionTokenPage';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         { path: '/group/confirm/user', element: <ActionTokenPage action="confirmUser" /> },
         { path: '/group/delete/user', element: <ActionTokenPage action="declineUser" /> },
         { path: '/password/forgot', element: <ActionTokenPage action="resetPassword" /> },
+        { path: '/schedule/public/:token', element: <PublicSchedulePage /> },
     ]);
 
     return (

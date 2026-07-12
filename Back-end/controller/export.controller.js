@@ -1,4 +1,5 @@
-const { groupService, exportService } = require('../service/schedule');
+const { groupService, exportService, scheduleWeekService } = require('../service/schedule');
+const scheduleDate = require('../helper/scheduleDate.helper');
 const { SELF_URL } = require('../config/config');
 
 const feedUrl = (token) => `${SELF_URL}/api/schedule/export/${token}/calendar.ics`;
@@ -45,6 +46,39 @@ module.exports = {
             res.set('Content-Type', 'text/calendar; charset=utf-8');
             res.set('Content-Disposition', 'inline; filename="grouptime.ics"');
             res.send(icsText);
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    // Public read-only schedule for one week, resolved by the same share token as
+    // the .ics feed — no login. `?date=` selects the ISO week (defaults to now).
+    // Returns the populated week plus the group's display window/timezone so an
+    // unauthenticated viewer sees times exactly as the group stores them.
+    getPublicSchedule: async (req, res, next) => {
+        try {
+            const { token } = req.params;
+            const group = await groupService.findGroupByCalendarToken(token);
+            if (!group) {
+                res.status(404).json('Schedule not found');
+                return;
+            }
+
+            const date = req.query.date ? new Date(req.query.date) : new Date();
+            const countWeek = scheduleDate.getISOWeekNumber(
+                Number.isNaN(date.getTime()) ? new Date() : date,
+            );
+            const weekData = await scheduleWeekService.buildWeekDataByCountWeek(group._id, countWeek);
+
+            res.json({
+                group: {
+                    name: group.name,
+                    gmt: group?.parameters?.gmt || 0,
+                    periodStartEvent: group?.parameters?.periodStartEvent || '8:00',
+                    periodEndEvent: group?.parameters?.periodEndEvent || '21:00',
+                },
+                ...weekData,
+            });
         } catch (e) {
             next(e);
         }
