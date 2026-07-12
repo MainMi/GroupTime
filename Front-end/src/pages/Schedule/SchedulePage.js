@@ -10,6 +10,7 @@ import ScheduleFilter from '../../components/Schedule/ScheduleFilter/ScheduleFil
 import ModalScheduleSettings from '../../components/Schedule/ModalScheduleSettings/ModalScheduleSettings';
 import ModalImportExport from '../../components/Schedule/ModalImportExport/ModalImportExport';
 import ModalFreeSlots from '../../components/Schedule/ModalFreeSlots/ModalFreeSlots';
+import ModalScheduleStats from '../../components/Schedule/ModalScheduleStats/ModalScheduleStats';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import roleEnum from '../../constants/roleEnum';
 import { canEditEvents, canViewSchedule } from '../../helper/roleHelper';
@@ -317,6 +318,8 @@ const SchedulePage = () => {
     const [isImportExport, setIsImportExport] = useState(false);
     // Common free-slot finder (across groups / per member).
     const [isFreeSlots, setIsFreeSlots] = useState(false);
+    // Workload statistics for the displayed week.
+    const [isStats, setIsStats] = useState(false);
 
     // Silent creation of the personal schedule from the group selector.
     const [isCreatingPersonal, setIsCreatingPersonal] = useState(false);
@@ -601,6 +604,14 @@ const SchedulePage = () => {
                                 {t('schedule.freeSlots')}
                             </Button>
                         )}
+                        {existingItem?.data && (
+                            <Button
+                                typeColor="green"
+                                onClick={() => setIsStats(true)}
+                            >
+                                {t('schedule.stats')}
+                            </Button>
+                        )}
                         {!isAllMode && groupInfo._id && (
                             <Button
                                 typeColor="green"
@@ -684,6 +695,14 @@ const SchedulePage = () => {
                         groups={viewableGroups}
                         defaultGroupId={!isAllMode ? groupInfo._id : null}
                         date={date}
+                    />
+                )}
+
+                {isStats && (
+                    <ModalScheduleStats
+                        modalClose={() => setIsStats(false)}
+                        data={existingItem?.data}
+                        title={groupInfo.name}
                     />
                 )}
 

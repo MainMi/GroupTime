@@ -1,0 +1,119 @@
+.modal {
+    width: min(560px, 92vw);
+    padding: 0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+}
+
+.title {
+    margin: 0;
+    font-size: 18px;
+    color: var(--clr-green-dark);
+}
+
+.subtitle {
+    margin: -8px 0 0;
+    font-size: 13px;
+    color: #888;
+}
+
+.empty {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+}
+
+.totals {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(43, 182, 115, 0.1);
+}
+
+.totalMain {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.totalValue {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--clr-green-dark, #1f7a4d);
+}
+
+.totalLabel {
+    font-size: 12px;
+    color: #666;
+}
+
+.count {
+    font-size: 13px;
+    color: #666;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sectionTitle {
+    margin: 0 0 2px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.barRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.barLabel {
+    flex: 0 0 108px;
+    font-size: 13px;
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.barTrack {
+    flex: 1;
+    min-width: 0;
+    height: 14px;
+    border-radius: 7px;
+    background: #f0f0f0;
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    border-radius: 7px;
+    min-width: 2px;
+    transition: width 0.25s ease;
+}
+
+.barValue {
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: #666;
+    min-width: 56px;
+    text-align: right;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

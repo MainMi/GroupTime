@@ -309,7 +309,17 @@
     "fsHideBusy": "Hide busy time",
     "fsNoMembers": "This group has no members.",
     "fsNoGroupsSelected": "Select at least one group.",
-    "fsError": "Could not load free time."
+    "fsError": "Could not load free time.",
+    "stats": "Statistics",
+    "statsTitle": "Workload statistics",
+    "statTotal": "Total this week",
+    "statEvents": "Events: {{count}}",
+    "statByType": "By type",
+    "statByDay": "Busiest days",
+    "statByTag": "By tag",
+    "statNoData": "No events to analyze this week.",
+    "unitH": "h",
+    "unitM": "m"
   },
   "profile": {
     "age": "Age",
