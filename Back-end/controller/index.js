@@ -5,4 +5,5 @@ module.exports = {
     sessionController: require('./session.controller'),
     eventDateController: require('./eventDate.controller'),
     eventInfoController: require('./eventInfo.controller'),
+    availabilityController: require('./availability.controller'),
 };

@@ -8,4 +8,5 @@ module.exports = {
     messageAnalyzeValidator: require('./messageAnalyze.validator'),
     weekValidator: require('./schedule/week.validator'),
     eventValidator: require('./schedule/event.vaidator'),
+    availabilityValidator: require('./schedule/availability.validator'),
 };

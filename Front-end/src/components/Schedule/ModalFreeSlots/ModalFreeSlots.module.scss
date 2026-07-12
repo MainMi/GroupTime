@@ -1,0 +1,161 @@
+.modal {
+    width: min(560px, 92vw);
+    padding: 0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px;
+}
+
+.title {
+    margin: 0;
+    font-size: 18px;
+    color: var(--clr-green-dark);
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--clr-green, #2bb673);
+    border-radius: 10px;
+    background: none;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+        background: rgba(43, 182, 115, 0.08);
+    }
+}
+
+.tabActive {
+    background: var(--clr-green, #2bb673);
+    color: #fff;
+    border-color: var(--clr-green, #2bb673);
+
+    &:hover {
+        background: var(--clr-green, #2bb673);
+    }
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.note {
+    margin: 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.groupList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.pickers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.toggleBusy {
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.results {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-top: 4px;
+    border-top: 1px solid #eee;
+}
+
+.empty {
+    margin: 8px 0;
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+}
+
+.dayRow {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.dayName {
+    flex: 0 0 92px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    padding-top: 4px;
+}
+
+.slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+.free {
+    padding: 3px 9px;
+    border-radius: 8px;
+    font-size: 13px;
+    background: rgba(43, 182, 115, 0.14);
+    color: var(--clr-green-dark, #1f7a4d);
+    white-space: nowrap;
+}
+
+.full {
+    font-size: 13px;
+    color: #b06;
+    opacity: 0.7;
+    padding: 3px 0;
+}
+
+.busy {
+    padding: 3px 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    background: rgba(232, 140, 144, 0.18);
+    color: #a24;
+    white-space: nowrap;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

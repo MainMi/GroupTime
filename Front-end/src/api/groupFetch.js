@@ -52,6 +52,13 @@ export function getGroupInfo (groupId, navigate) {
     return fetchAuthDispatch(responseFn, navigate, responseArgm);
 }
 
+// Like getGroupInfo but returns the group (with populated members) to the caller
+// instead of only dispatching it — used where a component needs the member list
+// inline (e.g. the free-slot finder's member picker).
+export function fetchGroupInfo (groupId, navigate) {
+    return fetchAuth({ url: urlEnum.groupInfo, method: 'POST', body: { groupId } }, navigate);
+}
+
 export function searchGroup (groupId) {
     const url = `${urlEnum.groupSearch}?groupId=${groupId}`
     return getFetch({ url, silent: true })

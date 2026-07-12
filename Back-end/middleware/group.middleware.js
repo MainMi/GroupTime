@@ -112,6 +112,25 @@ module.exports = {
             next(e);
         }
     },
+    // For the member-availability endpoint: the requested `userId` must be a
+    // verified member of the same group the requester is in (already checked by
+    // isUserInGroup). Guards against probing arbitrary users' schedules.
+    isTargetUserInGroup: async (req, res, next) => {
+        try {
+            const { groupId, userId } = req.body;
+            const membership = await verificateService.findVerificateUser({
+                group: groupId,
+                user: userId,
+                type: VERIFIED_TYPE,
+            });
+            if (!membership) {
+                return next(new ApiError(...Object.values(USER_IN_GROUP_NOT_FOUND)));
+            }
+            next();
+        } catch (e) {
+            next(e);
+        }
+    },
     isVerificateUser: (req, res, next) => {
         try {
             const { userInGroup } = req;

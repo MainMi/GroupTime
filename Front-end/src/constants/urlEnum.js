@@ -67,6 +67,10 @@ const urlEnum = {
   calendarSubscribe: `${api}/schedule/export/subscribe`,
   calendarRevoke: `${api}/schedule/export/revoke`,
 
+  // availability (common free slots)
+  availabilitySlots: `${api}/schedule/availability/slots`,
+  availabilityMember: `${api}/schedule/availability/member`,
+
   // message
   messageSend: `${api}/message/send`,
   messageAnalyze: `${api}/message/analyze`,

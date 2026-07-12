@@ -9,6 +9,7 @@ import Loader from '../../UI/Loader/Loader';
 import ScheduleFilter from '../../components/Schedule/ScheduleFilter/ScheduleFilter';
 import ModalScheduleSettings from '../../components/Schedule/ModalScheduleSettings/ModalScheduleSettings';
 import ModalImportExport from '../../components/Schedule/ModalImportExport/ModalImportExport';
+import ModalFreeSlots from '../../components/Schedule/ModalFreeSlots/ModalFreeSlots';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import roleEnum from '../../constants/roleEnum';
 import { canEditEvents, canViewSchedule } from '../../helper/roleHelper';
@@ -314,6 +315,8 @@ const SchedulePage = () => {
 
     // Import/export (.ics) lives in its own modal — one entry point for both.
     const [isImportExport, setIsImportExport] = useState(false);
+    // Common free-slot finder (across groups / per member).
+    const [isFreeSlots, setIsFreeSlots] = useState(false);
 
     // Silent creation of the personal schedule from the group selector.
     const [isCreatingPersonal, setIsCreatingPersonal] = useState(false);
@@ -462,6 +465,16 @@ const SchedulePage = () => {
         return map;
     }, [userInfo, userGmt]);
 
+    // Groups the viewer may read — fed to the free-slot finder (personal schedules
+    // use their localized label).
+    const viewableGroups = useMemo(() => (userInfo?.groups || [])
+        .filter((g) => g.group && canViewSchedule(g.role))
+        .map((g) => ({
+            _id: g.group._id,
+            name: g.group.type === groupTypeEnum.PERSONAL_TYPE ? t('schedule.personalName') : g.group.name,
+            type: g.group.type,
+        })), [userInfo, t]);
+
     if (!userInfo?.nickname) {
         return <Loader />;
     }
@@ -580,6 +593,14 @@ const SchedulePage = () => {
                                 isDisable={isAllMode}
                             />
                         )}
+                        {viewableGroups.length > 0 && (
+                            <Button
+                                typeColor="green"
+                                onClick={() => setIsFreeSlots(true)}
+                            >
+                                {t('schedule.freeSlots')}
+                            </Button>
+                        )}
                         {!isAllMode && groupInfo._id && (
                             <Button
                                 typeColor="green"
@@ -654,6 +675,15 @@ const SchedulePage = () => {
                         groupId={groupInfo._id}
                         canImport={canEdit}
                         refreshSchedule={() => refreshScheduleRef.current(true)}
+                    />
+                )}
+
+                {isFreeSlots && (
+                    <ModalFreeSlots
+                        modalClose={() => setIsFreeSlots(false)}
+                        groups={viewableGroups}
+                        defaultGroupId={!isAllMode ? groupInfo._id : null}
+                        date={date}
                     />
                 )}
 

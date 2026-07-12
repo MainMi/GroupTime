@@ -90,3 +90,23 @@ export function regenerateCalendarSubscribeUrl(data, navigate) {
     body: { groupId: data.groupId }
   }, navigate);
 }
+
+// Common free slots across several of the user's own groups (union busy → free).
+// Returns { data: { free, busy, countWeek, groups }, ok }.
+export function getGroupFreeSlots(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.availabilitySlots,
+    method: 'POST',
+    body: { groupIds: data.groupIds || [], date: data.date }
+  }, navigate);
+}
+
+// One member's availability across all their groups (co-members only).
+// Returns { data: { free, busy, countWeek }, ok }.
+export function getMemberFreeSlots(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.availabilityMember,
+    method: 'POST',
+    body: { groupId: data.groupId, userId: data.userId, date: data.date }
+  }, navigate);
+}

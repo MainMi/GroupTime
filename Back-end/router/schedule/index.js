@@ -3,4 +3,5 @@ module.exports = {
     eventRouter: require('./event.router'),
     exportRouter: require('./export.router'),
     reminderRouter: require('./reminder.router'),
+    availabilityRouter: require('./availability.router'),
 };
