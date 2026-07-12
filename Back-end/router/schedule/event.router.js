@@ -12,6 +12,7 @@ const {
 const {
     addStaticEvent,
     addDynamicEvent,
+    addRecurringEvent,
     deleteStaticEvent,
     deleteDynamicEvent,
     editEvent,
@@ -56,6 +57,15 @@ router.post(
     userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
     scheduleMiddleware.checkParams(eventValidator.addDynamicEvent),
     addDynamicEvent
+);
+
+router.post(
+    '/add/recurring',
+    authMiddleware.checkAccessToken(GROUP_INFO),
+    groupMiddleware.isUserInGroup,
+    userMiddleware.checkGroupParamRole('assistantCommandRole', ADMIN_ROLE),
+    scheduleMiddleware.checkParams(eventValidator.addRecurringEvent),
+    addRecurringEvent
 );
 
 router.post(

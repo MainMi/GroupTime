@@ -11,11 +11,12 @@ import TagInput from '../../../UI/TagInput/TagInput';
 import TypeSelect from '../../../UI/TypeSelect/TypeSelect';
 import FileUpload from '../../../UI/FileUpload/FileUpload';
 import DatePicker from '../../../UI/DatePicker/DatePicker';
+import Checkbox from '../../../UI/Checkbox/Checkbox';
 import { validateFn, isUrlOrEmptyFn } from '../../../constants/validateFn.enum';
 import { DAYS, BACKEND_DAY_TO_JSDAY, JSDAY_TO_DAYS_INDEX, SCHEDULE_TYPE } from '../../../constants/scheduleEnum';
 import { timeStringToMinutes, getMondayOfISOWeek } from '../../../helper/dateHelper';
 
-import { addStaticEvent, addDynamicEvent, editEvent, addFileToEvent, deleteFileFromEvent } from '../../../api/eventFetch';
+import { addStaticEvent, addDynamicEvent, addRecurringEvent, editEvent, addFileToEvent, deleteFileFromEvent } from '../../../api/eventFetch';
 import { addStaticWeekToGroup } from '../../../api/scheduleFetch';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -106,6 +107,16 @@ const ModalCreateEvent = ({
 
     // Dynamic mode: specific date
     const [selectedDate, setSelectedDate] = useState(new Date());
+
+    // Dynamic mode: optional weekly recurrence (same weekday/time every N weeks
+    // until an end date). Static events already recur, so this is dynamic-only.
+    const [repeatEnabled, setRepeatEnabled] = useState(false);
+    const [repeatInterval, setRepeatInterval] = useState('1');
+    const [repeatUntil, setRepeatUntil] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 56); // ~8 weeks ahead by default
+        return d;
+    });
 
     // Pre-populate fields from editEventData
     useEffect(() => {
@@ -231,6 +242,12 @@ const ModalCreateEvent = ({
         return [...eventsConst.tag, ...extra];
     }, [extraTags]);
 
+    // "every N weeks" options for the recurrence interval.
+    const repeatIntervalOptions = useMemo(() => [1, 2, 3, 4].map((n) => ({
+        value: String(n),
+        title: n === 1 ? t('event.everyWeek') : t('event.everyNWeeks', { n }),
+    })), [t]);
+
     // Upload all staged files to the given eventDate (sequential, best-effort).
     // Returns the number of files that failed to upload so the caller can warn.
     // groupId must be sent too — the /add/file middleware checks group membership.
@@ -348,24 +365,40 @@ const ModalCreateEvent = ({
                 }
 
             } else {
-                // Dynamic event
+                // Dynamic event (optionally repeated weekly until an end date)
                 const finalDate = new Date(selectedDate);
                 if (time) {
                     const [h, m] = time.split(':');
                     finalDate.setHours(Number(h), Number(m), 0, 0);
                 }
-                response = await addDynamicEvent({
-                    ...commonFields,
-                    date: finalDate.toString(),
-                }, navigate);
+                if (repeatEnabled) {
+                    response = await addRecurringEvent({
+                        ...commonFields,
+                        date: finalDate.toString(),
+                        until: new Date(repeatUntil).toString(),
+                        interval: Number(repeatInterval) || 1,
+                    }, navigate);
+                    // Recurring events are batch-created; per-occurrence file upload
+                    // isn't supported, so files are skipped for a repeated event.
+                } else {
+                    response = await addDynamicEvent({
+                        ...commonFields,
+                        date: finalDate.toString(),
+                    }, navigate);
 
-                if (response && response.ok !== false) {
-                    fileFailures = await uploadStagedFiles(response.data?.eventDate);
+                    if (response && response.ok !== false) {
+                        fileFailures = await uploadStagedFiles(response.data?.eventDate);
+                    }
                 }
             }
 
             if (response && response.ok !== false) {
-                dispatch(showSuccessNotification(isEditMode ? t('event.updated') : t('event.created')));
+                const successMsg = isEditMode
+                    ? t('event.updated')
+                    : (repeatEnabled && scheduleType === SCHEDULE_TYPE.DYNAMIC
+                        ? t('event.recurringCreated', { count: response.data?.created ?? 0 })
+                        : t('event.created'));
+                dispatch(showSuccessNotification(successMsg));
                 // If the event saved but some files didn't upload, warn alongside the
                 // success toast (both stay visible — see the toast cap of 2).
                 if (fileFailures > 0) {
@@ -389,7 +422,7 @@ const ModalCreateEvent = ({
         valueLink, valueTag, valueDescription, duration,
         scheduleType, selectedDay, selectedStaticWeekValue, staticWeeksCount,
         selectedDate, time, navigate, refreshSchedule, modalClose, dispatch,
-        uploadStagedFiles, t,
+        uploadStagedFiles, t, repeatEnabled, repeatInterval, repeatUntil,
     ]);
 
     return (
@@ -549,6 +582,37 @@ const ModalCreateEvent = ({
                             error={showErr('duration')}
                         />
                     </div>
+
+                    {!isEditMode && scheduleType === SCHEDULE_TYPE.DYNAMIC && (
+                        <div className={classes.section}>
+                            <Checkbox
+                                typeColor="green"
+                                value={repeatEnabled}
+                                onChange={() => setRepeatEnabled((v) => !v)}
+                            >
+                                {t('event.repeatWeekly')}
+                            </Checkbox>
+                            {repeatEnabled && (
+                                <>
+                                    <label>{t('event.repeatInterval')}</label>
+                                    <Dropdown
+                                        key={`ri-${repeatInterval}`}
+                                        arrValue={repeatIntervalOptions}
+                                        changeValueHandler={setRepeatInterval}
+                                        defaultIndex={Math.max(0, repeatIntervalOptions.findIndex((o) => o.value === repeatInterval))}
+                                        color="green"
+                                        borderRadius={15}
+                                    />
+                                    <label>{t('event.repeatUntil')}</label>
+                                    <DatePicker
+                                        isTime={false}
+                                        value={repeatUntil}
+                                        onChange={(d) => setRepeatUntil(d)}
+                                    />
+                                </>
+                            )}
+                        </div>
+                    )}
 
                     <div className={classes.section}>
                         <label htmlFor="description">{t('event.description')}</label>

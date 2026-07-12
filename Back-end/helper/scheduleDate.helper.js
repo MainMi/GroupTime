@@ -114,6 +114,25 @@ const isoWeeksInRange = (from, to) => {
     return [...weeks];
 };
 
+// Weekly occurrence dates from `start` (inclusive) up to and including `until`,
+// stepping `intervalWeeks` weeks and preserving the start's time-of-day. Capped at
+// `maxCount`. Always yields at least the start date (so a bad/earlier `until`
+// still creates the single base event).
+const weeklyOccurrences = (start, until, intervalWeeks = 1, maxCount = 60) => {
+    const startDate = new Date(start);
+    const endDate = new Date(until);
+    if (Number.isNaN(startDate.getTime())) return [];
+    const step = Math.max(1, Math.floor(intervalWeeks));
+    const out = [];
+    const cursor = new Date(startDate);
+    const hasEnd = !Number.isNaN(endDate.getTime()) && endDate >= startDate;
+    do {
+        out.push(new Date(cursor));
+        cursor.setDate(cursor.getDate() + step * 7);
+    } while (hasEnd && cursor <= endDate && out.length < maxCount);
+    return out;
+};
+
 // Midpoint (ISO string) between two timestamps — used to slot a reordered week
 // between its neighbours without renumbering the whole sequence.
 const calculateMiddleTimestamp = (earlierTimestamp, laterTimestamp) => {
@@ -157,5 +176,6 @@ module.exports = {
     getISOWeekMonday,
     nextEventOccurrence,
     isoWeeksInRange,
+    weeklyOccurrences,
     calculateMiddleTimestamp
 };

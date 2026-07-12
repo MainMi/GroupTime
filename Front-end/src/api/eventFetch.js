@@ -20,6 +20,15 @@ export function addDynamicEvent(data, navigate) {
   }, navigate);
 }
 
+// Додавання повторюваної (щотижневої) динамічної події
+export function addRecurringEvent(data, navigate) {
+  return fetchAuth({
+    url: urlEnum.eventAddRecurring,
+    method: 'POST',
+    body: data
+  }, navigate);
+}
+
 // Редагування події
 export function editEvent(data, navigate) {
   return fetchAuth({

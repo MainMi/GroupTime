@@ -119,6 +119,15 @@ const editEvent = customJoi.object({
 
 const addDynamicEvent = customJoi.object(eventSchemaBase);
 
+// Weekly-repeating dynamic event: the base event fields plus an end date and an
+// optional week interval.
+const addRecurringEvent = customJoi.object({
+    ...eventSchemaBase,
+    until: customJoi.stringDate().required(),
+    interval: Joi.number().integer().min(1).max(8)
+        .default(1)
+});
+
 const importEvents = Joi.object({
     groupId: Joi.string().required(),
     // Raw .ics text (cap at ~2MB to bound parse work).
@@ -155,6 +164,7 @@ module.exports = {
     deleteEvent,
     editEvent,
     addDynamicEvent,
+    addRecurringEvent,
     importEvents,
     subscribeCalendar,
     setReminder,

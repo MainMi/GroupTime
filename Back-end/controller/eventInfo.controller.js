@@ -6,6 +6,7 @@ const {
     eventDateService,
     importService,
     groupService,
+    recurrenceService,
 } = require('../service/schedule');
 
 module.exports = {
@@ -193,6 +194,35 @@ module.exports = {
             await scheduleWeekService.addEvent(groupId, countWeek, day, event, false);
 
             res.json(event);
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    // Create a weekly-repeating (dynamic) event: the same weekday/time in every
+    // week from the start date up to `until`, stepping `interval` weeks. Each
+    // occurrence is an independent event (edit/delete one without the others).
+    addRecurringEvent: async (req, res, next) => {
+        try {
+            const {
+                groupId, date, until, interval = 1,
+                teacherName, name, type, color, place, platform, link, tag, description, duration,
+            } = req.body;
+
+            const { day, time, date: startDate } = date.value;
+
+            const weeks = recurrenceService.occurrenceWeeks(startDate, until, interval);
+
+            const created = await recurrenceService.createRecurringDynamicEvents(
+                groupId,
+                {
+                    teacherName, name, type, color, place, platform, link, tag, description, duration, day, time,
+                },
+                weeks,
+                req.authUser._id,
+            );
+
+            res.json({ created });
         } catch (e) {
             next(e);
         }

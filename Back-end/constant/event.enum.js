@@ -15,4 +15,6 @@ module.exports = {
     IMPORTED_EVENT_NAME: 'Imported event',
     // Hard cap per .ics import request — each event costs several DB writes.
     MAX_IMPORT_EVENTS: 300,
+    // Hard cap on occurrences created from one recurring-event request (~1 year weekly).
+    MAX_RECURRING_OCCURRENCES: 60,
 };

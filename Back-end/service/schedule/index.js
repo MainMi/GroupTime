@@ -8,5 +8,6 @@ module.exports = {
     scheduleWeekService: require('./scheduleWeek.service'),
     importService: require('./import.service'),
     exportService: require('./export.service'),
-    availabilityService: require('./availability.service')
+    availabilityService: require('./availability.service'),
+    recurrenceService: require('./recurrence.service')
 };

@@ -56,6 +56,7 @@ const urlEnum = {
   // event
   eventAddStatic: `${api}/schedule/event/add/static`,
   eventAddDynamic: `${api}/schedule/event/add/dynamic`,
+  eventAddRecurring: `${api}/schedule/event/add/recurring`,
   eventEdit: `${api}/schedule/event/edit`,
   eventDeleteStatic: `${api}/schedule/event/delete/static`,
   eventDeleteDynamic: `${api}/schedule/event/delete/dynamic`,
