@@ -33,6 +33,7 @@ import Modalassistant from '../../components/Schedule/ModalAssitent/ModalAssiten
 import ScheduleTour from '../../components/Onboarding/ScheduleTour';
 
 import { deleteStaticEvent, deleteDynamicEvent, editEvent } from '../../api/eventFetch';
+import { createGroup } from '../../api/groupFetch';
 import { showSuccessNotification, showErrorNotification } from '../../redux/actions/notification-actions';
 
 // Merge several groups' week data into one, tagging each event with its group
@@ -314,6 +315,10 @@ const SchedulePage = () => {
     // Import/export (.ics) lives in its own modal — one entry point for both.
     const [isImportExport, setIsImportExport] = useState(false);
 
+    // Silent creation of the personal schedule from the group selector.
+    const [isCreatingPersonal, setIsCreatingPersonal] = useState(false);
+    const pendingPersonalSelectRef = useRef(false);
+
     // Open a confirmation modal before deleting an event
     const requestDeleteEvent = useCallback((ev) => {
         setEventToDelete(ev);
@@ -375,6 +380,9 @@ const SchedulePage = () => {
 
     // Memoized: these flow into the React.memo'd EventsHour grid (~100 cells), so
     // a fresh identity on every render would defeat that memoization entirely.
+    const hasPersonal = (userInfo?.groups || []).some(
+        (g) => g?.group?.type === groupTypeEnum.PERSONAL_TYPE
+    );
     const groupsNames = useMemo(() => [
         ...(userInfo?.groups || []).map((group, idx) => ({
             // Personal schedules use a localized label so switching language
@@ -384,8 +392,49 @@ const SchedulePage = () => {
                 : group.group.name,
             value: String(idx),
         })),
+        // Always offer a personal schedule; if the user has none yet, selecting
+        // this entry silently creates it (handled in handleGroupChange).
+        ...(!hasPersonal ? [{ title: `★ ${t('schedule.personalName')}`, value: 'personal-create' }] : []),
         { title: t('schedule.allGroups'), value: 'all' },
-    ], [userInfo, t]);
+    ], [userInfo, t, hasPersonal]);
+
+    const handleGroupChange = useCallback(async (val) => {
+        if (val !== 'personal-create') {
+            setSelectedGroup(val === 'all' ? 'all' : Number(val));
+            return;
+        }
+        if (isCreatingPersonal) return;
+        setIsCreatingPersonal(true);
+        try {
+            const res = await createGroup({
+                name: t('schedule.personalName'),
+                description: t('schedule.personalDesc'),
+                type: groupTypeEnum.PERSONAL_TYPE,
+            });
+            if (res && res.ok !== false) {
+                pendingPersonalSelectRef.current = true;
+                await dispatch(fetchUserInfo(navigate));
+            } else {
+                dispatch(showErrorNotification(t('schedule.personalCreateError')));
+            }
+        } catch (e) {
+            dispatch(showErrorNotification(t('schedule.personalCreateError')));
+        } finally {
+            setIsCreatingPersonal(false);
+        }
+    }, [isCreatingPersonal, dispatch, navigate, t]);
+
+    // Once the just-created personal schedule shows up in userInfo, select it.
+    useEffect(() => {
+        if (!pendingPersonalSelectRef.current) return;
+        const idx = (userInfo?.groups || []).findIndex(
+            (g) => g?.group?.type === groupTypeEnum.PERSONAL_TYPE
+        );
+        if (idx >= 0) {
+            pendingPersonalSelectRef.current = false;
+            setSelectedGroup(idx);
+        }
+    }, [userInfo]);
 
     // Lightweight group context for single-group cards (author fallback → group icon).
     const groupMeta = useMemo(() => (!isAllMode && selectedGroupInfo
@@ -475,7 +524,7 @@ const SchedulePage = () => {
                         defaultIndex={selectedGroup === 'all' ? groupsNames.length - 1 : selectedGroup}
                         label={t('schedule.group')}
                         arrValue={groupsNames}
-                        changeValueHandler={(val) => setSelectedGroup(val === 'all' ? 'all' : Number(val))}
+                        changeValueHandler={handleGroupChange}
                     />
                 </span>
                 <Calendar

@@ -278,6 +278,7 @@
     "moreEvents": "+{{count}}",
     "personalName": "Мій розклад",
     "personalDesc": "Персональний розклад",
+    "personalCreateError": "Не вдалося створити персональний розклад.",
     "createPersonal": "Створити персональний розклад",
     "creatingPersonal": "Створення розкладу...",
     "personalBadge": "Особистий",

@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchUserInfo } from '../../../redux/actions/auth-actions';
 import { deleteGroup, editGroup, getGroupInfo, leaveGroup, searchGroup, inviteUsersToGroup, deleteInviteGroup, removeUserFromGroup, transferOwnership } from '../../../api/groupFetch';
+import groupTypeEnum from '../../../constants/type/groupTypeEnum';
 import roleEnum from '../../../constants/roleEnum';
 import Textarea from '../../../UI/Textarea/Textarea';
 import useInput from '../../../hooks/useInput';
@@ -176,6 +177,9 @@ const GroupInfo = () => {
     const isOwner = role === roleEnum.OWNER_ROLE;
     const isManager = isOwner || role === roleEnum.ADMIN_ROLE;
     const isPrivate = groupInfo?.type === 'private';
+    // A personal schedule is a hidden single-owner group: no members UI, no
+    // invites, and none of the people-related parameters.
+    const isPersonal = group.type === groupTypeEnum.PERSONAL_TYPE;
 
     const deleteGroupHandler = async () => {
         setShowLeaveConfirm(false);
@@ -259,10 +263,12 @@ const GroupInfo = () => {
                                 <img src={buttonsImages[isPrivate ? 'LockClose-pink' : 'lockOpen-green']} alt="lock" />
                                 {group.type}
                             </div>
-                            <div className={`${classes.groupInfoBtn} ${classes.green}`}>
-                                <img src={buttonsImages['people-green']} alt="people" />
-                                {group.userCount}/{group.parameters.usersLimit}
-                            </div>
+                            {!isPersonal && (
+                                <div className={`${classes.groupInfoBtn} ${classes.green}`}>
+                                    <img src={buttonsImages['people-green']} alt="people" />
+                                    {group.userCount}/{group.parameters.usersLimit}
+                                </div>
+                            )}
                         </div>
                         {!isEdit
                             ? <p>{t('groupInfo.descriptionLabel')}: {group.description}</p>
@@ -280,13 +286,14 @@ const GroupInfo = () => {
                                 {!isEdit
                                 ? <Button typeColor='green' onClick={() => toggleIsEditHandler(group.name, group.description)}>{t('common.edit')}</Button>
                                 : <div className={classes.buttonBox}>
-                                    <Button typeColor='green' onClick={onModalOpenHandler}>{t('groupInfo.configureParams')}</Button>
+                                    {!isPersonal && <Button typeColor='green' onClick={onModalOpenHandler}>{t('groupInfo.configureParams')}</Button>}
                                     <Button typeColor='green' onClick={handleApply}>{t('groupInfo.apply')}</Button>
                                 </div>
                             }</>}
                         </div>
                     </div>
                 </div>
+                {!isPersonal && (
                 <div className={classes.userBox}>
                     <p>{t('groupInfo.members')}: {group.userCount}</p>
                     {isEdit && isManager && (
@@ -322,6 +329,7 @@ const GroupInfo = () => {
                         })}
                     </div>
                 </div>
+                )}
             </div>
             {isAvatarOpen && (
                 <AvatarUploadModal

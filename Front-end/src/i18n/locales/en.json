@@ -278,6 +278,7 @@
     "moreEvents": "+{{count}}",
     "personalName": "My schedule",
     "personalDesc": "Personal schedule",
+    "personalCreateError": "Could not create your personal schedule.",
     "createPersonal": "Create personal schedule",
     "creatingPersonal": "Creating schedule...",
     "personalBadge": "Personal",
