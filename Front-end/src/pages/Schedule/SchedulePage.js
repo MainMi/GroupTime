@@ -11,6 +11,7 @@ import ModalScheduleSettings from '../../components/Schedule/ModalScheduleSettin
 import ModalImportExport from '../../components/Schedule/ModalImportExport/ModalImportExport';
 import ModalFreeSlots from '../../components/Schedule/ModalFreeSlots/ModalFreeSlots';
 import ModalScheduleStats from '../../components/Schedule/ModalScheduleStats/ModalScheduleStats';
+import MonthView from '../../components/Schedule/MonthView/MonthView';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import roleEnum from '../../constants/roleEnum';
 import { canEditEvents, canViewSchedule } from '../../helper/roleHelper';
@@ -67,6 +68,8 @@ const SchedulePage = () => {
     const [eventToDelete, setEventToDelete] = useState(null);
     const [isModalassistant, setIsModalassistant] = useState(false);
     const [timeSheet, setTimeSheet] = useState(1);
+    // 'week' = the hour grid (default); 'month' = calendar-month overview.
+    const [viewMode, setViewMode] = useState('week');
     const [existingItem, setExistingItem] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -141,6 +144,14 @@ const SchedulePage = () => {
             return atNoon(d);
         });
     }, []);
+
+    // Month view steps a whole month at a time (clamped to the 1st so a short month
+    // can't skip one, e.g. Mar 31 → Feb).
+    const shiftMonth = useCallback((delta) => {
+        setDate((prev) => atNoon(new Date(prev.getFullYear(), prev.getMonth() + delta, 1)));
+    }, []);
+    const handlePrevMonth = useCallback(() => shiftMonth(-1), [shiftMonth]);
+    const handleNextMonth = useCallback(() => shiftMonth(1), [shiftMonth]);
 
     // Calendar: use noon to prevent UTC midnight timezone rollover (date -1 bug)
     const handleCalendarDateChange = useCallback((newDate) => {
@@ -468,6 +479,21 @@ const SchedulePage = () => {
         return map;
     }, [userInfo, userGmt]);
 
+    // Groups the month overview should show — same resolution as the week view
+    // (one group, or the filtered set in "all" mode), skipping unreadable roles.
+    const monthTargetGroups = useMemo(() => {
+        const groups = userInfo?.groups;
+        if (!groups?.length) return [];
+        if (selectedGroup === 'all') {
+            const ids = activeFilter?.groups || [];
+            return groups
+                .filter((g) => g.group && canViewSchedule(g.role) && (!ids.length || ids.includes(g.group._id)))
+                .map((g) => g.group);
+        }
+        const entry = groups[selectedGroup];
+        return (entry?.group && canViewSchedule(entry.role)) ? [entry.group] : [];
+    }, [userInfo, selectedGroup, activeFilter]);
+
     // Groups the viewer may read — fed to the free-slot finder (personal schedules
     // use their localized label).
     const viewableGroups = useMemo(() => (userInfo?.groups || [])
@@ -568,13 +594,13 @@ const SchedulePage = () => {
                         <ButtonSmall
                             centerImg="chevron-pink"
                             className={classes.button}
-                            onClick={handlePrevWeek}
+                            onClick={viewMode === 'month' ? handlePrevMonth : handlePrevWeek}
                             style={{ transform: 'rotate(90deg)' }}
                         />
                         <ButtonSmall
                             centerImg="chevron-pink"
                             className={classes.button}
-                            onClick={handleNextWeek}
+                            onClick={viewMode === 'month' ? handleNextMonth : handleNextWeek}
                             style={{ transform: 'rotate(-90deg)' }}
                         />
                     </div>
@@ -583,11 +609,19 @@ const SchedulePage = () => {
                         <span data-tour="schedule-assistant" style={{ display: 'inline-flex' }}>
                             <ButtonSmall centerImg={logo} onClick={openAssistant} />
                         </span>
-                        <ButtonSmall
-                            centerImg={squareIcons[timeSheet]}
-                            onClick={timeSheetChangeHandler}
-                            typeColor="green"
-                        />
+                        <Button
+                            typeColor={viewMode === 'month' ? 'green' : 'noBorder'}
+                            onClick={() => setViewMode((m) => (m === 'week' ? 'month' : 'week'))}
+                        >
+                            {viewMode === 'week' ? t('schedule.viewMonth') : t('schedule.viewWeek')}
+                        </Button>
+                        {viewMode === 'week' && (
+                            <ButtonSmall
+                                centerImg={squareIcons[timeSheet]}
+                                onClick={timeSheetChangeHandler}
+                                typeColor="green"
+                            />
+                        )}
                         {isGroupAdmin && (
                             <ButtonSmall
                                 centerImg="gear"
@@ -634,6 +668,8 @@ const SchedulePage = () => {
                     <div className={classes.emptyState}>
                         {t('schedule.noAccess')}
                     </div>
+                ) : viewMode === 'month' ? (
+                    <MonthView date={date} targetGroups={monthTargetGroups} />
                 ) : isLoading ? (
                     <Loader />
                 ) : existingItem ? (

@@ -319,7 +319,9 @@
     "statByTag": "За тегом",
     "statNoData": "Немає подій для аналізу цього тижня.",
     "unitH": "год",
-    "unitM": "хв"
+    "unitM": "хв",
+    "viewWeek": "Тиждень",
+    "viewMonth": "Місяць"
   },
   "profile": {
     "age": "Вік",

@@ -319,7 +319,9 @@
     "statByTag": "By tag",
     "statNoData": "No events to analyze this week.",
     "unitH": "h",
-    "unitM": "m"
+    "unitM": "m",
+    "viewWeek": "Week",
+    "viewMonth": "Month"
   },
   "profile": {
     "age": "Age",
