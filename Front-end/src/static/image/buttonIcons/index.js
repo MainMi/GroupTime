@@ -26,6 +26,11 @@ import plus from './plusIcon.svg'
 import trash from './trashIcon.svg'
 import gear from './gearIcon.svg'
 import camera from './cameraIcon.svg'
+import stats from './statsIcon.svg'
+import freeTime from './freeTimeIcon.svg'
+import calendar from './calendarIcon.svg'
+import week from './weekIcon.svg'
+import importExport from './importExportIcon.svg'
 
 const buttonsImages = {
     arrow,
@@ -55,7 +60,12 @@ const buttonsImages = {
     'three-square': threeSquare,
     trash,
     gear,
-    camera
+    camera,
+    stats,
+    'free-time': freeTime,
+    calendar,
+    week,
+    'import-export': importExport
 }
 
 export default buttonsImages;

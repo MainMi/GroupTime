@@ -610,7 +610,8 @@ const SchedulePage = () => {
                             <ButtonSmall centerImg={logo} onClick={openAssistant} />
                         </span>
                         <Button
-                            typeColor={viewMode === 'month' ? 'green' : 'noBorder'}
+                            typeColor="green"
+                            beforeImg={viewMode === 'week' ? 'calendar' : 'week'}
                             onClick={() => setViewMode((m) => (m === 'week' ? 'month' : 'week'))}
                         >
                             {viewMode === 'week' ? t('schedule.viewMonth') : t('schedule.viewWeek')}
@@ -633,6 +634,7 @@ const SchedulePage = () => {
                         {viewableGroups.length > 0 && (
                             <Button
                                 typeColor="green"
+                                beforeImg="free-time"
                                 onClick={() => setIsFreeSlots(true)}
                             >
                                 {t('schedule.freeSlots')}
@@ -641,6 +643,7 @@ const SchedulePage = () => {
                         {existingItem?.data && (
                             <Button
                                 typeColor="green"
+                                beforeImg="stats"
                                 onClick={() => setIsStats(true)}
                             >
                                 {t('schedule.stats')}
@@ -649,6 +652,7 @@ const SchedulePage = () => {
                         {!isAllMode && groupInfo._id && (
                             <Button
                                 typeColor="green"
+                                beforeImg="import-export"
                                 onClick={() => setIsImportExport(true)}
                             >
                                 {t('schedule.importExport')}

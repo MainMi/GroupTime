@@ -112,26 +112,29 @@ const ModalImportExport = ({ modalClose, groupId, canImport, refreshSchedule }) 
             <div className={classes.content}>
                 <h3 className={classes.title}>{t('schedule.importExport')}</h3>
 
-                {canImport && (
-                    <section className={classes.section}>
-                        <h4 className={classes.sectionTitle}>{t('schedule.importTitle')}</h4>
-                        <p className={classes.note}>{t('schedule.importHint')}</p>
-                        <input
-                            ref={importInputRef}
-                            type="file"
-                            accept=".ics,text/calendar"
-                            style={{ display: 'none' }}
-                            onChange={handleImportFile}
-                        />
-                        <Button
-                            typeColor="green"
-                            onClick={() => importInputRef.current?.click()}
-                            disabled={isImporting}
-                        >
-                            {isImporting ? t('schedule.importing') : t('schedule.importChoose')}
-                        </Button>
-                    </section>
-                )}
+                {/* Shown to everyone so the feature is discoverable, but only schedule
+                    admins can run it — non-admins see it greyed out with the reason. */}
+                <section className={`${classes.section} ${canImport ? '' : classes.locked}`}>
+                    <h4 className={classes.sectionTitle}>{t('schedule.importTitle')}</h4>
+                    <p className={classes.note}>{t('schedule.importHint')}</p>
+                    {!canImport && (
+                        <p className={classes.adminOnly}>{t('schedule.adminOnly')}</p>
+                    )}
+                    <input
+                        ref={importInputRef}
+                        type="file"
+                        accept=".ics,text/calendar"
+                        style={{ display: 'none' }}
+                        onChange={handleImportFile}
+                    />
+                    <Button
+                        typeColor="green"
+                        onClick={() => importInputRef.current?.click()}
+                        disabled={isImporting || !canImport}
+                    >
+                        {isImporting ? t('schedule.importing') : t('schedule.importChoose')}
+                    </Button>
+                </section>
 
                 <section className={classes.section}>
                     <h4 className={classes.sectionTitle}>{t('scheduleSettings.calendarExport')}</h4>
@@ -158,14 +161,19 @@ const ModalImportExport = ({ modalClose, groupId, canImport, refreshSchedule }) 
                                 <a className={classes.calLink} href={calUrl} target="_blank" rel="noreferrer">
                                     {t('scheduleSettings.downloadIcs')}
                                 </a>
+                                {/* Rotating the token revokes every existing feed — admins only. */}
                                 <button
                                     type="button"
                                     className={classes.calLinkBtn}
                                     onClick={handleRegenerateCal}
-                                    disabled={calLoading}
+                                    disabled={calLoading || !canImport}
+                                    title={canImport ? undefined : t('schedule.adminOnly')}
                                 >
                                     {t('scheduleSettings.regenerateLink')}
                                 </button>
+                                {!canImport && (
+                                    <span className={classes.adminOnly}>{t('schedule.adminOnly')}</span>
+                                )}
                             </div>
                         </>
                     )}

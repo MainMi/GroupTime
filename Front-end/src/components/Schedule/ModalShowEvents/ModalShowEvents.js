@@ -56,7 +56,6 @@ const EventRsvp = ({ groupId, eventInfoId }) => {
 
     return (
         <div className={classes.rsvpBox}>
-            <label>{t('event.rsvp')}</label>
             <div className={classes.rsvpButtons}>
                 {RSVP_OPTIONS.map((status) => (
                     <button

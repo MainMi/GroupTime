@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ModalShowEvents from '../ModalShowEvents/ModalShowEvents';
+import Loader from '../../../UI/Loader/Loader';
 import { colorForType } from '../../../constants/type/eventEnum';
 import { ORDERED_BACKEND_DAYS } from '../../../constants/scheduleEnum';
 import { getISOWeekNumber, atNoon } from '../../../helper/dateHelper';
@@ -30,9 +31,9 @@ const buildMonthGrid = (date) => {
     });
 };
 
-// Month overview: reuses the week feed — each calendar date resolves to an ISO
-// week whose data the backend already returns fully resolved, so we just fetch
-// each needed week once (cached in redux) and place events on their weekday.
+// Month overview. Reuses the week feed: every calendar date belongs to an ISO week
+// the backend already returns fully resolved, so the month just pulls in each week
+// it needs (cached in redux) and drops events onto their weekday.
 const MonthView = ({ date, targetGroups }) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -40,6 +41,7 @@ const MonthView = ({ date, targetGroups }) => {
     const schedules = useSelector((state) => state.schedule.schedules);
 
     const [dayEvents, setDayEvents] = useState(null);
+    const [pending, setPending] = useState(0);
 
     const cells = useMemo(() => buildMonthGrid(date), [date]);
     const month = date.getMonth();
@@ -48,30 +50,52 @@ const MonthView = ({ date, targetGroups }) => {
     const groupsKey = (targetGroups || []).map((g) => g._id).join(',');
     const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
 
-    // Fetch every (week, group) the grid needs that isn't already cached. Keyed on
-    // month+groups only (not `schedules`) so dispatching results doesn't re-trigger.
-    const requestedRef = useRef(new Set());
-    useEffect(() => {
-        const weeksByRepresentative = new Map(); // isoWeek -> a date in it
+    // Every (ISO week, group) pair this month needs, with a date to fetch it by.
+    const needed = useMemo(() => {
+        const byWeek = new Map();
         cells.forEach((d) => {
             const iso = getISOWeekNumber(d);
-            if (!weeksByRepresentative.has(iso)) weeksByRepresentative.set(iso, d);
+            if (!byWeek.has(iso)) byWeek.set(iso, d);
         });
-        weeksByRepresentative.forEach((repDate, iso) => {
+        const out = [];
+        byWeek.forEach((repDate, iso) => {
             (targetGroups || []).forEach((g) => {
-                const gid = String(g._id);
-                const has = schedules.some((s) => s.isoWeek === iso && String(s.groupId) === gid);
-                const reqKey = `${iso}|${gid}`;
-                if (!has && !requestedRef.current.has(reqKey)) {
-                    requestedRef.current.add(reqKey);
-                    dispatch(getScheduleWeekInfo({ date: repDate, groupId: gid }, navigate));
-                }
+                out.push({ key: `${iso}|${String(g._id)}`, iso, groupId: String(g._id), repDate });
             });
         });
+        return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [monthKey, groupsKey, cells]);
+
+    // Which of those aren't cached yet. Recomputed as results land, so the effect
+    // below settles once everything is in.
+    const missing = useMemo(
+        () => needed.filter(({ iso, groupId }) => !schedules
+            .some((s) => s.isoWeek === iso && String(s.groupId) === groupId)),
+        [needed, schedules]
+    );
+    const missingKey = missing.map((m) => m.key).join(',');
+
+    // Guards against re-firing a request that's already in flight (or that failed —
+    // we don't retry in a loop). Reset when the month or the group set changes.
+    const requestedRef = useRef(new Set());
+    useEffect(() => {
+        requestedRef.current = new Set();
     }, [monthKey, groupsKey]);
 
-    // Events on a given calendar date across all target groups (tagged with group).
+    useEffect(() => {
+        const toFetch = missing.filter((m) => !requestedRef.current.has(m.key));
+        if (!toFetch.length) return;
+        toFetch.forEach((m) => requestedRef.current.add(m.key));
+        setPending((n) => n + toFetch.length);
+        toFetch.forEach(({ repDate, groupId }) => {
+            Promise.resolve(dispatch(getScheduleWeekInfo({ date: repDate, groupId }, navigate)))
+                .finally(() => setPending((n) => Math.max(0, n - 1)));
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [missingKey]);
+
+    // Events on a calendar date across every target group (tagged with their group).
     const eventsForDate = (d) => {
         const iso = getISOWeekNumber(d);
         const code = dayCodeOf(d);
@@ -84,7 +108,9 @@ const MonthView = ({ date, targetGroups }) => {
                 if (day.day !== code) return;
                 (day.events || []).forEach((ev) => {
                     if (ev?.eventInfo && ev?.eventDate) {
-                        out.push({ ...ev, groupId: gid, groupName: g.name, intervalTime: ev.eventDate.time });
+                        out.push({
+                            ...ev, groupId: gid, groupName: g.name, intervalTime: ev.eventDate.time,
+                        });
                     }
                 });
             }));
@@ -92,46 +118,59 @@ const MonthView = ({ date, targetGroups }) => {
         return out.sort((a, b) => String(a.eventDate?.time).localeCompare(String(b.eventDate?.time)));
     };
 
-    const weekdayLabels = ORDERED_BACKEND_DAYS.map((c) => t(`assistant.weekday.${c}`, c));
-
     return (
         <div className={classes.month}>
             <div className={classes.weekHeader}>
-                {weekdayLabels.map((lbl, i) => (
-                    <div key={ORDERED_BACKEND_DAYS[i]} className={classes.weekHeaderCell}>{lbl}</div>
+                {ORDERED_BACKEND_DAYS.map((code) => (
+                    <div key={code} className={classes.weekHeaderCell}>
+                        {t(`assistant.weekday.${code}`, code)}
+                    </div>
                 ))}
             </div>
-            <div className={classes.grid}>
-                {cells.map((d) => {
-                    const events = eventsForDate(d);
-                    const inMonth = d.getMonth() === month;
-                    const isToday = sameDay(d, today);
-                    return (
-                        <button
-                            type="button"
-                            key={d.toISOString()}
-                            className={`${classes.cell} ${inMonth ? '' : classes.outMonth} ${isToday ? classes.today : ''}`}
-                            onClick={() => events.length && setDayEvents(events)}
-                        >
-                            <span className={classes.dayNum}>{d.getDate()}</span>
-                            <span className={classes.chips}>
-                                {events.slice(0, MAX_CHIPS).map((ev, idx) => (
-                                    <span
-                                        key={`${ev.eventInfo._id}-${idx}`}
-                                        className={classes.chip}
-                                        style={{ background: ev.eventInfo.color || colorForType(ev.eventInfo.type) }}
-                                        title={`${ev.eventDate.time} ${ev.eventInfo.name}`}
-                                    >
-                                        {ev.eventDate.time} {ev.eventInfo.name}
-                                    </span>
-                                ))}
-                                {events.length > MAX_CHIPS && (
-                                    <span className={classes.more}>{t('schedule.moreEvents', { count: events.length - MAX_CHIPS })}</span>
-                                )}
-                            </span>
-                        </button>
-                    );
-                })}
+
+            <div className={classes.gridWrap}>
+                {pending > 0 && (
+                    <div className={classes.loading}><Loader /></div>
+                )}
+                <div className={classes.grid}>
+                    {cells.map((d) => {
+                        const events = eventsForDate(d);
+                        const inMonth = d.getMonth() === month;
+                        const isToday = sameDay(d, today);
+                        return (
+                            <button
+                                type="button"
+                                key={d.toISOString()}
+                                className={[
+                                    classes.cell,
+                                    inMonth ? '' : classes.outMonth,
+                                    isToday ? classes.today : '',
+                                ].filter(Boolean).join(' ')}
+                                onClick={() => events.length && setDayEvents(events)}
+                            >
+                                <span className={classes.dayNum}>{d.getDate()}</span>
+                                <span className={classes.chips}>
+                                    {events.slice(0, MAX_CHIPS).map((ev, idx) => (
+                                        <span
+                                            key={`${ev.eventInfo._id}-${idx}`}
+                                            className={classes.chip}
+                                            style={{ '--chip-color': ev.eventInfo.color || colorForType(ev.eventInfo.type) }}
+                                            title={`${ev.eventDate.time} ${ev.eventInfo.name}`}
+                                        >
+                                            <span className={classes.chipTime}>{ev.eventDate.time}</span>
+                                            <span className={classes.chipName}>{ev.eventInfo.name}</span>
+                                        </span>
+                                    ))}
+                                    {events.length > MAX_CHIPS && (
+                                        <span className={classes.more}>
+                                            {t('schedule.moreEvents', { count: events.length - MAX_CHIPS })}
+                                        </span>
+                                    )}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {dayEvents && (

@@ -8,42 +8,48 @@
     flex-direction: column;
     gap: 18px;
     padding: 24px;
+    color: #414141;
 }
 
 .title {
     margin: 0;
-    font-size: 18px;
-    color: var(--clr-green-dark);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--clr-primary-text);
 }
 
+/* Tab strip echoes the week header: pink fill, active state = the deeper pink. */
 .tabs {
     display: flex;
-    gap: 8px;
+    gap: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid var(--clr-primary-bg2);
 }
 
 .tab {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid var(--clr-green, #2bb673);
-    border-radius: 10px;
-    background: none;
-    font-size: 14px;
-    color: #555;
+    border: none;
+    background-color: var(--clr-primary-bg);
+    color: var(--clr-primary-text);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background-color 200ms, color 200ms;
 
     &:hover {
-        background: rgba(43, 182, 115, 0.08);
+        background-color: var(--clr-primary-bg2);
     }
 }
 
 .tabActive {
-    background: var(--clr-green, #2bb673);
-    color: #fff;
-    border-color: var(--clr-green, #2bb673);
+    background-color: var(--clr-primary);
+    color: var(--clr-bg);
 
     &:hover {
-        background: var(--clr-green, #2bb673);
+        background-color: var(--clr-primary);
     }
 }
 
@@ -55,8 +61,8 @@
 
 .note {
     margin: 0;
-    font-size: 13px;
-    color: #555;
+    font-size: 14px;
+    color: var(--clr-primary-text);
 }
 
 .groupList {
@@ -67,11 +73,85 @@
     overflow-y: auto;
 }
 
-.pickers {
+/* Group picker in member mode: small selectable pills. */
+.groupChips {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
+    gap: 8px;
+}
+
+.groupChip {
+    padding: 5px 12px;
+    border: 2px solid var(--clr-green);
+    border-radius: 20px;
+    background-color: transparent;
+    color: var(--clr-green-dark);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms, color 200ms;
+
+    &:hover {
+        background-color: var(--clr-green-bg2);
+    }
+}
+
+.groupChipActive {
+    background-color: var(--clr-green);
+    border-color: var(--clr-green);
+    color: var(--clr-bg);
+
+    &:hover {
+        background-color: var(--clr-green-hover);
+    }
+}
+
+.memberList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 210px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.member {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--clr-border);
+    border-radius: 10px;
+    background-color: transparent;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 200ms, border-color 200ms;
+
+    &:hover {
+        background-color: var(--clr-primary-bg);
+        border-color: var(--clr-primary-bg2);
+    }
+}
+
+.memberActive {
+    background-color: var(--clr-primary-bg);
+    border-color: var(--clr-primary);
+}
+
+.memberName {
+    font-size: 15px;
+    font-weight: 600;
+    color: #414141;
+}
+
+.memberNick {
+    font-size: 13px;
+    color: var(--clr-primary-text);
 }
 
 .actions {
@@ -84,8 +164,9 @@
     padding: 0;
     border: none;
     background: none;
-    font-size: 13px;
-    color: #888;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--clr-primary-text);
     cursor: pointer;
     text-decoration: underline;
 }
@@ -96,15 +177,16 @@
     gap: 8px;
     max-height: 320px;
     overflow-y: auto;
-    padding-top: 4px;
-    border-top: 1px solid #eee;
+    padding-top: 12px;
+    border-top: 1px solid var(--clr-border);
 }
 
 .empty {
     margin: 8px 0;
-    font-size: 14px;
-    color: #888;
+    font-size: 15px;
+    color: var(--clr-primary-text);
     text-align: center;
+    opacity: 0.8;
 }
 
 .dayRow {
@@ -115,10 +197,10 @@
 
 .dayName {
     flex: 0 0 92px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
     padding-top: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--clr-primary-text);
 }
 
 .slots {
@@ -129,29 +211,32 @@
     min-width: 0;
 }
 
+/* Free = the green "available" language; busy = the pink event language. */
 .free {
-    padding: 3px 9px;
-    border-radius: 8px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    background-color: var(--clr-green-bg2);
+    border: 1px solid var(--clr-green-active);
+    color: var(--clr-green-dark);
     font-size: 13px;
-    background: rgba(43, 182, 115, 0.14);
-    color: var(--clr-green-dark, #1f7a4d);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.busy {
+    padding: 3px 10px;
+    border-radius: 5px;
+    background-color: var(--clr-primary-bg);
+    border: 1px solid var(--clr-primary-bg2);
+    color: var(--clr-primary-dark);
+    font-size: 13px;
     white-space: nowrap;
 }
 
 .full {
-    font-size: 13px;
-    color: #b06;
-    opacity: 0.7;
     padding: 3px 0;
-}
-
-.busy {
-    padding: 3px 9px;
-    border-radius: 8px;
-    font-size: 12px;
-    background: rgba(232, 140, 144, 0.18);
-    color: #a24;
-    white-space: nowrap;
+    font-size: 13px;
+    color: var(--clr-disabled);
 }
 
 .buttonGroup {

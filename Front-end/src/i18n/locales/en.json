@@ -299,6 +299,8 @@
     "fsGroupsHint": "Pick groups — we'll show the times when none of them is busy.",
     "fsMemberHint": "Pick a member — we'll show when they're free (across all their groups).",
     "fsSelectMember": "Member",
+    "fsSearchMember": "Search members by name",
+    "fsNoMemberMatch": "No members match that search.",
     "fsFind": "Find",
     "fsSearching": "Searching…",
     "fsFree": "Free",
@@ -321,7 +323,8 @@
     "unitH": "h",
     "unitM": "m",
     "viewWeek": "Week",
-    "viewMonth": "Month"
+    "viewMonth": "Month",
+    "adminOnly": "Group admins only"
   },
   "profile": {
     "age": "Age",
@@ -477,14 +480,62 @@
       "special": "At least one special character (@$!%*#?&)"
     },
     "flows": {
-      "confirmEmail": { "title": "Email confirmation", "loadingText": "Confirming your email, please wait…", "successTitle": "✓ Email confirmed!", "successText": "Your email has been confirmed successfully.", "errorTitle": "✗ Confirmation error" },
-      "confirmGroup": { "title": "Joining the group", "loadingText": "Processing the invitation…", "successTitle": "✓ Invitation accepted!", "successText": "You have successfully joined the group.", "errorTitle": "✗ Failed to accept the invitation" },
-      "declineGroup": { "title": "Decline invitation", "loadingText": "Processing the request…", "successTitle": "✓ Invitation declined", "successText": "The group invitation has been declined.", "errorTitle": "✗ Failed to decline the invitation" },
-      "confirmAdmin": { "title": "Administrator confirmation", "loadingText": "Processing the request…", "successTitle": "✓ Confirmed!", "successText": "The administrator has been confirmed successfully.", "errorTitle": "✗ Failed to confirm" },
-      "declineAdmin": { "title": "Decline administrator", "loadingText": "Processing the request…", "successTitle": "✓ Declined", "successText": "The administrator request has been declined.", "errorTitle": "✗ Failed to decline" },
-      "confirmUser": { "title": "User confirmation", "loadingText": "Processing the request…", "successTitle": "✓ User confirmed!", "successText": "The user has been added to the group successfully.", "errorTitle": "✗ Failed to confirm" },
-      "declineUser": { "title": "Decline request", "loadingText": "Processing the request…", "successTitle": "✓ Request declined", "successText": "The user's request has been declined.", "errorTitle": "✗ Failed to decline" },
-      "resetPassword": { "title": "Change password", "loadingText": "Saving the new password…", "successTitle": "✓ Password changed!", "successText": "Your password has been changed successfully. You can now sign in.", "errorTitle": "✗ Failed to change the password" }
+      "confirmEmail": {
+        "title": "Email confirmation",
+        "loadingText": "Confirming your email, please wait…",
+        "successTitle": "✓ Email confirmed!",
+        "successText": "Your email has been confirmed successfully.",
+        "errorTitle": "✗ Confirmation error"
+      },
+      "confirmGroup": {
+        "title": "Joining the group",
+        "loadingText": "Processing the invitation…",
+        "successTitle": "✓ Invitation accepted!",
+        "successText": "You have successfully joined the group.",
+        "errorTitle": "✗ Failed to accept the invitation"
+      },
+      "declineGroup": {
+        "title": "Decline invitation",
+        "loadingText": "Processing the request…",
+        "successTitle": "✓ Invitation declined",
+        "successText": "The group invitation has been declined.",
+        "errorTitle": "✗ Failed to decline the invitation"
+      },
+      "confirmAdmin": {
+        "title": "Administrator confirmation",
+        "loadingText": "Processing the request…",
+        "successTitle": "✓ Confirmed!",
+        "successText": "The administrator has been confirmed successfully.",
+        "errorTitle": "✗ Failed to confirm"
+      },
+      "declineAdmin": {
+        "title": "Decline administrator",
+        "loadingText": "Processing the request…",
+        "successTitle": "✓ Declined",
+        "successText": "The administrator request has been declined.",
+        "errorTitle": "✗ Failed to decline"
+      },
+      "confirmUser": {
+        "title": "User confirmation",
+        "loadingText": "Processing the request…",
+        "successTitle": "✓ User confirmed!",
+        "successText": "The user has been added to the group successfully.",
+        "errorTitle": "✗ Failed to confirm"
+      },
+      "declineUser": {
+        "title": "Decline request",
+        "loadingText": "Processing the request…",
+        "successTitle": "✓ Request declined",
+        "successText": "The user's request has been declined.",
+        "errorTitle": "✗ Failed to decline"
+      },
+      "resetPassword": {
+        "title": "Change password",
+        "loadingText": "Saving the new password…",
+        "successTitle": "✓ Password changed!",
+        "successText": "Your password has been changed successfully. You can now sign in.",
+        "errorTitle": "✗ Failed to change the password"
+      }
     }
   },
   "confirmEmail": {
@@ -572,7 +623,6 @@
     "everyNWeeks": "Every {{n}} weeks",
     "repeatUntil": "Repeat until",
     "recurringCreated": "Recurring events created: {{count}}",
-    "rsvp": "Will you attend?",
     "rsvp_going": "Going",
     "rsvp_maybe": "Maybe",
     "rsvp_declined": "Declined",

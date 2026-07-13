@@ -5,8 +5,8 @@ import { useDispatch } from 'react-redux';
 import classes from './ModalFreeSlots.module.scss';
 import Modal from '../../../UI/Modal/Modal';
 import Button from '../../../UI/Button/Button';
+import Input from '../../../UI/Input/Input';
 import Checkbox from '../../../UI/Checkbox/Checkbox';
-import Dropdown from '../../../UI/Dropdown/Dropdown';
 import Loader from '../../../UI/Loader/Loader';
 import { ORDERED_BACKEND_DAYS } from '../../../constants/scheduleEnum';
 import { getGroupFreeSlots, getMemberFreeSlots } from '../../../api/scheduleFetch';
@@ -28,17 +28,16 @@ const ModalFreeSlots = ({ modalClose, groups, defaultGroupId, date }) => {
         defaultGroupId ? [defaultGroupId] : groups.map((g) => g._id)
     ));
 
-    // Member mode: pick a group, then a member of it.
+    // Member mode: pick a group, then search a member of it.
     const [memberGroupId, setMemberGroupId] = useState(defaultGroupId || groups[0]?._id || '');
     const [members, setMembers] = useState([]);
     const [membersLoading, setMembersLoading] = useState(false);
+    const [memberQuery, setMemberQuery] = useState('');
     const [selectedMember, setSelectedMember] = useState('');
 
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showBusy, setShowBusy] = useState(false);
-
-    const dayName = useCallback((code) => t(`assistant.weekday.${code}`, code), [t]);
 
     const toggleGroup = useCallback((id) => {
         setResult(null);
@@ -47,11 +46,12 @@ const ModalFreeSlots = ({ modalClose, groups, defaultGroupId, date }) => {
 
     // Load the chosen group's members when in member mode.
     useEffect(() => {
-        if (mode !== 'member' || !memberGroupId) return;
+        if (mode !== 'member' || !memberGroupId) return undefined;
         let alive = true;
         setMembersLoading(true);
         setMembers([]);
         setSelectedMember('');
+        setMemberQuery('');
         setResult(null);
         (async () => {
             const res = await fetchGroupInfo(memberGroupId, navigate);
@@ -60,14 +60,22 @@ const ModalFreeSlots = ({ modalClose, groups, defaultGroupId, date }) => {
                 .filter((m) => m?.user?._id && m.type !== 'not verified')
                 .map((m) => ({
                     id: m.user._id,
-                    name: [m.user.firstName, m.user.lastName].filter(Boolean).join(' ') || m.user.nickname || '—',
+                    name: [m.user.firstName, m.user.lastName].filter(Boolean).join(' ')
+                        || m.user.nickname || '—',
+                    nickname: m.user.nickname || '',
                 }));
             setMembers(list);
-            if (list.length) setSelectedMember(list[0].id);
             setMembersLoading(false);
         })();
         return () => { alive = false; };
     }, [mode, memberGroupId, navigate]);
+
+    const shownMembers = useMemo(() => {
+        const q = memberQuery.trim().toLowerCase();
+        if (!q) return members;
+        return members.filter((m) => m.name.toLowerCase().includes(q)
+            || m.nickname.toLowerCase().includes(q));
+    }, [members, memberQuery]);
 
     const handleFind = useCallback(async () => {
         setLoading(true);
@@ -82,7 +90,10 @@ const ModalFreeSlots = ({ modalClose, groups, defaultGroupId, date }) => {
                 res = await getGroupFreeSlots({ groupIds: selectedIds, date }, navigate);
             } else {
                 if (!selectedMember) return;
-                res = await getMemberFreeSlots({ groupId: memberGroupId, userId: selectedMember, date }, navigate);
+                res = await getMemberFreeSlots(
+                    { groupId: memberGroupId, userId: selectedMember, date },
+                    navigate
+                );
             }
             if (res && res.ok !== false && res.data) setResult(res.data);
             else dispatch(showErrorNotification(t('schedule.fsError')));
@@ -92,15 +103,6 @@ const ModalFreeSlots = ({ modalClose, groups, defaultGroupId, date }) => {
             setLoading(false);
         }
     }, [mode, selectedIds, selectedMember, memberGroupId, date, navigate, dispatch, t]);
-
-    const groupOptions = useMemo(
-        () => groups.map((g) => ({ title: g.name, value: g._id })),
-        [groups]
-    );
-    const memberOptions = useMemo(
-        () => members.map((m) => ({ title: m.name, value: m.id })),
-        [members]
-    );
 
     const hasAnyFree = result && ORDERED_BACKEND_DAYS.some((d) => (result.free?.[d] || []).length);
     const canFind = mode === 'groups' ? selectedIds.length > 0 : !!selectedMember;
@@ -146,38 +148,60 @@ const ModalFreeSlots = ({ modalClose, groups, defaultGroupId, date }) => {
                 ) : (
                     <section className={classes.section}>
                         <p className={classes.note}>{t('schedule.fsMemberHint')}</p>
-                        <div className={classes.pickers}>
-                            {groupOptions.length > 1 && (
-                                <Dropdown
-                                    color="green"
-                                    borderRadius={5}
-                                    label={t('schedule.group')}
-                                    arrValue={groupOptions}
-                                    defaultIndex={Math.max(0, groups.findIndex((g) => g._id === memberGroupId))}
-                                    changeValueHandler={(val) => setMemberGroupId(val)}
-                                />
-                            )}
-                            {membersLoading ? (
-                                <Loader />
-                            ) : members.length ? (
-                                <Dropdown
-                                    key={`members-${memberGroupId}`}
-                                    color="green"
-                                    borderRadius={5}
-                                    label={t('schedule.fsSelectMember')}
-                                    arrValue={memberOptions}
-                                    defaultIndex={0}
-                                    changeValueHandler={(val) => { setSelectedMember(val); setResult(null); }}
-                                />
-                            ) : (
-                                <p className={classes.note}>{t('schedule.fsNoMembers')}</p>
-                            )}
-                        </div>
+
+                        {groups.length > 1 && (
+                            <div className={classes.groupChips}>
+                                {groups.map((g) => (
+                                    <button
+                                        key={g._id}
+                                        type="button"
+                                        className={`${classes.groupChip} ${memberGroupId === g._id ? classes.groupChipActive : ''}`}
+                                        onClick={() => setMemberGroupId(g._id)}
+                                    >
+                                        {g.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        <Input
+                            placeholder={t('schedule.fsSearchMember')}
+                            value={memberQuery}
+                            onChange={(e) => setMemberQuery(e.target.value)}
+                        />
+
+                        {membersLoading ? (
+                            <Loader />
+                        ) : !members.length ? (
+                            <p className={classes.note}>{t('schedule.fsNoMembers')}</p>
+                        ) : !shownMembers.length ? (
+                            <p className={classes.note}>{t('schedule.fsNoMemberMatch')}</p>
+                        ) : (
+                            <ul className={classes.memberList}>
+                                {shownMembers.map((m) => (
+                                    <li key={m.id}>
+                                        <button
+                                            type="button"
+                                            className={`${classes.member} ${selectedMember === m.id ? classes.memberActive : ''}`}
+                                            onClick={() => { setSelectedMember(m.id); setResult(null); }}
+                                        >
+                                            <span className={classes.memberName}>{m.name}</span>
+                                            {m.nickname && <span className={classes.memberNick}>@{m.nickname}</span>}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </section>
                 )}
 
                 <div className={classes.actions}>
-                    <Button typeColor="green" onClick={handleFind} disabled={loading || !canFind}>
+                    <Button
+                        typeColor="green"
+                        beforeImg="free-time"
+                        onClick={handleFind}
+                        disabled={loading || !canFind}
+                    >
                         {loading ? t('schedule.fsSearching') : t('schedule.fsFind')}
                     </Button>
                     {result && (
@@ -200,7 +224,7 @@ const ModalFreeSlots = ({ modalClose, groups, defaultGroupId, date }) => {
                             if (!free.length && !busy.length && !showBusy) return null;
                             return (
                                 <div key={d} className={classes.dayRow}>
-                                    <span className={classes.dayName}>{dayName(d)}</span>
+                                    <span className={classes.dayName}>{t(`assistant.weekday.${d}`, d)}</span>
                                     <div className={classes.slots}>
                                         {free.length ? (
                                             free.map((w, i) => (

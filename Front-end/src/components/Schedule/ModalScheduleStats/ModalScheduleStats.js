@@ -34,7 +34,7 @@ const ModalScheduleStats = ({ modalClose, data, title }) => {
             <div className={classes.barTrack}>
                 <div
                     className={classes.barFill}
-                    style={{ width: `${Math.round((minutes / max) * 100)}%`, background: color || 'var(--clr-green, #2bb673)' }}
+                    style={{ width: `${Math.round((minutes / max) * 100)}%`, background: color || 'var(--clr-green)' }}
                 />
             </div>
             <span className={classes.barValue}>{fmt(minutes)}</span>
@@ -79,7 +79,13 @@ const ModalScheduleStats = ({ modalClose, data, title }) => {
                             <section className={classes.section}>
                                 <h4 className={classes.sectionTitle}>{t('schedule.statByTag')}</h4>
                                 {stats.tags.map((x) => (
-                                    <Bar key={x.name} label={x.name} minutes={x.minutes} max={maxTag} color="#9B6DD6" />
+                                    <Bar
+                                        key={x.name}
+                                        label={x.name}
+                                        minutes={x.minutes}
+                                        max={maxTag}
+                                        color="var(--clr-primary-bg2)"
+                                    />
                                 ))}
                             </section>
                         )}
