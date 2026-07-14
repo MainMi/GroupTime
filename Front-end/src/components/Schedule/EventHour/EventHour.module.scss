@@ -127,61 +127,120 @@
         }
     }
 
-    /* Several events in one slot: the same chip language as the month view — a
-       type-coloured left edge, the start time, then all remaining width to the
-       title (the full range lives in the tooltip / the event modal). */
+    /* Several events share one slot. It stays a single cell, but the background is
+       split into equal bands (one per event, see bandBackground) so two events read
+       as half one colour / half the other. Each row sits on its own band and keeps
+       as much of the single-event card as its share of the height allows. */
     .stack {
+        position: relative;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        gap: 3px;
         width: 100%;
         min-width: 0;
         max-width: 100%;
         height: 100%;
-        padding: 5px;
-        background-color: transparent;
+        padding: 2px;
+        gap: 2px;
+        background-color: var(--clr-primary-bg);
+        border: 1px solid var(--clr-primary-bg2);
+        border-radius: 5px;
         cursor: pointer;
+        box-shadow: 1px 2px 4px 0px var(--clr-shadow);
         transition: transform 250ms;
         overflow: hidden;
 
         &:hover { transform: scale(1.03); }
 
         .stackRow {
+            flex: 1 1 0;
             display: flex;
-            align-items: baseline;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1px;
+            min-width: 0;
+            min-height: 0;
+            padding: 2px 5px;
+            border-left: 3px solid var(--chip-color, var(--clr-primary-bg2));
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .stackName {
+            min-width: 0;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.2;
+            color: #414141;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .stackMeta {
+            display: flex;
+            align-items: center;
             gap: 4px;
             min-width: 0;
-            padding: 3px 5px;
-            background-color: var(--clr-primary-bg);
-            border: 1px solid var(--clr-primary-bg2);
-            border-left: 4px solid var(--chip-color, var(--clr-primary-bg2));
-            border-radius: 5px;
-            font-size: 11px;
-            line-height: 1.25;
-
-            .stackTime {
-                flex: 0 0 auto;
-                color: var(--clr-primary-dark);
-                font-weight: 600;
-            }
-            .stackName {
-                flex: 1;
-                min-width: 0;
-                color: #414141;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
         }
+
+        .stackTime {
+            flex: 0 0 auto;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--clr-primary-dark);
+        }
+
+        .stackTag {
+            min-width: 0;
+            padding: 0 6px;
+            border: 1px solid;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 600;
+            line-height: 1.5;
+            color: rgba(0, 0, 0, 0.72);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .morePill {
-            align-self: flex-start;
+            position: absolute;
+            right: 3px;
+            bottom: 3px;
             font-size: 10px;
             font-weight: 700;
             color: #fff;
             background-color: var(--clr-primary-active);
             border-radius: 10px;
-            padding: 1px 8px;
+            padding: 0 7px;
+        }
+
+        /* Two events: each half is basically the single-event card — name, time, tag. */
+        &.roomy {
+            .stackName {
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+        }
+
+        /* Three: name and time survive, the type tag is the first thing to go. */
+        &.medium {
+            .stackTag { display: none; }
+        }
+
+        /* Four or more: one tight line each — time first, then the name. */
+        &.tight {
+            .stackRow {
+                flex-direction: row;
+                align-items: baseline;
+                gap: 4px;
+            }
+            .stackMeta { order: 1; flex: 0 0 auto; }
+            .stackName { order: 2; flex: 1; font-size: 10px; }
+            .stackTag { display: none; }
         }
     }
 }

@@ -93,30 +93,74 @@ const SingleEventCard = ({ ev, showModalFn, addEventInfoFn, groupMeta, isAllMode
     );
 };
 
-// `intervalTime` is the full "8:30-10:00" range. In a stacked cell that range eats
-// the row and leaves nothing for the name, so — like the month view — show only the
-// start time and give the rest of the width to the title.
+// `intervalTime` is the full "8:30-10:00" range. Stacked cells only have room for
+// the start time — the range stays in the tooltip and the event modal.
 const startOf = (intervalTime) => String(intervalTime || '').split('-')[0].trim();
+
+// How many events still get their own row before we collapse the tail into "+N".
+// Past four rows a slot is unreadable at any realistic cell height.
+const MAX_ROWS = 4;
+
+// How much each row can show, given how many share the slot:
+//   2 → the full single-event treatment (name, time, type tag)
+//   3 → name + time, no tag
+//   4+ → one tight line each, plus a "+N" pill for the overflow
+const densityFor = (count) => {
+    if (count === 2) return 'roomy';
+    if (count === 3) return 'medium';
+    return 'tight';
+};
+
+// The slot is one cell, but its background is split into equal bands — one per
+// event shown — so two events read as "half this colour, half that one", three as
+// thirds, and so on. Each row sits exactly on its own band.
+const bandBackground = (colors) => {
+    if (colors.length < 2) return undefined;
+    const step = 100 / colors.length;
+    const stops = colors.flatMap((c, i) => [
+        `${c}33 ${i * step}%`,
+        `${c}33 ${(i + 1) * step}%`,
+    ]);
+    return `linear-gradient(180deg, ${stops.join(', ')})`;
+};
 
 const EventStack = ({ events, showModalFn, addEventInfoFn }) => {
     const { t } = useTranslation();
     const open = () => { showModalFn(); addEventInfoFn(events); };
-    const shown = events.slice(0, 3);
+
+    const shown = events.slice(0, MAX_ROWS);
     const rest = events.length - shown.length;
+    const density = densityFor(events.length);
+    const colors = shown.map(getEventColor);
 
     return (
-        <div className={classes.stack} onClick={open}>
+        <div
+            className={`${classes.stack} ${classes[density]}`}
+            style={{ backgroundImage: bandBackground(colors) }}
+            onClick={open}
+        >
             {shown.map((ev, idx) => {
-                const color = getEventColor(ev);
+                const color = colors[idx];
+                const name = ev.eventInfo?.name || t('schedule.untitled');
                 return (
                     <div
                         key={(ev.eventInfo?._id || idx) + '-' + idx}
                         className={classes.stackRow}
                         style={{ '--chip-color': color }}
-                        title={`${ev.intervalTime} ${ev.eventInfo?.name || ''}`.trim()}
+                        title={`${ev.intervalTime} ${name}`}
                     >
-                        <span className={classes.stackTime}>{startOf(ev.intervalTime)}</span>
-                        <span className={classes.stackName}>{ev.eventInfo?.name || t('schedule.untitled')}</span>
+                        <span className={classes.stackName}>{name}</span>
+                        <span className={classes.stackMeta}>
+                            <span className={classes.stackTime}>{startOf(ev.intervalTime)}</span>
+                            {ev.eventInfo?.type && (
+                                <span
+                                    className={classes.stackTag}
+                                    style={{ backgroundColor: color, borderColor: color }}
+                                >
+                                    {ev.eventInfo.type}
+                                </span>
+                            )}
+                        </span>
                     </div>
                 );
             })}
