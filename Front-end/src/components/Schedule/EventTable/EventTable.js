@@ -32,7 +32,6 @@ const EventTable = ({
     onDeleteEvent,
     onMoveEvent,
     groupMeta,
-    groupId,
     isAllMode,
     gmtDelta = 0,
     gmtDeltaByGroup
@@ -282,7 +281,6 @@ const EventTable = ({
                     onHiddenCart={toggleShowEventHandler}
                     onEditEvent={onEditEvent}
                     onDeleteEvent={onDeleteEvent}
-                    fallbackGroupId={groupId}
                 />
             )}
             <DragOverlay dropAnimation={null}>

@@ -7,7 +7,6 @@ const {
     importService,
     groupService,
     recurrenceService,
-    rsvpService,
 } = require('../service/schedule');
 
 module.exports = {
@@ -59,7 +58,6 @@ module.exports = {
             const { day, countWeek } = date;
 
             await eventInfoService.removeEventInfoById(eventInfoId);
-            await rsvpService.deleteForEvent(eventInfoId);
 
             await scheduleWeekService.deletePair(groupId, countWeek, day, eventInfoId, true);
 
@@ -239,7 +237,6 @@ module.exports = {
             const { countWeek, day } = date;
 
             await eventInfoService.removeEventInfoById(eventInfoId);
-            await rsvpService.deleteForEvent(eventInfoId);
 
             await scheduleWeekService.deletePair(groupId, countWeek, day, eventInfoId, false);
 

@@ -72,10 +72,6 @@ const urlEnum = {
   availabilitySlots: `${api}/schedule/availability/slots`,
   availabilityMember: `${api}/schedule/availability/member`,
 
-  // RSVP (event attendance)
-  rsvpSet: `${api}/schedule/rsvp/set`,
-  rsvpGet: `${api}/schedule/rsvp/get`,
-
   // public read-only schedule (shared by token, no auth)
   schedulePublic: `${api}/schedule/public`,
 

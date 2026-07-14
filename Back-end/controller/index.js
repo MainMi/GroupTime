@@ -6,5 +6,4 @@ module.exports = {
     eventDateController: require('./eventDate.controller'),
     eventInfoController: require('./eventInfo.controller'),
     availabilityController: require('./availability.controller'),
-    rsvpController: require('./rsvp.controller'),
 };

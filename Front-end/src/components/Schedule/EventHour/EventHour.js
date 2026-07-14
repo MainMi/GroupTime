@@ -93,6 +93,11 @@ const SingleEventCard = ({ ev, showModalFn, addEventInfoFn, groupMeta, isAllMode
     );
 };
 
+// `intervalTime` is the full "8:30-10:00" range. In a stacked cell that range eats
+// the row and leaves nothing for the name, so — like the month view — show only the
+// start time and give the rest of the width to the title.
+const startOf = (intervalTime) => String(intervalTime || '').split('-')[0].trim();
+
 const EventStack = ({ events, showModalFn, addEventInfoFn }) => {
     const { t } = useTranslation();
     const open = () => { showModalFn(); addEventInfoFn(events); };
@@ -104,9 +109,13 @@ const EventStack = ({ events, showModalFn, addEventInfoFn }) => {
             {shown.map((ev, idx) => {
                 const color = getEventColor(ev);
                 return (
-                    <div key={(ev.eventInfo?._id || idx) + '-' + idx} className={classes.stackRow}>
-                        <span className={classes.dot} style={{ backgroundColor: color }} />
-                        <span className={classes.stackTime}>{ev.intervalTime}</span>
+                    <div
+                        key={(ev.eventInfo?._id || idx) + '-' + idx}
+                        className={classes.stackRow}
+                        style={{ '--chip-color': color }}
+                        title={`${ev.intervalTime} ${ev.eventInfo?.name || ''}`.trim()}
+                    >
+                        <span className={classes.stackTime}>{startOf(ev.intervalTime)}</span>
                         <span className={classes.stackName}>{ev.eventInfo?.name || t('schedule.untitled')}</span>
                     </div>
                 );

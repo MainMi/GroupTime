@@ -632,31 +632,31 @@ const SchedulePage = () => {
                             />
                         )}
                         {viewableGroups.length > 0 && (
-                            <Button
-                                typeColor="green"
-                                beforeImg="free-time"
-                                onClick={() => setIsFreeSlots(true)}
-                            >
-                                {t('schedule.freeSlots')}
-                            </Button>
+                            <span title={t('schedule.freeSlots')} style={{ display: 'inline-flex' }}>
+                                <ButtonSmall
+                                    centerImg="free-time"
+                                    typeColor="green"
+                                    onClick={() => setIsFreeSlots(true)}
+                                />
+                            </span>
                         )}
                         {existingItem?.data && (
-                            <Button
-                                typeColor="green"
-                                beforeImg="stats"
-                                onClick={() => setIsStats(true)}
-                            >
-                                {t('schedule.stats')}
-                            </Button>
+                            <span title={t('schedule.stats')} style={{ display: 'inline-flex' }}>
+                                <ButtonSmall
+                                    centerImg="stats"
+                                    typeColor="green"
+                                    onClick={() => setIsStats(true)}
+                                />
+                            </span>
                         )}
                         {!isAllMode && groupInfo._id && (
-                            <Button
-                                typeColor="green"
-                                beforeImg="import-export"
-                                onClick={() => setIsImportExport(true)}
-                            >
-                                {t('schedule.importExport')}
-                            </Button>
+                            <span title={t('schedule.importExport')} style={{ display: 'inline-flex' }}>
+                                <ButtonSmall
+                                    centerImg="import-export"
+                                    typeColor="green"
+                                    onClick={() => setIsImportExport(true)}
+                                />
+                            </span>
                         )}
                         {canEdit && (
                             <span data-tour="schedule-create" style={{ display: 'inline-flex' }}>
@@ -685,7 +685,6 @@ const SchedulePage = () => {
                         scheduleWeek={existingItem}
                         activeFilter={activeFilter}
                         groupMeta={groupMeta}
-                        groupId={!isAllMode ? groupInfo._id : null}
                         isAllMode={isAllMode}
                         gmtDelta={gmtDelta}
                         gmtDeltaByGroup={gmtDeltaByGroup}

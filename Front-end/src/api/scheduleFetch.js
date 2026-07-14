@@ -110,22 +110,3 @@ export function getMemberFreeSlots(data, navigate) {
     body: { groupId: data.groupId, userId: data.userId, date: data.date }
   }, navigate);
 }
-
-// Read attendance responses for an event. Returns
-// { data: { counts, myStatus, total }, ok }.
-export function getRsvp(data, navigate) {
-  return fetchAuth({
-    url: urlEnum.rsvpGet,
-    method: 'POST',
-    body: { groupId: data.groupId, eventInfoId: data.eventInfoId }
-  }, navigate);
-}
-
-// Set (or clear, with status 'none') the caller's response; returns the fresh summary.
-export function setRsvp(data, navigate) {
-  return fetchAuth({
-    url: urlEnum.rsvpSet,
-    method: 'POST',
-    body: { groupId: data.groupId, eventInfoId: data.eventInfoId, status: data.status }
-  }, navigate);
-}
