@@ -1,15 +1,13 @@
 FROM node:18-alpine AS build
 
-# CRA bakes env vars into the bundle at build time.
-ARG REACT_APP_API_URL=http://localhost:5000/api
-ARG REACT_APP_SECRET_KEY=SecretAESKey
-ENV REACT_APP_API_URL=$REACT_APP_API_URL \
-    REACT_APP_SECRET_KEY=$REACT_APP_SECRET_KEY
+# Vite inlines env vars (VITE_*) into the bundle at build time.
+ARG VITE_API_URL=http://localhost:5000/api
+ENV VITE_API_URL=$VITE_API_URL
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci
 
 COPY . .
 RUN npm run build

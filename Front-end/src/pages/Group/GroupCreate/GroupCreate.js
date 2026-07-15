@@ -154,7 +154,7 @@ const GroupCreate = () => {
                         <AddUserForm editUser={editUser} readyAddUsers={readyAddUsers} onAddUser={handleAddUser} navigate={navigate} />
                     </div>
                     <div className={classes.usersBox}>
-                        {readyAddUsers.map((userInfo, idx) => <div className={classes.userCardBox} id={userInfo.user.id}>
+                        {readyAddUsers.map((userInfo, idx) => <div key={userInfo.user.id} className={classes.userCardBox} id={userInfo.user.id}>
                             <UserCard userInfo={userInfo} id={userInfo.user.id}></UserCard>
                             <div className={classes.buttonBox}>
                                 <ButtonSmall

@@ -1,4 +1,4 @@
-import { REACT_APP_API_URL as api } from '../config/config';
+import { API_URL as api } from '../config/config';
 
 const urlEnum = {
   // auth

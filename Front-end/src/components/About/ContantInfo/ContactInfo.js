@@ -9,8 +9,8 @@ const ContactInfo = (props) => {
         <img className={classes.avatar} src={teamInfo.avatar} alt={`Avatar ${teamName}`}></img>
         <h3>{teamInfo.fullname}</h3>
         {isContacts && <div className={classes.contact}>
-            {teamInfo.contacts.map((user, index) => {
-                return <label for={`${user.type}`}>
+            {teamInfo.contacts.map((user) => {
+                return <label key={user.type} htmlFor={`${user.type}`}>
                     <img src={`../../../static/image/constactsInfo/${user.type}-${color}.svg`} alt={`${user.type}`}></img>
                     <p>{user.value}</p>
                 </label>
