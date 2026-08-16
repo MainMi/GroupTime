@@ -263,7 +263,7 @@ npm run lint
 
 ## Деплой
 
-Проєкт живе на безкоштовних тарифах: **MongoDB Atlas** (база) + **Render** (API, Docker) + **Vercel** (фронт). Покрокова інструкція, змінні середовища й альтернативи — у **[DEPLOY.md](DEPLOY.md)**.
+Проєкт живе на безкоштовних тарифах: **MongoDB Atlas** (база) + **Render** (API, Docker) + **Vercel** (фронт). API має власний `Dockerfile` (root directory — `Back-end`), фронт збирається через Vite у `build/`. Обидва деплояться з `main`.
 
 ---
 

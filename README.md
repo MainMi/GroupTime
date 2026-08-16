@@ -263,7 +263,7 @@ In **Profile**: avatar (upload and crop), your GMT offset, and Telegram for remi
 
 ## Deployment
 
-The project runs on free tiers: **MongoDB Atlas** (database) + **Render** (API, Docker) + **Vercel** (front-end). Step-by-step instructions, environment variables and alternatives are in **[DEPLOY.md](DEPLOY.md)**.
+The project runs on free tiers: **MongoDB Atlas** (database) + **Render** (API, Docker) + **Vercel** (front-end). The API ships a `Dockerfile` (root directory `Back-end`); the front-end builds with Vite to `build/`. Both deploy from `main`.
 
 ---
 
