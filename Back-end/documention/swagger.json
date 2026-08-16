@@ -2,8 +2,8 @@
     "swagger": "2.0",
     "info": {
         "version": "1.3.8.5",
-        "title": "HiddenWarrionKPI",
-        "description": "Documention for HiddenWarrionKPI"
+        "title": "GroupTime",
+        "description": "Documention for GroupTime"
     },
     "paths": {
         "/api/group/info": {
