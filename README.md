@@ -8,7 +8,7 @@
 
 ![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![Vite 6](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
-![Node](https://img.shields.io/badge/Node-18+-339933?logo=nodedotjs&logoColor=white)
+![Node](https://img.shields.io/badge/Node-20+-339933?logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
 
@@ -127,7 +127,7 @@ Compose supplies `MONGODB_URL`, `PORT` and `FROENT_URL` itself; everything else 
 
 ### Option 2 — Locally
 
-**Requirements:** Node.js 18+, and MongoDB — either running locally or a free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster.
+**Requirements:** Node.js 20+ (`node-ical` needs the `v` regex flag), and MongoDB — either running locally or a free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster.
 
 ```bash
 git clone https://github.com/MainMi/GroupTime.git
