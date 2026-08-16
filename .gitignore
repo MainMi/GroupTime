@@ -15,8 +15,11 @@ _local/
 # has its own package.json and reads TELEGRAM_BOT_TOKEN from Back-end/.env)
 /telegram-bot/
 
-# Docs and Claude Code working files
+# Docs and Claude Code working files — the project docs are the exceptions
 *.md
+!README.md
+!README.uk.md
+!DEPLOY.md
 CLAUDE.md
 .claude/
 
@@ -28,5 +31,3 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
-
-package-lock.json

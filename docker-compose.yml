@@ -27,8 +27,7 @@ services:
     build:
       context: ./Front-end
       args:
-        REACT_APP_API_URL: http://localhost:5000/api
-        REACT_APP_SECRET_KEY: SecretAESKey
+        VITE_API_URL: http://localhost:5000/api
     restart: unless-stopped
     depends_on:
       - backend
