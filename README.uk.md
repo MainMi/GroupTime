@@ -12,6 +12,10 @@
 ![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
 
+**[Живе демо](https://group-time-indol.vercel.app)** · **[Документація API](https://grouptime.onrender.com/api/docs/)**
+
+<sub>API живе на безкоштовному інстансі Render, який засинає після ~15 хв простою — перший запит може будитися до хвилини.</sub>
+
 </div>
 
 ---
