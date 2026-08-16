@@ -103,7 +103,8 @@
     "genericError": "Something went wrong. Please try again.",
     "registerError": "Registration error. Please try again.",
     "checkEmail": "Please check your email to confirm your registration!",
-    "invalidCredentials": "Wrong email or password. Please check your details."
+    "invalidCredentials": "Wrong email or password. Please check your details.",
+    "googleError": "Google sign-in didn't go through. Try again."
   },
   "errors": {
     "sessionExpired": "Your session has expired. Please sign in again.",
@@ -178,7 +179,9 @@
     "forgotPassword": "Forgot password?",
     "forgotPasswordTitle": "Password recovery",
     "forgotPasswordText": "Enter your account e-mail and we will send you a reset link.",
-    "forgotPasswordSent": "Password reset e-mail sent"
+    "forgotPasswordSent": "Password reset e-mail sent",
+    "or": "or",
+    "googleUnavailable": "Google sign-in couldn't load. Use your email and password."
   },
   "filter": {
     "eventType": "Event type",

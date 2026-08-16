@@ -1,0 +1,43 @@
+.googleBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+// A hairline rule with the label sitting in a gap, rather than a boxed "OR" —
+// it separates the two sign-in paths without competing with the submit button.
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    color: #414141;
+    font-size: 13px;
+
+    &::before,
+    &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: rgba(65, 65, 65, 0.18);
+    }
+
+    span {
+        white-space: nowrap;
+    }
+}
+
+.button {
+    display: flex;
+    justify-content: center;
+    min-height: 40px;
+}
+
+.unavailable {
+    margin: 0;
+    font-size: 13px;
+    color: #CB5456;
+    text-align: center;
+}

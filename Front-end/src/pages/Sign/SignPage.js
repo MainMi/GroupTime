@@ -17,6 +17,7 @@ import validateFn from '../../constants/validateFn.enum';
 import { showErrorMsg } from '../../error/error.validate.msg';
 import { useTranslation } from 'react-i18next';
 import ModalForgotPassword from '../../components/Sign/ModalForgotPassword/ModalForgotPassword';
+import GoogleSignIn from '../../components/Sign/GoogleSignIn/GoogleSignIn';
 
 const SignPage = () => {
     const dispatch = useDispatch();
@@ -232,6 +233,7 @@ const SignPage = () => {
                     />
                 </div>
                 <Button height={'fit-content'} disabled={!isValidRegister} typeBtn="submit">{t('sign.signUpButton')}</Button>
+                <GoogleSignIn />
                 <div className={classes.mobileButtonBox}>
                     <p>{t('sign.haveAccount')}</p>
                     <Link to={'/sign?mode=signIn'} >{t('sign.enter')}</Link>
@@ -269,6 +271,7 @@ const SignPage = () => {
                     >{t('sign.forgotPassword')}</button>
                 </div>
                 <Button height={'fit-content'} disabled={!isLoginValid}>{t('sign.enter')}</Button>
+                <GoogleSignIn />
                 <div className={classes.mobileButtonBox}>
                     <p>{t('sign.noAccount')}</p>
                     <Link to={'/sign?mode=signUp'}>{t('sign.signUpButton')}</Link>

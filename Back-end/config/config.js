@@ -8,6 +8,11 @@ module.exports = {
     SELF_URL: (process.env.SELF_URL || `http://localhost:${process.env.PORT || 5000}`).replace(/\/+$/, ''),
     MONGODB_URL: process.env.MONGODB_URL,
 
+    // Extra browser origins allowed to call this API, comma-separated. FROENT_URL
+    // and the local dev hosts are always allowed — this is for preview deploys or
+    // a second front-end domain.
+    CORS_ORIGINS: process.env.CORS_ORIGINS || '',
+
     API_SCHEDULE: process.env.API_SCHEDULE || ' ',
 
     JWT_SECRET: process.env.JWT_SECRET || 'secret',

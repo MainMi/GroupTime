@@ -5,6 +5,7 @@ const urlEnum = {
   api,
   register: `${api}/users/create`,
   login: `${api}/auth/login`,
+  googleAuth: `${api}/auth/google`,
   refresh: `${api}/auth/refresh`,
 
   // user

@@ -37,6 +37,12 @@ router.post(
     authController.getNewTokenEvent
 );
 
+// Google Identity Services sign-in/up. Must stay ABOVE the email guard below:
+// the client sends only the Google ID token, and a first-time Google user has no
+// account yet, so requiring `email` in the body and pre-loading that user would
+// reject every sign-up.
+router.post('/google', authController.googleAuth);
+
 router.use(
     authMiddleware.emailValid,
     userMiddleware.getUserByDunamically('email')
@@ -46,8 +52,6 @@ router.post(
     authMiddleware.isLoginDataValid,
     authController.login
 );
-// Google Identity Services sign-in/up (verifies the ID token server-side).
-router.post('/google', authController.googleAuth);
 router.post('/forgot/password', authController.sendForgetPassword);
 
 module.exports = router;
