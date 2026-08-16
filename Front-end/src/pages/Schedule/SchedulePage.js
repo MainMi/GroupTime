@@ -694,6 +694,7 @@ const SchedulePage = () => {
                         staticWeeksCount={staticWeeksCount}
                         periodStartEvent={periodStartEvent}
                         periodEndEvent={periodEndEvent}
+                        gmtDelta={gmtDelta}
                         extraTypes={extraTypes}
                         extraTags={extraTags}
                     />

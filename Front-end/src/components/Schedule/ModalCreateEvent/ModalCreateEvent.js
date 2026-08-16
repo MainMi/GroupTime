@@ -14,7 +14,7 @@ import DatePicker from '../../../UI/DatePicker/DatePicker';
 import Checkbox from '../../../UI/Checkbox/Checkbox';
 import { validateFn, isUrlOrEmptyFn } from '../../../constants/validateFn.enum';
 import { DAYS, BACKEND_DAY_TO_JSDAY, JSDAY_TO_DAYS_INDEX, SCHEDULE_TYPE } from '../../../constants/scheduleEnum';
-import { timeStringToMinutes, getMondayOfISOWeek } from '../../../helper/dateHelper';
+import { isTimeInWindow, shiftTimeString, getMondayOfISOWeek } from '../../../helper/dateHelper';
 
 import { addStaticEvent, addDynamicEvent, addRecurringEvent, editEvent, addFileToEvent, deleteFileFromEvent } from '../../../api/eventFetch';
 import { addStaticWeekToGroup } from '../../../api/scheduleFetch';
@@ -62,6 +62,7 @@ const ModalCreateEvent = ({
     staticWeeksCount = 0,
     periodStartEvent = '8:00',
     periodEndEvent = '21:00',
+    gmtDelta = 0,
     extraTypes = [],
     extraTags = [],
 }) => {
@@ -69,9 +70,12 @@ const ModalCreateEvent = ({
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // Events may only be scheduled within the group's display window (e.g. 8:30–21:00).
-    const minTime = padTime(periodStartEvent);
-    const maxTime = padTime(periodEndEvent);
+    // The form speaks the viewer's timezone, exactly like the schedule grid: the
+    // times it is seeded with are already shifted by `gmtDelta`. The group's event
+    // window is stored in group wall-clock, so shift it the same way before using
+    // it as bounds — a shifted window may wrap past midnight (see isTimeInWindow).
+    const minTime = shiftTimeString(padTime(periodStartEvent), gmtDelta * 60).time;
+    const maxTime = shiftTimeString(padTime(periodEndEvent), gmtDelta * 60).time;
 
     const isEditMode = !!editEventData;
     const isEditStatic = isEditMode && editEventData?.isStatic === true;
@@ -88,7 +92,7 @@ const ModalCreateEvent = ({
     const [valuePlatform, setValuePlatform] = useState(eventsConst.platform[0] || 'Zoom');
     const [valueTag, setValueTag] = useState([]);
     const [valueDescription, setValueDescription] = useState('');
-    const [time, setTime] = useState(padTime(periodStartEvent));
+    const [time, setTime] = useState(minTime);
     const [duration, setDuration] = useState(90);
 
     // Files: staged (not yet uploaded) + existing (edit mode, already on the event)
@@ -208,8 +212,9 @@ const ModalCreateEvent = ({
         if (durErr.includes('typeError')) e.duration = t('validation.number');
         else if (durErr.includes('limitError')) e.duration = t('validation.numberRange', { min: 5, max: 300 });
 
-        // Time must fall within the group's display window.
-        if (time && (timeStringToMinutes(time) < timeStringToMinutes(minTime) || timeStringToMinutes(time) > timeStringToMinutes(maxTime))) {
+        // Time must fall within the group's event window, expressed in the
+        // viewer's timezone (the window wraps midnight when the offset is large).
+        if (time && !isTimeInWindow(time, minTime, maxTime)) {
             e.time = t('validation.timeRange', { start: minTime, end: maxTime });
         }
 
@@ -304,6 +309,15 @@ const ModalCreateEvent = ({
             duration: Number(duration),
         };
 
+        // The form works in the viewer's timezone; the API stores group wall-clock
+        // time, so undo the display shift before sending (mirrors the drag-move
+        // handler in EventTable). Shifting the Date rolls the weekday over for us.
+        const toGroupTime = (d) => {
+            const out = new Date(d);
+            if (gmtDelta) out.setMinutes(out.getMinutes() - gmtDelta * 60);
+            return out;
+        };
+
         // Resolve a date for the chosen static week (creating a new week if needed).
         const resolveStaticWeekDate = async () => {
             let N = staticWeeksCount;
@@ -342,7 +356,7 @@ const ModalCreateEvent = ({
                 }
                 response = await editEvent({
                     ...commonFields,
-                    date: finalDate.toString(),
+                    date: toGroupTime(finalDate).toString(),
                     isStatic: isEditStatic,
                     eventInfoId: editEventData.eventInfo._id,
                     eventDateId: editEventData.eventDate._id,
@@ -357,7 +371,7 @@ const ModalCreateEvent = ({
 
                 response = await addStaticEvent({
                     ...commonFields,
-                    date: finalDate.toString(),
+                    date: toGroupTime(finalDate).toString(),
                 }, navigate);
 
                 if (response && response.ok !== false) {
@@ -374,7 +388,7 @@ const ModalCreateEvent = ({
                 if (repeatEnabled) {
                     response = await addRecurringEvent({
                         ...commonFields,
-                        date: finalDate.toString(),
+                        date: toGroupTime(finalDate).toString(),
                         until: new Date(repeatUntil).toString(),
                         interval: Number(repeatInterval) || 1,
                     }, navigate);
@@ -383,7 +397,7 @@ const ModalCreateEvent = ({
                 } else {
                     response = await addDynamicEvent({
                         ...commonFields,
-                        date: finalDate.toString(),
+                        date: toGroupTime(finalDate).toString(),
                     }, navigate);
 
                     if (response && response.ok !== false) {
@@ -422,7 +436,7 @@ const ModalCreateEvent = ({
         valueLink, valueTag, valueDescription, duration,
         scheduleType, selectedDay, selectedStaticWeekValue, staticWeeksCount,
         selectedDate, time, navigate, refreshSchedule, modalClose, dispatch,
-        uploadStagedFiles, t, repeatEnabled, repeatInterval, repeatUntil,
+        uploadStagedFiles, t, repeatEnabled, repeatInterval, repeatUntil, gmtDelta,
     ]);
 
     return (

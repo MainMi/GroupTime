@@ -126,6 +126,18 @@ export function shiftTimeString(timeStr, deltaMinutes) {
     return { time: `${h}:${m}`, dayShift };
 }
 
+// Whether an 'HH:MM' time falls inside the [start, end] window (inclusive). A
+// window whose end is earlier than its start wraps past midnight — a group's
+// event window shifted into the viewer's timezone can straddle the day boundary.
+export function isTimeInWindow(timeStr, start, end) {
+    const time = timeStringToMinutes(timeStr);
+    const from = timeStringToMinutes(start);
+    const to = timeStringToMinutes(end);
+    return from <= to
+        ? (time >= from && time <= to)
+        : (time >= from || time <= to);
+}
+
 // Return a copy of `date` set to local noon — avoids UTC-midnight day rollover
 // (e.g. UTC+3 turning a midnight date into the previous day).
 export function atNoon(date) {
