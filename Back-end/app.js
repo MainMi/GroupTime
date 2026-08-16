@@ -12,11 +12,12 @@ const { MAX_SUPPORT_SIZE } = require('./constant/type/fileSize.enum');
 
 const apiRouter = require('./router/api.router');
 const logger = require('./config/logger');
+const { corsOptions } = require('./config/cors');
 const { NODE_ENV } = require('./config/config');
 
 const app = express();
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Structured request logging (skip under tests to keep output clean).
 if (NODE_ENV !== 'test') {

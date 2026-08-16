@@ -211,6 +211,32 @@ export const fetchLogin = (body, navigate) => {
     };
 };
 
+// Google sign-in: the browser only ever holds Google's ID token, which the API
+// verifies against Google before issuing our own token pair. Success looks
+// exactly like a password login, so the same handler finishes the job.
+export const fetchGoogleAuth = (credential, navigate) => {
+    const parameters = {
+        url: urlEnum.googleAuth,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { credential },
+    };
+
+    return async (dispatch) => {
+        try {
+            await dispatch(getFetchDispatch(parameters, navigate, (data, nav, dsp) => {
+                if (!data?.access_token) {
+                    dsp(showErrorNotification(resolveErrorMessage(data, 'auth.googleError')));
+                    return;
+                }
+                handleLoginSuccess(data, nav, dsp);
+            }));
+        } catch (error) {
+            console.error(error.message);
+        }
+    };
+};
+
 export const fetchUserInfo = (navigate) => {
     const responseFn = (data, navigate, dispatch) => {
         data.birthday = new Date(data.birthday).toISOString();
