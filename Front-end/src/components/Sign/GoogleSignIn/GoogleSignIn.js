@@ -34,6 +34,24 @@ const loadGsi = () => {
     return gsiPromise;
 };
 
+// google.accounts.id.initialize() is global and warns when called more than once
+// ("only the last initialized instance will be used"). The button is mounted on
+// both the sign-in and sign-up forms, so initialization happens once and the
+// callback forwards to whichever instance is currently mounted.
+let isGsiInitialized = false;
+let onCredential = null;
+
+const initGsiOnce = () => {
+    if (isGsiInitialized) return;
+    window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: ({ credential }) => {
+            if (credential) onCredential?.(credential);
+        },
+    });
+    isGsiInitialized = true;
+};
+
 // Google's own sign-in button. Renders nothing when no client id is configured,
 // so a deployment without a Google project simply falls back to email/password.
 const GoogleSignIn = () => {
@@ -49,16 +67,13 @@ const GoogleSignIn = () => {
 
         let alive = true;
 
+        onCredential = (credential) => dispatch(fetchGoogleAuth(credential, navigate));
+
         loadGsi()
             .then(() => {
                 if (!alive || !buttonRef.current) return;
 
-                window.google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: ({ credential }) => {
-                        if (credential) dispatch(fetchGoogleAuth(credential, navigate));
-                    },
-                });
+                initGsiOnce();
 
                 // Google draws the button itself; re-rendering on a language change
                 // keeps its label in the same language as the rest of the page.
