@@ -1,4 +1,4 @@
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 
 # Vite inlines env vars (VITE_*) into the bundle at build time.
 ARG VITE_API_URL=http://localhost:5000/api
