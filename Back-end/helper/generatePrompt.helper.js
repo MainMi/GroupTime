@@ -1,13 +1,19 @@
+/* eslint-disable max-len -- the prompt bodies below are natural-language copy;
+   hard-wrapping them would change the text the model actually receives. */
 const { DAY_NAMES_UK } = require('../constant/week.text');
 const { languageRule, INTERNAL_RULES } = require('../constant/promptText');
+const { PROMPT_BUDGET } = require('../constant/assistant.enum');
 
 const dayName = (code) => DAY_NAMES_UK[code] || code;
+
+// Truncate to a character budget, marking the cut so the model can tell the
+// context was shortened rather than treating it as the whole picture.
+const capText = (text, max) => (text.length <= max ? text : `${text.slice(0, max)}\n…(скорочено)`);
 
 function formatDayEvents(dayObj) {
     if (!dayObj.events?.length) return null;
     const lines = [`${dayName(dayObj.day)}:`];
-    for (const ev of dayObj.events) {
-        if (!ev.eventInfo || !ev.eventDate) continue;
+    for (const ev of dayObj.events.filter((e) => e.eventInfo && e.eventDate)) {
         const {
             name, teacherName, place, platform, link
         } = ev.eventInfo;
@@ -54,14 +60,16 @@ function formatGroupsSchedule(data) {
         : [{ name: data.group?.name, weekData: data.currentWeek }];
 
     if (groups.length === 1) {
-        return formatSchedule(groups[0].weekData);
+        return capText(formatSchedule(groups[0].weekData), PROMPT_BUDGET.scheduleChars);
     }
 
     // Chat context labels groups as `groupName`, the /magic context as `name` —
     // accept either so multi-group headers never collapse to «—».
-    return groups
+    const text = groups
         .map((g) => `=== Група «${g.name || g.groupName || '—'}» ===\n${formatSchedule(g.weekData)}`)
         .join('\n\n');
+
+    return capText(text, PROMPT_BUDGET.scheduleChars);
 }
 
 // Turn structured analyzer issues into a plain-text Ukrainian summary the model
@@ -96,10 +104,27 @@ function issuesToText(issues) {
     }).join('\n');
 }
 
+// Keep the most recent turns that fit the budget, walking newest-first so a long
+// old reply is dropped before a short recent one, then restore reading order.
+function trimHistory(history) {
+    const valid = history.filter((m) => m && m.content);
+    const kept = [];
+    let remaining = PROMPT_BUDGET.historyChars;
+
+    for (let i = valid.length - 1; i >= 0 && kept.length < PROMPT_BUDGET.historyMessages; i--) {
+        const content = capText(String(valid[i].content), PROMPT_BUDGET.historyMessageChars);
+        if (content.length > remaining) break;
+
+        remaining -= content.length;
+        kept.push({ role: valid[i].role, content });
+    }
+
+    return kept.reverse();
+}
+
 function formatHistory(history) {
     if (!Array.isArray(history) || !history.length) return '';
-    const lines = history
-        .filter((m) => m && m.content)
+    const lines = trimHistory(history)
         .map((m) => `${m.role === 'assistant' ? 'Асистент' : 'Користувач'}: ${m.content}`);
     return lines.length ? `\nПопередня розмова:\n${lines.join('\n')}\n` : '';
 }
