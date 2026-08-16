@@ -10,7 +10,6 @@ import ScheduleFilter from '../../components/Schedule/ScheduleFilter/ScheduleFil
 import ModalScheduleSettings from '../../components/Schedule/ModalScheduleSettings/ModalScheduleSettings';
 import ModalImportExport from '../../components/Schedule/ModalImportExport/ModalImportExport';
 import ModalFreeSlots from '../../components/Schedule/ModalFreeSlots/ModalFreeSlots';
-import ModalScheduleStats from '../../components/Schedule/ModalScheduleStats/ModalScheduleStats';
 import MonthView from '../../components/Schedule/MonthView/MonthView';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import roleEnum from '../../constants/roleEnum';
@@ -317,7 +316,7 @@ const SchedulePage = () => {
             return;
         }
         refreshScheduleRef.current();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     }, [userInfo?.nickname, date, selectedGroup, groupFilterKey, dispatch, navigate]);
 
     const handleOpenCreateModal = useCallback(() => {
@@ -329,8 +328,6 @@ const SchedulePage = () => {
     const [isImportExport, setIsImportExport] = useState(false);
     // Common free-slot finder (across groups / per member).
     const [isFreeSlots, setIsFreeSlots] = useState(false);
-    // Workload statistics for the displayed week.
-    const [isStats, setIsStats] = useState(false);
 
     // Silent creation of the personal schedule from the group selector.
     const [isCreatingPersonal, setIsCreatingPersonal] = useState(false);
@@ -640,15 +637,6 @@ const SchedulePage = () => {
                                 />
                             </span>
                         )}
-                        {existingItem?.data && (
-                            <span title={t('schedule.stats')} style={{ display: 'inline-flex' }}>
-                                <ButtonSmall
-                                    centerImg="stats"
-                                    typeColor="green"
-                                    onClick={() => setIsStats(true)}
-                                />
-                            </span>
-                        )}
                         {!isAllMode && groupInfo._id && (
                             <span title={t('schedule.importExport')} style={{ display: 'inline-flex' }}>
                                 <ButtonSmall
@@ -735,14 +723,6 @@ const SchedulePage = () => {
                         groups={viewableGroups}
                         defaultGroupId={!isAllMode ? groupInfo._id : null}
                         date={date}
-                    />
-                )}
-
-                {isStats && (
-                    <ModalScheduleStats
-                        modalClose={() => setIsStats(false)}
-                        data={existingItem?.data}
-                        title={groupInfo.name}
                     />
                 )}
 

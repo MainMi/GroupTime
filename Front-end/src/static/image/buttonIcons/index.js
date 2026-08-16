@@ -26,7 +26,6 @@ import plus from './plusIcon.svg'
 import trash from './trashIcon.svg'
 import gear from './gearIcon.svg'
 import camera from './cameraIcon.svg'
-import stats from './statsIcon.svg'
 import freeTime from './freeTimeIcon.svg'
 import calendar from './calendarIcon.svg'
 import week from './weekIcon.svg'
@@ -61,7 +60,6 @@ const buttonsImages = {
     trash,
     gear,
     camera,
-    stats,
     'free-time': freeTime,
     calendar,
     week,
