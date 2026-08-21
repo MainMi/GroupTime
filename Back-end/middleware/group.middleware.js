@@ -49,7 +49,11 @@ module.exports = {
     },
     isGroupFind: (errorType = FIND_TYPE) => async (req, res, next) => {
         try {
-            const { name = null, groupId = null } = req.body;
+            const { name = null, groupId = null, type = null } = req.body;
+
+            if (errorType === FIND_TYPE && type === PERSONAL_TYPE) {
+                return next();
+            }
 
             const group = name
                 ? await groupService.getGroupByName(name)

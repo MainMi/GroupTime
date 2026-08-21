@@ -103,6 +103,30 @@
             color: var(--clr-primary-text);
             opacity: 0.7;
         }
+        .invitePending {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            max-width: 520px;
+            margin: 48px auto;
+            padding: 28px 32px;
+            border-left: 3px solid #E88C90;
+            background-color: rgba(232, 140, 144, 0.08);
+            border-radius: 0 12px 12px 0;
+
+            h2 {
+                font-size: 20px;
+                font-weight: 500;
+                color: var(--clr-primary-text);
+            }
+            p {
+                font-size: 15px;
+                font-weight: 300;
+                line-height: 1.5;
+                color: var(--clr-primary-text);
+            }
+        }
         .weekInfo {
             position: relative;
             display: grid;

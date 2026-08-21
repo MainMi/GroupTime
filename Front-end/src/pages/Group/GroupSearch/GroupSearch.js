@@ -12,7 +12,7 @@ import Input from '../../../UI/Input/Input';
 import { notifyError } from '../../../helper/notify';
 import { searchGroups, createGroup } from '../../../api/groupFetch';
 import groupTypeEnum from '../../../constants/type/groupTypeEnum';
-import { groupLabel } from '../../../helper/groupHelper';
+import { groupLabel, isVerifiedMembership } from '../../../helper/groupHelper';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { fetchUserInfo } from '../../../redux/actions/auth-actions';
@@ -21,19 +21,18 @@ import groupEnum from '../../../constants/groupEnum';
 
 const GroupsCards = ({ groups, userGroups }) => {
     const { t } = useTranslation();
-    // Map a joined group's id -> the viewer's role in it, so "my groups" show the
-    // role while search results the viewer hasn't joined keep showing the type.
-    const roleByGroup = {};
+    const membershipByGroup = {};
     (userGroups || []).forEach((verificate) => {
         const gid = verificate.group?._id || verificate.group?.id;
-        if (gid) roleByGroup[String(gid)] = verificate.role;
+        if (gid) membershipByGroup[String(gid)] = verificate;
     });
-    const groupIds = Object.keys(roleByGroup);
 
     return (
         <div className={classes.groupsBox}>
             {groups.map((group) => {
-                const role = roleByGroup[String(group._id)];
+                const membership = membershipByGroup[String(group._id)];
+                const isMember = isVerifiedMembership(membership);
+                const isPending = !!membership && !isMember;
                 return (
                     <GroupCard
                         id={group._id}
@@ -42,11 +41,15 @@ const GroupsCards = ({ groups, userGroups }) => {
                         title={groupLabel(group, t)}
                         description={group.description}
                         status={group.type}
-                        statusName={role ? t(`roles.${role}`) : group.type}
+                        statusName={isMember
+                            ? t(`roles.${membership.role}`)
+                            : isPending ? t('group.invitePending') : group.type}
                         usersCount={group.userCount}
                         maxCount={group.parameters?.usersLimit}
                         type='add'
-                        isView={groupIds.includes(String(group._id))}
+                        isView={isMember}
+                        isVerificate={!isPending}
+                        actionToken={isPending ? membership.actionToken : ''}
                     />
                 );
             })}
@@ -141,7 +144,7 @@ const GroupSearch = () => {
 
     if (loading) return <div>{t('common.loading')}</div>;
 
-    const myGroups = userInfo?.groups?.map(g => g.group) || [];
+    const myGroups = (userInfo?.groups || []).map(g => g.group).filter(Boolean);
     const isSearchEmpty = groupNameInfo.trim().length < groupEnum.MIN_SEARCH_LENGTH;
 
     return (

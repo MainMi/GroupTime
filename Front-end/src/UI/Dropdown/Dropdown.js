@@ -122,9 +122,12 @@ const Dropdown = ({
         }
     }, [resetFn]);
 
+    const changeValueHandlerRef = useRef(changeValueHandler);
+    changeValueHandlerRef.current = changeValueHandler;
+
     useEffect(() => {
-        changeValueHandler(selectedValue);
-    }, [changeValueHandler, selectedValue]);
+        changeValueHandlerRef.current(selectedValue);
+    }, [selectedValue]);
 
     const toggleDropdown = useCallback(() => {
         setIsOpen((prevIsOpen) => !prevIsOpen);

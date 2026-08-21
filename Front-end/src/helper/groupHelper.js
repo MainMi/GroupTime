@@ -16,6 +16,9 @@ export const countValidGroups = (groups) =>
             && membership.group.type !== groupTypeEnum.PERSONAL_TYPE
     ).length;
 
+export const isVerifiedMembership = (membership) =>
+    membership?.type === verificateType.VERIFIED_TYPE;
+
 export const isPersonalGroup = (group) => group?.type === groupTypeEnum.PERSONAL_TYPE;
 
 /**

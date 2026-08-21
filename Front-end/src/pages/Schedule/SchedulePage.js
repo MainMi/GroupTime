@@ -14,6 +14,7 @@ import MonthView from '../../components/Schedule/MonthView/MonthView';
 import ConfirmModal from '../../UI/ConfirmModal/ConfirmModal';
 import roleEnum from '../../constants/roleEnum';
 import { canEditEvents, canViewSchedule } from '../../helper/roleHelper';
+import { isVerifiedMembership } from '../../helper/groupHelper';
 import { SCHEDULE_TYPE } from '../../constants/scheduleEnum';
 import groupTypeEnum from '../../constants/type/groupTypeEnum';
 import { colorForType } from '../../constants/type/eventEnum';
@@ -243,11 +244,14 @@ const SchedulePage = () => {
         if (selectedGroup === 'all') {
             const ids = activeFilterRef.current?.groups || [];
             targetGroups = ui.groups
-                .filter((g) => g.group && canViewSchedule(g.role) && (!ids.length || ids.includes(g.group._id)))
+                .filter((g) => g.group && isVerifiedMembership(g) && canViewSchedule(g.role)
+                    && (!ids.length || ids.includes(g.group._id)))
                 .map((g) => g.group);
         } else {
             const entry = ui.groups[selectedGroup];
-            targetGroups = (entry?.group && canViewSchedule(entry.role)) ? [entry.group] : [];
+            targetGroups = (entry?.group && isVerifiedMembership(entry) && canViewSchedule(entry.role))
+                ? [entry.group]
+                : [];
         }
 
         if (!targetGroups.length) {
@@ -329,8 +333,7 @@ const SchedulePage = () => {
     // Common free-slot finder (across groups / per member).
     const [isFreeSlots, setIsFreeSlots] = useState(false);
 
-    // Silent creation of the personal schedule from the group selector.
-    const [isCreatingPersonal, setIsCreatingPersonal] = useState(false);
+    const isCreatingPersonalRef = useRef(false);
     const pendingPersonalSelectRef = useRef(false);
 
     // Open a confirmation modal before deleting an event
@@ -390,7 +393,9 @@ const SchedulePage = () => {
     }, [dispatch, navigate, selectedGroup, t]);
 
     const isAllMode = selectedGroup === 'all';
-    const selectedGroupInfo = !isAllMode ? userInfo?.groups?.[selectedGroup]?.group : null;
+    const selectedMembership = !isAllMode ? userInfo?.groups?.[selectedGroup] : null;
+    const selectedGroupInfo = selectedMembership?.group || null;
+    const isPendingInvite = !!selectedMembership && !isVerifiedMembership(selectedMembership);
 
     // Memoized: these flow into the React.memo'd EventsHour grid (~100 cells), so
     // a fresh identity on every render would defeat that memoization entirely.
@@ -398,14 +403,20 @@ const SchedulePage = () => {
         (g) => g?.group?.type === groupTypeEnum.PERSONAL_TYPE
     );
     const groupsNames = useMemo(() => [
-        ...(userInfo?.groups || []).map((group, idx) => ({
+        ...(userInfo?.groups || []).map((membership, idx) => {
+            const group = membership.group;
             // Personal schedules use a localized label so switching language
             // re-labels them (their stored name is fixed at creation).
-            title: group.group.type === groupTypeEnum.PERSONAL_TYPE
+            const name = group?.type === groupTypeEnum.PERSONAL_TYPE
                 ? `★ ${t('schedule.personalName')}`
-                : group.group.name,
-            value: String(idx),
-        })),
+                : group?.name || '';
+            return {
+                title: isVerifiedMembership(membership)
+                    ? name
+                    : `${name} (${t('schedule.invitePendingBadge')})`,
+                value: String(idx),
+            };
+        }),
         // Always offer a personal schedule; if the user has none yet, selecting
         // this entry silently creates it (handled in handleGroupChange).
         ...(!hasPersonal ? [{ title: `★ ${t('schedule.personalName')}`, value: 'personal-create' }] : []),
@@ -417,8 +428,8 @@ const SchedulePage = () => {
             setSelectedGroup(val === 'all' ? 'all' : Number(val));
             return;
         }
-        if (isCreatingPersonal) return;
-        setIsCreatingPersonal(true);
+        if (isCreatingPersonalRef.current) return;
+        isCreatingPersonalRef.current = true;
         try {
             const res = await createGroup({
                 name: t('schedule.personalName'),
@@ -434,9 +445,9 @@ const SchedulePage = () => {
         } catch (e) {
             dispatch(showErrorNotification(t('schedule.personalCreateError')));
         } finally {
-            setIsCreatingPersonal(false);
+            isCreatingPersonalRef.current = false;
         }
-    }, [isCreatingPersonal, dispatch, navigate, t]);
+    }, [dispatch, navigate, t]);
 
     // Once the just-created personal schedule shows up in userInfo, select it.
     useEffect(() => {
@@ -447,6 +458,7 @@ const SchedulePage = () => {
         if (idx >= 0) {
             pendingPersonalSelectRef.current = false;
             setSelectedGroup(idx);
+            if (idx === selectedGroupRef.current) refreshScheduleRef.current(true);
         }
     }, [userInfo]);
 
@@ -484,17 +496,20 @@ const SchedulePage = () => {
         if (selectedGroup === 'all') {
             const ids = activeFilter?.groups || [];
             return groups
-                .filter((g) => g.group && canViewSchedule(g.role) && (!ids.length || ids.includes(g.group._id)))
+                .filter((g) => g.group && isVerifiedMembership(g) && canViewSchedule(g.role)
+                    && (!ids.length || ids.includes(g.group._id)))
                 .map((g) => g.group);
         }
         const entry = groups[selectedGroup];
-        return (entry?.group && canViewSchedule(entry.role)) ? [entry.group] : [];
+        return (entry?.group && isVerifiedMembership(entry) && canViewSchedule(entry.role))
+            ? [entry.group]
+            : [];
     }, [userInfo, selectedGroup, activeFilter]);
 
     // Groups the viewer may read — fed to the free-slot finder (personal schedules
     // use their localized label).
     const viewableGroups = useMemo(() => (userInfo?.groups || [])
-        .filter((g) => g.group && canViewSchedule(g.role))
+        .filter((g) => g.group && isVerifiedMembership(g) && canViewSchedule(g.role))
         .map((g) => ({
             _id: g.group._id,
             name: g.group.type === groupTypeEnum.PERSONAL_TYPE ? t('schedule.personalName') : g.group.name,
@@ -510,16 +525,15 @@ const SchedulePage = () => {
         || selectedGroupRole === roleEnum.OWNER_ROLE;
     // Only owner/admin/help_admin may create or edit events. In "all groups" mode
     // there's no single target group, so editing is disabled there too.
-    const canEdit = !isAllMode && canEditEvents(selectedGroupRole);
+    const canEdit = !isAllMode && !isPendingInvite && canEditEvents(selectedGroupRole);
     const groupInfo = selectedGroupInfo || { name: isAllMode ? t('schedule.allGroups') : '', _id: null, parameters: {} };
     const periodStartEvent = groupInfo.parameters?.periodStartEvent || '8:00';
     const periodEndEvent = groupInfo.parameters?.periodEndEvent || '21:00';
 
     // Group options for the "all groups" multi-select in the filter
     const groupFilterOptions = userInfo.groups
-        .map((g) => g.group)
-        .filter(Boolean)
-        .map((g) => ({ value: g._id, label: g.name }));
+        .filter((g) => g.group && isVerifiedMembership(g))
+        .map((g) => ({ value: g.group._id, label: g.group.name }));
 
     // Filter options span every cached week across all the user's groups (no extra requests)
     const filterSources = [
@@ -637,7 +651,7 @@ const SchedulePage = () => {
                                 />
                             </span>
                         )}
-                        {!isAllMode && groupInfo._id && (
+                        {!isAllMode && !isPendingInvite && groupInfo._id && (
                             <span title={t('schedule.importExport')} style={{ display: 'inline-flex' }}>
                                 <ButtonSmall
                                     centerImg="import-export"
@@ -656,7 +670,15 @@ const SchedulePage = () => {
                     </div>
                 </div>
 
-                {!isAllMode && !canViewSchedule(selectedGroupRole) ? (
+                {isPendingInvite ? (
+                    <div className={classes.invitePending}>
+                        <h2>{t('schedule.invitePendingTitle')}</h2>
+                        <p>{t('schedule.invitePendingText')}</p>
+                        <Button typeColor="green" onClick={() => navigate('/profile')}>
+                            {t('schedule.invitePendingAction')}
+                        </Button>
+                    </div>
+                ) : !isAllMode && !canViewSchedule(selectedGroupRole) ? (
                     <div className={classes.emptyState}>
                         {t('schedule.noAccess')}
                     </div>
