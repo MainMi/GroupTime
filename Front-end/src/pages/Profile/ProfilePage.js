@@ -22,7 +22,7 @@ import { countValidGroups, groupLabel } from '../../helper/groupHelper';
 
 const GroupsCards = ({ userGroups, checkInvite = false }) => {
     const { t } = useTranslation();
-    return userGroups.map((groupInfo) => {
+    return userGroups.filter((groupInfo) => groupInfo?.group).map((groupInfo) => {
         const { group } = groupInfo;
         let isVerificate = false
         if (checkInvite) {
@@ -36,7 +36,7 @@ const GroupsCards = ({ userGroups, checkInvite = false }) => {
             description={group.description}
             status={groupInfo.type}
             usersCount={group.userCount}
-            maxCount={group.parameters.usersLimit}
+            maxCount={group.parameters?.usersLimit}
             statusName={groupInfo.role ? t(`roles.${groupInfo.role}`) : groupInfo.type}
             isVerificate={isVerificate}
             actionToken={groupInfo.actionToken}
@@ -83,14 +83,15 @@ const ProfilePage = () => {
         return null;
     }
 
-    const userGroups = userInfo.groups;
-    const userContacts = userInfo.contacts;;
+    const userGroups = userInfo.groups || [];
+    const userContacts = userInfo.contacts || {};
 
     const hasContactInfo = Object.values(userContacts).some((contactValue) => contactValue);
 
-    const getAge = (dateString) => { 
-        const today = new Date();
+    const getAge = (dateString) => {
         const birthDate = new Date(dateString);
+        if (!dateString || Number.isNaN(birthDate.getTime())) return null;
+        const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -134,9 +135,11 @@ const ProfilePage = () => {
                             <Button beforeImg={contactImages.gmail} padding={'4px 16px'}>
                                 {userInfo.email}
                             </Button>
-                            <Button beforeImg='edit' padding={'4px 16px'}>
-                                {t('profile.age')}: {userAge}
-                            </Button>
+                            {userAge !== null && (
+                                <Button beforeImg='edit' padding={'4px 16px'}>
+                                    {t('profile.age')}: {userAge}
+                                </Button>
+                            )}
                             {userInfo.phone && (
                                 <Button beforeImg={contactImages.phone} padding={'4px 16px'}>
                                     {userInfo.phone}

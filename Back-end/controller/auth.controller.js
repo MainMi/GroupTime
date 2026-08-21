@@ -66,11 +66,12 @@ module.exports = {
                 return next(new ApiError(...Object.values(GOOGLE_EMAIL_NOT_VERIFIED)));
             }
 
-            let user = await userService.getUser({ email });
+            let user = await userService.getUserDoc({ email });
 
             if (user) {
                 if (!user.googleId) {
                     await userService.updateUser(user._id, { googleId });
+                    user.googleId = googleId;
                 }
             } else {
                 const nickname = await userService.getUniqueNickname(email);
@@ -88,10 +89,9 @@ module.exports = {
             const tokenPair = authService.generateTokenPair({ userId: user._id });
             await authService.createOauth(user._id, tokenPair);
 
-            const userObj = user.toObject ? user.toObject() : user;
-            delete userObj.password;
+            await userService.populateGroupsDetail(user);
 
-            res.status(200).json({ user: userObj, ...tokenPair });
+            res.status(200).json({ user: user.toObject(), ...tokenPair });
         } catch (e) {
             next(e);
         }

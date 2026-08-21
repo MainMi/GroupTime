@@ -239,7 +239,8 @@ export const fetchGoogleAuth = (credential, navigate) => {
 
 export const fetchUserInfo = (navigate) => {
     const responseFn = (data, navigate, dispatch) => {
-        data.birthday = new Date(data.birthday).toISOString();
+        const birthday = new Date(data.birthday);
+        data.birthday = Number.isNaN(birthday.getTime()) ? null : birthday.toISOString();
         dispatch(authAction.updateAuth({
             userInfo: { ...data, password: undefined },
         }));

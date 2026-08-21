@@ -10,6 +10,7 @@ module.exports = {
     getUsers: () => userModel.find().lean(),
     getUsersById: (usersId) => userModel.find({ _id: { $in: usersId } }),
     getUser: (userData) => userModel.findOne(userData).lean(),
+    getUserDoc: (userData) => userModel.findOne(userData),
     // Build a unique nickname from an email's local-part, appending a short random
     // suffix if the base is already taken. General-purpose (e.g. Google sign-up).
     getUniqueNickname: async (email) => {
